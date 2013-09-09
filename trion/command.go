@@ -1,4 +1,4 @@
-package main
+package trion
 
 import (
 	. "polydawn.net/gosh/psh"
@@ -9,7 +9,7 @@ import (
 var docker = Sh("docker").BakeOpts(DefaultIO)
 
 //Prepare flags for 'docker run'
-func prepRun(config TrionConfig) Shfn {
+func PrepRun(config TrionConfig) Shfn {
 	dockRun := docker("run")
 
 	//Where should the container start?
