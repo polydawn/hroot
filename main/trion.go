@@ -2,9 +2,11 @@ package main
 
 import (
 	. "polydawn.net/dockctrl/trion"
+	. "fmt"
 )
 
 func main() {
 	config := FindConfig(".")
-	PrepRun(config)()
+	CID := Run(config)
+	Println(CID)
 }
