@@ -2,7 +2,6 @@ package trion
 
 import (
 	. "polydawn.net/gosh/psh"
-	"strings"
 	. "fmt"
 	"os"
 	"path/filepath"
@@ -44,8 +43,8 @@ func PrepRun(config TrionConfig) (Shfn, chan string) {
 	}
 
 	//Custom DNS servers?
-	if len(config.DNS) != 0 {
-		dockRun = dockRun("-dns", strings.Join(config.DNS, ","))
+	for i := range config.DNS {
+		dockRun = dockRun ("-dns", config.DNS[i])
 	}
 
 	//What folders get mounted?
