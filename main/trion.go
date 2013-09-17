@@ -15,6 +15,7 @@ func main() {
 	}
 
 	CID := Run(config)
+	Wait(CID)
 
 	if config.Purge {
 		Print("Purging... ")
