@@ -3,6 +3,9 @@ package trion
 import (
 	. "polydawn.net/gosh/psh"
 	"strings"
+	. "fmt"
+	"os"
+	"path/filepath"
 )
 
 //Default docker command template
@@ -16,6 +19,17 @@ const TempPrefix = "trion-"
 //	Returns a channel you can read to get the CIDfile. Sorry, this is needed due to docker being docker.
 func PrepRun(config TrionConfig) (Shfn, chan string) {
 	dockRun := docker("run")
+
+	//Find the absolute path for each host mount
+	for i, j := range config.Mount {
+		cwd, err := filepath.Abs(j[0])
+		if err != nil {
+			Println("Fatal: Cannot determine absolute path:", j[0])
+			os.Exit(1)
+		}
+
+		config.Mount[i][0] = cwd
+	}
 
 	//Where should docker write the new CID?
 	CIDfilename := createCIDfile()

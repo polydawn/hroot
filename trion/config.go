@@ -31,7 +31,7 @@ var DefaultTrionConfig = TrionConfig {
 	false,                  //Attach
 	false,                  //Quiet
 	[]string{},             //DNS
-	[]string{"build.sh"},  //Command
+	[]string{"build.sh"},   //Command
 }
 
 //Recursively finds configuration files and loads them top-down.
