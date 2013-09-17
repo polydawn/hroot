@@ -52,6 +52,11 @@ func PrepRun(config TrionConfig) (Shfn, chan string) {
 		dockRun = dockRun("-v", config.Mount[i][0] + ":" + config.Mount[i][1] + ":" + config.Mount[i][2])
 	}
 
+	//What environment variables are set?
+	for i:= range config.Environment {
+		dockRun = dockRun("-e", config.Environment[i][0] + "=" + config.Environment[i][1])
+	}
+
 	//Are we attaching?
 	if config.Attach {
 		dockRun = dockRun("-i", "-t")

@@ -20,6 +20,7 @@ type TrionConfig struct {
 	DNS          []string   //Do you want to use custom DNS servers?
 	BuildCommand []string   //What command to run when building
 	Purge          bool     //Delete when done?
+	Environment [][]string  //Env variables (each an array of strings: variable, value)
 	             //DAT ALIGNNMENT. SO GOOD.
 }
 
@@ -34,6 +35,7 @@ var DefaultTrionConfig = TrionConfig {
 	[]string{},             //DNS
 	[]string{"build.sh"},   //Command
 	false,                  //Purge
+	[][]string{},           //Environment
 }
 
 //Recursively finds configuration files and loads them top-down.
@@ -90,6 +92,7 @@ func AddConfig(inc, base *TrionConfig) {
 	}
 	base.Privileged = inc.Privileged
 	base.Mount = append(base.Mount, inc.Mount ...)
+	base.Environment = append(base.Environment, inc.Environment ...)
 	if len(inc.Command) != 0 {
 		base.Command = inc.Command
 	}
