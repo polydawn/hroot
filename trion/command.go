@@ -75,3 +75,13 @@ func Run(config TrionConfig) string {
 	run()
 	return <- getCID
 }
+
+//Prepares 'docker rm'
+func PrepPurge(CID string) Shfn {
+	return docker("rm", CID)
+}
+
+//Executes 'docker rm' syncronously
+func Purge(CID string) {
+	PrepPurge(CID)()
+}

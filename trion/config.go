@@ -19,6 +19,7 @@ type TrionConfig struct {
 	Quiet          bool     //Suppress docker output entirely?
 	DNS          []string   //Do you want to use custom DNS servers?
 	BuildCommand []string   //What command to run when building
+	Purge          bool     //Delete when done?
 	             //DAT ALIGNNMENT. SO GOOD.
 }
 
@@ -32,6 +33,7 @@ var DefaultTrionConfig = TrionConfig {
 	false,                  //Quiet
 	[]string{},             //DNS
 	[]string{"build.sh"},   //Command
+	false,                  //Purge
 }
 
 //Recursively finds configuration files and loads them top-down.
@@ -94,6 +96,7 @@ func AddConfig(inc, base *TrionConfig) {
 	if len(inc.BuildCommand) != 0 {
 		base.BuildCommand = inc.BuildCommand
 	}
+	base.Purge = inc.Purge
 	base.Attach = inc.Attach
 	base.Quiet = inc.Quiet
 	base.DNS = append(base.DNS, inc.DNS ...)

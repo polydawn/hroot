@@ -15,6 +15,11 @@ func main() {
 	}
 
 	CID := Run(config)
-	Println(CID)
+
+	if config.Purge {
+		Print("Purging... ")
+		Purge(CID)
+	}
+
 	os.Exit(0) //GOTTA GO FAST. SIX TIMES AS MUCH FAST.
 }
