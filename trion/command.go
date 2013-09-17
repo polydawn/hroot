@@ -89,3 +89,12 @@ func Wait(CID string) {
 func Purge(CID string) {
 	docker("rm", CID)()
 }
+
+func Export(CID, path string) {
+	out, err := os.OpenFile(path + "image.tar", os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		panic(err);
+	}
+
+	docker("export", CID)(Opts{Out: out})()
+}

@@ -17,6 +17,10 @@ func main() {
 	CID := Run(config)
 	Wait(CID)
 
+	if len(os.Args) > 1 && os.Args[1] == "build" {
+		Export(CID, "./")
+	}
+
 	if config.Purge {
 		Print("Purging... ")
 		Purge(CID)
