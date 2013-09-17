@@ -18,6 +18,7 @@ type TrionConfig struct {
 	Attach         bool     //Attach interactive terminal?
 	Quiet          bool     //Suppress docker output entirely?
 	DNS          []string   //Do you want to use custom DNS servers?
+	BuildCommand []string   //What command to run when building
 	             //DAT ALIGNNMENT. SO GOOD.
 }
 
@@ -30,6 +31,7 @@ var DefaultTrionConfig = TrionConfig {
 	false,                  //Attach
 	false,                  //Quiet
 	[]string{},             //DNS
+	[]string{"build.sh"},  //Command
 }
 
 //Recursively finds configuration files and loads them top-down.
@@ -88,6 +90,9 @@ func AddConfig(inc, base *TrionConfig) {
 	base.Mount = append(base.Mount, inc.Mount ...)
 	if len(inc.Command) != 0 {
 		base.Command = inc.Command
+	}
+	if len(inc.BuildCommand) != 0 {
+		base.BuildCommand = inc.BuildCommand
 	}
 	base.Attach = inc.Attach
 	base.Quiet = inc.Quiet
