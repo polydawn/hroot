@@ -54,11 +54,11 @@ func (dock *Dock) Client() Shfn {
 }
 
 func (dock *Dock) GetPidfilePath() string {
-	return fmt.Sprintf("/%s/%s", dock.Dir(), "docker.pid")
+	return fmt.Sprintf("%s/%s", dock.Dir(), "docker.pid")
 }
 
 func (dock *Dock) GetSockPath() string {
-	return fmt.Sprintf("/%s/%s", dock.Dir(), "docker.sock")
+	return fmt.Sprintf("%s/%s", dock.Dir(), "docker.sock")
 }
 
 func (dock *Dock) daemon() Shfn {
