@@ -2,13 +2,14 @@ package trion
 
 import (
 	. "polydawn.net/gosh/psh"
+	"polydawn.net/dockctrl/crocker"
 	. "fmt"
 	"os"
 	"path/filepath"
 )
 
 //Default docker command template
-var docker = Sh("docker").BakeOpts(DefaultIO)
+var docker = crocker.NewDock("dock").Client()
 
 //Where to place & call CIDfiles
 const TempDir    = "/tmp"
