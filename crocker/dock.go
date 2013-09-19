@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"io/ioutil"
+	"net"
 	. "polydawn.net/gosh/psh"
 	"path/filepath"
 	"strconv"
@@ -82,17 +83,24 @@ func (dock *Dock) awaitSocket(patience time.Duration) error {
 	for !done {
 		done = time.Now().After(timeout)
 		sockStat, err := os.Stat(dock.GetSockPath())
-		fmt.Printf("wat :: %#v  %#v\n", sockStat, err)
 		if os.IsNotExist(err) {
-			if !done {
-				time.Sleep(10 * time.Millisecond)
+			// continue
+		} else if err != nil {
+			panic(err);
+		} else if (sockStat.Mode() & os.ModeSocket) != 0 {
+			// still have to check if it's dialable; docker daemon doesn't even try to remove socket files when it's done.
+			dial, err := net.Dial("unix", dock.GetSockPath())
+			if err == nil {
+				// success!
+				dial.Close()
+				return nil
 			}
-			continue
+		} else {
+			// file exists but isn't socket; do not want
+			return fmt.Errorf("not a socket in place of docker socket")
 		}
-		if err != nil { panic(err); }
-		if (sockStat.Mode() & os.ModeSocket) != 0 {
-			// success!
-			return nil;
+		if !done {
+			time.Sleep(10 * time.Millisecond)
 		}
 	}
 	return fmt.Errorf("timeout waiting for docker socket")
