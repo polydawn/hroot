@@ -2,21 +2,100 @@ package crocker
 
 import (
 	"fmt"
+	"os"
+	"io/ioutil"
 	. "polydawn.net/gosh/psh"
+	"path/filepath"
+	"strconv"
 	"time"
 )
 
 /**
- * @param dir relative path to dock dir.
+Produces a Dock struct referring to an active docker daemon.
+If an existing daemon can be found running, it is used; if not, one is started.
+@param dir path to dock dir.  May be relative.
  */
 func NewDock(dir string) *Dock {
-	dock := &Dock{dir: dir}
-	//TODO ping if exists, spawn process if not, etc.
+	dir, err := filepath.Abs(dir)
+	if err != nil { panic(err); }
+	dock := loadDock(dir)
+	if dock == nil {
+		dock = createDock(dir)
+	}
+	return dock
+}
+
+/**
+Launch a new docker daemon.
+You should try loadDock before this.  (Yes, there are inherently race conditions here.)
+*/
+func createDock(dir string) *Dock {
+	dock := &Dock{
+		dir: dir,
+		isMine: true,
+	}
 	Sh("mkdir")("-p")(DefaultIO)(dock.Dir())()
 	dock.daemon().Start()
-	dock.isMine = true
-	time.Sleep(200 * time.Millisecond)
+	dock.awaitSocket(250 * time.Millisecond)
 	return dock
+}
+
+/**
+Check for what looks like an existing docker daemon setup, and return a Dock if one is found.
+We do a basic check if the pidfile and socket are present, and check if pid is stale, and that's it.
+No dialing or protocol negotiation is performed at this stage.
+*/
+func loadDock(dir string) *Dock {
+	dock := &Dock{
+		dir: dir,
+		isMine: false,
+	}
+
+	// check pidfile presence.
+	pidfileStat, err := os.Stat(dock.GetPidfilePath())
+	if os.IsNotExist(err) { return nil; }
+	if err != nil { panic(err); }
+	if !pidfileStat.Mode().IsRegular() { return nil; }
+
+	// check for process.
+	pidfileBlob, err := ioutil.ReadFile(dock.GetPidfilePath())
+	if os.IsNotExist(err) { return nil; }
+	if err != nil { panic(err); }
+	pid, err := strconv.Atoi(string(pidfileBlob))
+	if err != nil { panic(err); }
+	_, err = os.FindProcess(pid)
+	if err != nil { panic(err); }
+
+	// check for socket.
+	if dock.awaitSocket(20 * time.Millisecond) != nil { return nil; }
+
+	// alright, looks like a docker daemon.
+	return dock
+}
+
+/**
+Check/wait for existence of docker.sock.
+*/
+func (dock *Dock) awaitSocket(patience time.Duration) error {
+	timeout := time.Now().Add(patience)
+	done := false
+	for !done {
+		done = time.Now().After(timeout)
+		sockStat, err := os.Stat(dock.GetSockPath())
+		fmt.Printf("wat :: %#v  %#v\n", sockStat, err)
+		if os.IsNotExist(err) {
+			if !done {
+				time.Sleep(10 * time.Millisecond)
+			}
+			continue
+		}
+		if err != nil { panic(err); }
+		if (sockStat.Mode() & os.ModeSocket) != 0 {
+			// success!
+			return nil;
+		}
+	}
+	return fmt.Errorf("timeout waiting for docker socket")
 }
 
 type Dock struct {
