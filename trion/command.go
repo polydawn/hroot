@@ -15,7 +15,10 @@ var docker = crocker.NewDock("dock").Client()
 //Where to place & call CIDfiles
 const TempDir    = "/tmp"
 const TempPrefix = "trion-"
+
+//Default tar filename amd image tag
 const TarFile    = "image.tar"
+const DefaultTag = "latest"
 
 //Executes 'docker run' and returns the container's CID.
 func Run(config TrionConfig) string {
@@ -136,7 +139,7 @@ func Import(config TrionConfig, path string) {
 		tag = sp[1]
 	} else {
 		repo = config.Image
-		tag = "latest"
+		tag = DefaultTag
 	}
 
 	Println("Importing", repo + ":" + tag)
