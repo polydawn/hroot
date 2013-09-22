@@ -15,9 +15,8 @@ var docker = crocker.NewDock("dock").Client()
 const TempDir    = "/tmp"
 const TempPrefix = "trion-"
 
-//Prepare flags for 'docker run'
-//	Returns a channel you can read to get the CIDfile. Sorry, this is needed due to docker being docker.
-func PrepRun(config TrionConfig) (Shfn, chan string) {
+//Executes 'docker run' syncronously, and returns the container's CID.
+func Run(config TrionConfig) string {
 	dockRun := docker("run")
 
 	//Find the absolute path for each host mount
@@ -71,13 +70,9 @@ func PrepRun(config TrionConfig) (Shfn, chan string) {
 		dockRun = dockRun(config.Command[i])
 	}
 
-	return dockRun, pollCid(CIDfilename)
-}
-
-//Executes 'docker run' syncronously, and returns the container's CID.
-func Run(config TrionConfig) string {
-	run, getCID := PrepRun(config)
-	run()
+	//Poll for the CID and run the docker
+	getCID := pollCid(CIDfilename)
+	dockRun()
 	return <- getCID
 }
 
