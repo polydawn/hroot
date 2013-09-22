@@ -143,7 +143,5 @@ func Import(config TrionConfig, path string) {
 	}
 
 	Println("Importing", repo + ":" + tag)
-
-	// docker import URL|- [REPOSITORY [TAG]]
 	docker("import", "-", repo, tag)(Opts{In: in, Out: os.Stdout })()
 }
