@@ -6,6 +6,7 @@ import (
 	. "fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 //Default docker command template
@@ -14,6 +15,7 @@ var docker = crocker.NewDock("dock").Client()
 //Where to place & call CIDfiles
 const TempDir    = "/tmp"
 const TempPrefix = "trion-"
+const TarFile    = "image.tar"
 
 //Executes 'docker run' and returns the container's CID.
 func Run(config TrionConfig) string {
@@ -89,14 +91,16 @@ func Purge(CID string) {
 //Executes 'docker export', after ensuring there is no image.tar in the way.
 //	This is because docker will *happily* export into an existing tar.
 func Export(CID, path string) {
+	tar := path + TarFile
+
 	//Check for existing file
-	file, _ := os.Open("./image.tar")
+	file, _ := os.Open(tar)
 	_, err  := file.Stat()
 	file.Close()
 
 	//Delete tar if it exists
 	if err == nil {
-		Println("Warning: output image.tar already exists. Overwriting...")
+		Println("Warning: Output image.tar already exists. Overwriting...")
 		err = os.Remove("./image.tar")
 		if err != nil {
 			Println("Fatal: Could not delete tar file.")
@@ -104,10 +108,39 @@ func Export(CID, path string) {
 		}
 	}
 
-	out, err := os.OpenFile(path + "image.tar", os.O_WRONLY|os.O_CREATE, 0644)
+	out, err := os.OpenFile(tar, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		panic(err);
 	}
 
 	docker("export", CID)(Opts{Out: out})()
+}
+
+//Import an image into docker's repository.
+func Import(config TrionConfig, path string) {
+	tar := path + TarFile
+
+	//Open the file
+	in, err := os.Open(tar)
+	if err != nil {
+		Println("Fatal: Could not open file for import:", tar)
+	}
+
+	//Get the repository and tag from the config
+	repo, tag := "", ""
+	sp := strings.Split(config.Image, ":")
+
+	//If both a name and version are specified, use them, otherwise just tag it as 'latest'
+	if len(sp) == 2 {
+		repo = sp[0]
+		tag = sp[1]
+	} else {
+		repo = config.Image
+		tag = "latest"
+	}
+
+	Println("Importing", repo + ":" + tag)
+
+	// docker import URL|- [REPOSITORY [TAG]]
+	docker("import", "-", repo, tag)(Opts{In: in, Out: os.Stdout })()
 }

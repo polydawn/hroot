@@ -70,6 +70,7 @@ func (opts *launchCmd) Execute(args []string) error {
 type buildCmd struct {}
 func (opts *buildCmd) Execute(args []string) error {
 	config := trion.FindConfig(".")
+	path := "./"
 
 	//Use the build command and upstream image
 	buildConfig        := config
@@ -80,7 +81,12 @@ func (opts *buildCmd) Execute(args []string) error {
 	CID := trion.Run(buildConfig)
 	trion.Wait(CID)
 
-	trion.Export(CID, "./")
+	//Create a tar
+	trion.Export(CID, path)
+
+	//Import the built docker
+	// Todo: add --noImport option to goflags
+	trion.Import(config, path)
 
 	if config.Purge {
 		trion.Purge(CID)
