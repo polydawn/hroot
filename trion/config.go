@@ -18,7 +18,8 @@ type TrionConfig struct {
 	Attach         bool     //Attach interactive terminal?
 	Quiet          bool     //Suppress docker output entirely?
 	DNS          []string   //Do you want to use custom DNS servers?
-	BuildCommand []string   //What command to run when building
+	Build        []string   //What command to run when building
+	Upstream       string   //What image to use when building
 	Purge          bool     //Delete when done?
 	Environment [][]string  //Env variables (each an array of strings: variable, value)
 	             //DAT ALIGNNMENT. SO GOOD.
@@ -33,7 +34,8 @@ var DefaultTrionConfig = TrionConfig {
 	false,                  //Attach
 	false,                  //Quiet
 	[]string{},             //DNS
-	[]string{"build.sh"},   //Command
+	[]string{"build.sh"},   //Build
+	"ubuntu",               //Upstream
 	false,                  //Purge
 	[][]string{},           //Environment
 }
@@ -87,6 +89,9 @@ func AddConfig(inc, base *TrionConfig) {
 	if inc.Image != "" {
 		base.Image = inc.Image
 	}
+	if inc.Upstream != "" {
+		base.Upstream = inc.Upstream
+	}
 	if inc.StartIn != "" {
 		base.StartIn = inc.StartIn
 	}
@@ -96,8 +101,8 @@ func AddConfig(inc, base *TrionConfig) {
 	if len(inc.Command) != 0 {
 		base.Command = inc.Command
 	}
-	if len(inc.BuildCommand) != 0 {
-		base.BuildCommand = inc.BuildCommand
+	if len(inc.Build) != 0 {
+		base.Build = inc.Build
 	}
 	base.Purge = inc.Purge
 	base.Attach = inc.Attach

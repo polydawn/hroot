@@ -72,7 +72,8 @@ func (opts *buildCmd) Execute(args []string) error {
 	config := trion.FindConfig(".")
 
 	// beacuse build mode
-	config.Command = config.BuildCommand
+	config.Command = config.Build
+	config.Image   = config.Upstream
 
 	CID := trion.Run(config)
 	trion.Wait(CID)
