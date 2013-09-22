@@ -73,8 +73,8 @@ func Run(config TrionConfig) string {
 	}
 
 	//Poll for the CID and run the docker
-	getCID := pollCid(CIDfilename)
 	dockRun()
+	getCID := pollCid(CIDfilename)
 	return <- getCID
 }
 
