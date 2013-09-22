@@ -71,11 +71,13 @@ type buildCmd struct {}
 func (opts *buildCmd) Execute(args []string) error {
 	config := trion.FindConfig(".")
 
-	// beacuse build mode
-	config.Command = config.Build
-	config.Image   = config.Upstream
+	//Use the build command and upstream image
+	buildConfig        := config
+	buildConfig.Command = config.Build
+	buildConfig.Image   = config.Upstream
 
-	CID := trion.Run(config)
+	//Run the build
+	CID := trion.Run(buildConfig)
 	trion.Wait(CID)
 
 	trion.Export(CID, "./")
