@@ -15,7 +15,7 @@ var docker = crocker.NewDock("dock").Client()
 const TempDir    = "/tmp"
 const TempPrefix = "trion-"
 
-//Executes 'docker run' syncronously, and returns the container's CID.
+//Executes 'docker run' and returns the container's CID.
 func Run(config TrionConfig) string {
 	dockRun := docker("run")
 
@@ -76,12 +76,12 @@ func Run(config TrionConfig) string {
 	return <- getCID
 }
 
-//Executes 'docker wait' syncronously
+//Executes 'docker wait'
 func Wait(CID string) {
 	docker("wait", CID)()
 }
 
-//Executes 'docker rm' syncronously
+//Executes 'docker rm'
 func Purge(CID string) {
 	docker("rm", CID)()
 }
