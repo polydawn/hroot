@@ -86,7 +86,24 @@ func Purge(CID string) {
 	docker("rm", CID)()
 }
 
+//Executes 'docker export', after ensuring there is no image.tar in the way.
+//	This is because docker will *happily* export into an existing tar.
 func Export(CID, path string) {
+	//Check for existing file
+	file, _ := os.Open("./image.tar")
+	_, err  := file.Stat()
+	file.Close()
+
+	//Delete tar if it exists
+	if err == nil {
+		Println("Warning: output image.tar already exists. Overwriting...")
+		err = os.Remove("./image.tar")
+		if err != nil {
+			Println("Fatal: Could not delete tar file.")
+			os.Exit(1)
+		}
+	}
+
 	out, err := os.OpenFile(path + "image.tar", os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		panic(err);
