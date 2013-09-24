@@ -97,9 +97,11 @@ func Export(CID, path string) {
 	tar := path + TarFile
 
 	//Check for existing file
-	file, _ := os.Open(tar)
-	_, err  := file.Stat()
-	file.Close()
+	file, err := os.Open(tar)
+	if (err == nil) {
+		_, err  = file.Stat()
+		file.Close()
+	}
 
 	//Delete tar if it exists
 	if err == nil {
