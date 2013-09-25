@@ -1,6 +1,6 @@
 //Handles the weird bits of the docker CLI
 
-package trion
+package crocker
 
 import (
 	. "fmt"
@@ -10,9 +10,12 @@ import (
 	"strings"
 )
 
+//Where to place & call CIDfiles
+const TempDir    = "/tmp"
+const TempPrefix = "trion-"
 
 //Create a temporary file for docker to print its CID to
-func createCIDfile() string {
+func CreateCIDfile() string {
 	//Create a temporary file
 	CIDfileFD, err := ioutil.TempFile(TempDir, TempPrefix)
 	if err != nil {
@@ -34,7 +37,7 @@ func createCIDfile() string {
 
 //Given a filename that docker prints a ContainerID to, poll for file and write that CID to a channel.
 //	This defeats the rather insane problem caused by docker not really writing the CIDfile at any particular time...
-func pollCid(filename string) chan string {
+func PollCid(filename string) chan string {
 	containerID := ""
 	getCID := make (chan string)
 

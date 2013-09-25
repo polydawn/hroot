@@ -2,6 +2,7 @@ package trion
 
 import (
 	. "polydawn.net/gosh/psh"
+	"polydawn.net/dockctrl/crocker"
 	. "fmt"
 	"os"
 	"path/filepath"
@@ -11,10 +12,6 @@ import (
 type Command struct {
 	Docker Shfn //pointer to a docker command template
 }
-
-//Where to place & call CIDfiles
-const TempDir    = "/tmp"
-const TempPrefix = "trion-"
 
 //Default tar filename amd image tag
 const TarFile    = "image.tar"
@@ -36,7 +33,7 @@ func (cmd *Command) Run(config TrionConfig) string {
 	}
 
 	//Where should docker write the new CID?
-	CIDfilename := createCIDfile()
+	CIDfilename := crocker.CreateCIDfile()
 	dockRun = dockRun("-cidfile", CIDfilename)
 
 	//Where should the container start?
@@ -77,7 +74,7 @@ func (cmd *Command) Run(config TrionConfig) string {
 
 	//Poll for the CID and run the docker
 	dockRun()
-	getCID := pollCid(CIDfilename)
+	getCID := crocker.PollCid(CIDfilename)
 	return <- getCID
 }
 
