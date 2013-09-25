@@ -29,16 +29,16 @@ func NewDock(dir string) *Dock {
 
 /**
 	Attempts to find an existing docker or starts one itself.
-	@return A docker instance, and the directory it lives in
+	@return A docker instance, the directory it lives in, and if we started it
 */
-func FindDock() (*Dock, string) {
+func FindDock() (*Dock, string, bool) {
 	dock := loadDock(defaultDir) // Is there a default docker running?
-	if dock != nil { return dock, defaultDir }
+	if dock != nil { return dock, defaultDir, false }
 
 	dock = loadDock(localDir)    // Is there a docker running in the current folder?
-	if dock != nil { return dock, defaultDir }
+	if dock != nil { return dock, defaultDir, false }
 
-	return createDock(localDir), localDir //Start our own daemon
+	return createDock(localDir), localDir, true //Start our own daemon
 }
 
 /**
