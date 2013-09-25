@@ -2,15 +2,15 @@ package trion
 
 import (
 	. "polydawn.net/gosh/psh"
-	"polydawn.net/dockctrl/crocker"
 	. "fmt"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-//Default docker command template
-var docker = crocker.NewDock("dock").Client()
+type Command struct {
+	Docker Shfn //pointer to a docker command template
+}
 
 //Where to place & call CIDfiles
 const TempDir    = "/tmp"
@@ -21,8 +21,8 @@ const TarFile    = "image.tar"
 const DefaultTag = "latest"
 
 //Executes 'docker run' and returns the container's CID.
-func Run(config TrionConfig) string {
-	dockRun := docker("run")
+func (cmd *Command) Run(config TrionConfig) string {
+	dockRun := cmd.Docker("run")
 
 	//Find the absolute path for each host mount
 	for i, j := range config.Mount {
@@ -82,18 +82,18 @@ func Run(config TrionConfig) string {
 }
 
 //Executes 'docker wait'
-func Wait(CID string) {
-	docker("wait", CID)()
+func (cmd *Command) Wait(CID string) {
+	cmd.Docker("wait", CID)()
 }
 
 //Executes 'docker rm'
-func Purge(CID string) {
-	docker("rm", CID)()
+func (cmd *Command) Purge(CID string) {
+	cmd.Docker("rm", CID)()
 }
 
 //Executes 'docker export', after ensuring there is no image.tar in the way.
 //	This is because docker will *happily* export into an existing tar.
-func Export(CID, path string) {
+func (cmd *Command) Export(CID, path string) {
 	tar := path + TarFile
 
 	//Check for existing file
@@ -118,11 +118,11 @@ func Export(CID, path string) {
 		panic(err);
 	}
 
-	docker("export", CID)(Opts{Out: out})()
+	cmd.Docker("export", CID)(Opts{Out: out})()
 }
 
 //Import an image into docker's repository.
-func Import(config TrionConfig, path string) {
+func (cmd *Command) Import(config TrionConfig, path string) {
 	tar := path + TarFile
 
 	//Open the file
@@ -145,5 +145,5 @@ func Import(config TrionConfig, path string) {
 	}
 
 	Println("Importing", repo + ":" + tag)
-	docker("import", "-", repo, tag)(Opts{In: in, Out: os.Stdout })()
+	cmd.Docker("import", "-", repo, tag)(Opts{In: in, Out: os.Stdout })()
 }
