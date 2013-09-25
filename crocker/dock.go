@@ -17,8 +17,6 @@ If an existing daemon can be found running, it is used; if not, one is started.
 @param dir path to dock dir.  May be relative.
  */
 func NewDock(dir string) *Dock {
-	dir, err := filepath.Abs(dir)
-	if err != nil { panic(err); }
 	dock := loadDock(dir)
 	if dock == nil {
 		dock = createDock(dir)
@@ -31,6 +29,9 @@ Launch a new docker daemon.
 You should try loadDock before this.  (Yes, there are inherently race conditions here.)
 */
 func createDock(dir string) *Dock {
+	dir, err := filepath.Abs(dir)
+	if err != nil { panic(err); }
+
 	dock := &Dock{
 		dir: dir,
 		isMine: true,
@@ -47,6 +48,9 @@ We do a basic check if the pidfile and socket are present, and check if pid is s
 No dialing or protocol negotiation is performed at this stage.
 */
 func loadDock(dir string) *Dock {
+	dir, err := filepath.Abs(dir)
+	if err != nil { panic(err); }
+
 	dock := &Dock{
 		dir: dir,
 		isMine: false,
