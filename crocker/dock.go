@@ -11,6 +11,9 @@ import (
 	"time"
 )
 
+const defaultDir = "/var/run" //Where a docker daemon will run by default
+const   localDir = "./dock"   //Where to start a local docker if desired
+
 /**
 Produces a Dock struct referring to an active docker daemon.
 If an existing daemon can be found running, it is used; if not, one is started.
@@ -22,6 +25,20 @@ func NewDock(dir string) *Dock {
 		dock = createDock(dir)
 	}
 	return dock
+}
+
+/**
+	Attempts to find an existing docker or starts one itself.
+	@return A docker instance, and the directory it lives in
+*/
+func FindDock() (*Dock, string) {
+	dock := loadDock(defaultDir) // Is there a default docker running?
+	if dock != nil { return dock, defaultDir }
+
+	dock = loadDock(localDir)    // Is there a docker running in the current folder?
+	if dock != nil { return dock, defaultDir }
+
+	return createDock(localDir), localDir //Start our own daemon
 }
 
 /**
