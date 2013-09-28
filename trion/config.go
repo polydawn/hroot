@@ -63,7 +63,7 @@ func FindConfig(dir string) TrionConfig {
 
 	//Apply the configuration file(s)
 	for stack.Len() > 0 {
-		content := LoadConfig(stack.Pop().([]byte), stackDir.Pop().(string))
+		content := LoadConfigFromJSON(stack.Pop().([]byte), stackDir.Pop().(string))
 		AddConfig(&content, &config)
 		loaded++
 	}
@@ -75,30 +75,46 @@ func FindConfig(dir string) TrionConfig {
 	return config
 }
 
-//Load data into struct
-func LoadConfig(data []byte, dir string) TrionConfig {
-	//Get the absolute path this configuration is relative to, and load the data into a config struct
+//Load data into struct from a JSON byte array
+func LoadConfigFromJSON(data []byte, dir string) TrionConfig {
 	var config TrionConfig
-	cwd, err := filepath.Abs(dir)
-	err2 := json.Unmarshal(data, &config)
+	err := json.Unmarshal(data, &config)
 
-	//Check the unmarshalling was successful and that filepath succeeded 
+	//Check the unmarshalling was successful and that filepath succeeded
+	if err != nil {
+		Println("Cannot decode JSON:", err.Error())
+		os.Exit(1)
+	}
+
+	PrepareConfig(&config, dir)
+	return config
+}
+
+//Pre-process a configuration object
+func PrepareConfig(config *TrionConfig, dir string) {
+	//Get the absolute directory this config is relative to
+	cwd, err := filepath.Abs(dir)
 	if err != nil {
 		Println("Fatal: Cannot determine absolute path:", dir)
 		os.Exit(1)
-	} else if err2 != nil {
-		Println("Cannot decode JSON:", err2.Error())
-		os.Exit(1)
 	}
 
-	//Check for triple-dot ... notation, which is relative to that config's directory, not the CWD
+	//Handle mounts
 	for i := range config.Mount {
+
+		//Check for triple-dot ... notation, which is relative to that config's directory, not the CWD
 		if strings.Index(config.Mount[i][0], "...") != -1 {
 			config.Mount[i][0] = strings.Replace(config.Mount[i][0], "...", cwd, -1)
 		}
-	}
 
-	return config
+		//Find the absolute path for each host mount
+		abs, err := filepath.Abs(config.Mount[i][0])
+		if err != nil {
+			Println("Fatal: Cannot determine absolute path:", config.Mount[i][0])
+			os.Exit(1)
+		}
+		config.Mount[i][0] = abs
+	}
 }
 
 //Loads a configuration object, overriding the base

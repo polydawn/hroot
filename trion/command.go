@@ -5,7 +5,6 @@ import (
 	"polydawn.net/dockctrl/crocker"
 	. "fmt"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
@@ -20,17 +19,6 @@ const DefaultTag = "latest"
 //Executes 'docker run' and returns the container's CID.
 func (cmd *Command) Run(config TrionConfig) string {
 	dockRun := cmd.Docker("run")
-
-	//Find the absolute path for each host mount
-	for i, j := range config.Mount {
-		cwd, err := filepath.Abs(j[0])
-		if err != nil {
-			Println("Fatal: Cannot determine absolute path:", j[0])
-			os.Exit(1)
-		}
-
-		config.Mount[i][0] = cwd
-	}
 
 	//Where should docker write the new CID?
 	CIDfilename := crocker.CreateCIDfile()
@@ -55,7 +43,6 @@ func (cmd *Command) Run(config TrionConfig) string {
 	}
 
 	for i := range config.Ports {
-		Println(config.Ports[i])
 		dockRun = dockRun("-p", config.Ports[i][0] + ":" + config.Ports[i][1])
 	}
 
