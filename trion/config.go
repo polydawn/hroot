@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 const FileName = "docker.json"
@@ -45,7 +47,7 @@ var DefaultTrionConfig = TrionConfig {
 //Recursively finds configuration files and loads them top-down.
 //This lets you have a base configuration in the parent directory and override it for specific containers.
 func FindConfig(dir string) TrionConfig {
-	file, stack, config, loaded := FileName, new(Stack), DefaultTrionConfig, 0
+	file, stack, stackDir, config, loaded := FileName, new(Stack), new(Stack), DefaultTrionConfig, 0
 
 	//recurse up the file tree looking for configuration
 	for {
@@ -54,14 +56,14 @@ func FindConfig(dir string) TrionConfig {
 			break
 		} else {
 			stack.Push(data)
-			file = "../" + file
+			stackDir.Push(dir)
+			dir = "../" + dir
 		}
 	}
 
-
 	//Apply the configuration file(s)
 	for stack.Len() > 0 {
-		content := LoadConfig(stack.Pop().([]byte))
+		content := LoadConfig(stack.Pop().([]byte), stackDir.Pop().(string))
 		AddConfig(&content, &config)
 		loaded++
 	}
@@ -74,16 +76,29 @@ func FindConfig(dir string) TrionConfig {
 }
 
 //Load data into struct
-func LoadConfig(data []byte) TrionConfig {
-	var content TrionConfig
-	err := json.Unmarshal(data, &content)
+func LoadConfig(data []byte, dir string) TrionConfig {
+	//Get the absolute path this configuration is relative to, and load the data into a config struct
+	var config TrionConfig
+	cwd, err := filepath.Abs(dir)
+	err2 := json.Unmarshal(data, &config)
 
-	if (err != nil) {
-		Println("Cannot decode JSON:", err.Error())
+	//Check the unmarshalling was successful and that filepath succeeded 
+	if err != nil {
+		Println("Fatal: Cannot determine absolute path:", dir)
+		os.Exit(1)
+	} else if err2 != nil {
+		Println("Cannot decode JSON:", err2.Error())
 		os.Exit(1)
 	}
 
-	return content
+	//Check for triple-dot ... notation, which is relative to that config's directory, not the CWD
+	for i := range config.Mount {
+		if strings.Index(config.Mount[i][0], "...") != -1 {
+			config.Mount[i][0] = strings.Replace(config.Mount[i][0], "...", cwd, -1)
+		}
+	}
+
+	return config
 }
 
 //Loads a configuration object, overriding the base
