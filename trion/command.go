@@ -54,6 +54,11 @@ func (cmd *Command) Run(config TrionConfig) string {
 		dockRun = dockRun("-v", config.Mount[i][0] + ":" + config.Mount[i][1] + ":" + config.Mount[i][2])
 	}
 
+	for i := range config.Ports {
+		Println(config.Ports[i])
+		dockRun = dockRun("-p", config.Ports[i][0] + ":" + config.Ports[i][1])
+	}
+
 	//What environment variables are set?
 	for i:= range config.Environment {
 		dockRun = dockRun("-e", config.Environment[i][0] + "=" + config.Environment[i][1])

@@ -18,6 +18,7 @@ type TrionConfig struct {
 	Attach         bool     //Attach interactive terminal?
 	Quiet          bool     //Suppress docker output entirely?
 	DNS          []string   //Do you want to use custom DNS servers?
+	Ports      [][]string   //What ports do you want to forward? (each an array of ints: host-port, guest-port)
 	Build        []string   //What command to run when building
 	Upstream       string   //What image to use when building
 	Purge          bool     //Delete when done?
@@ -34,6 +35,7 @@ var DefaultTrionConfig = TrionConfig {
 	false,                  //Attach
 	false,                  //Quiet
 	[]string{},             //DNS
+	[][]string{},           //Ports
 	[]string{"build.sh"},   //Build
 	"ubuntu",               //Upstream
 	false,                  //Purge
@@ -97,6 +99,7 @@ func AddConfig(inc, base *TrionConfig) {
 	}
 	base.Privileged = inc.Privileged
 	base.Mount = append(base.Mount, inc.Mount ...)
+	base.Ports = append(base.Ports, inc.Ports ...)
 	base.Environment = append(base.Environment, inc.Environment ...)
 	if len(inc.Command) != 0 {
 		base.Command = inc.Command
