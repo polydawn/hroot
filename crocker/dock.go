@@ -14,10 +14,10 @@ import (
 const defaultDir = "/var/run" //Where a docker daemon will run by default
 const   localDir = "./dock"   //Where to start a local docker if desired
 
-/**
-Produces a Dock struct referring to an active docker daemon.
-If an existing daemon can be found running, it is used; if not, one is started.
-@param dir path to dock dir.  May be relative.
+/*
+	Produces a Dock struct referring to an active docker daemon.
+	If an existing daemon can be found running, it is used; if not, one is started.
+	@param dir path to dock dir.  May be relative.
  */
 func NewDock(dir string) *Dock {
 	dock := loadDock(dir)
@@ -27,7 +27,7 @@ func NewDock(dir string) *Dock {
 	return dock
 }
 
-/**
+/*
 	Attempts to find an existing docker or starts one itself.
 	@return A docker instance, the directory it lives in, and if we started it
 */
@@ -41,9 +41,9 @@ func FindDock() (*Dock, string, bool) {
 	return createDock(localDir), localDir, true //Start our own daemon
 }
 
-/**
-Launch a new docker daemon.
-You should try loadDock before this.  (Yes, there are inherently race conditions here.)
+/*
+	Launch a new docker daemon.
+	You should try loadDock before this.  (Yes, there are inherently race conditions here.)
 */
 func createDock(dir string) *Dock {
 	dir, err := filepath.Abs(dir)
@@ -59,10 +59,10 @@ func createDock(dir string) *Dock {
 	return dock
 }
 
-/**
-Check for what looks like an existing docker daemon setup, and return a Dock if one is found.
-We do a basic check if the pidfile and socket are present, and check if pid is stale, and that's it.
-No dialing or protocol negotiation is performed at this stage.
+/*
+	Check for what looks like an existing docker daemon setup, and return a Dock if one is found.
+	We do a basic check if the pidfile and socket are present, and check if pid is stale, and that's it.
+	No dialing or protocol negotiation is performed at this stage.
 */
 func loadDock(dir string) *Dock {
 	dir, err := filepath.Abs(dir)
@@ -95,8 +95,8 @@ func loadDock(dir string) *Dock {
 	return dock
 }
 
-/**
-Check/wait for existence of docker.sock.
+/*
+	Check/wait for existence of docker.sock.
 */
 func (dock *Dock) awaitSocket(patience time.Duration) error {
 	timeout := time.Now().Add(patience)
@@ -128,21 +128,21 @@ func (dock *Dock) awaitSocket(patience time.Duration) error {
 }
 
 type Dock struct {
-	/**
-	 * Absolute path to the base dir for a docker daemon.
-	 *
-	 * 'docker.sock' and 'docker.pid' are expected to exist immediately inside this path.
-	 * The daemon's working dir may also be here.
-	 *
-	 * The last segment of the path is quite probably a symlink, and should be respected
-	 * even if dangling (unless that means making more than one directory on the far
-	 * side; if things are that dangling, give up).
+	/*
+		Absolute path to the base dir for a docker daemon.
+
+		'docker.sock' and 'docker.pid' are expected to exist immediately inside this path.
+		The daemon's working dir may also be here.
+
+		The last segment of the path is quite probably a symlink, and should be respected
+		even if dangling (unless that means making more than one directory on the far
+		side; if things are that dangling, give up).
 	 */
 	dir string
 
-	/**
-	 * True iff the daemon at this dock location was spawned by us.
-	 * Basically used to determine if Slay() should actually fire teh lazors or not.
+	/*
+		True iff the daemon at this dock location was spawned by us.
+		Basically used to determine if Slay() should actually fire teh lazors or not.
 	 */
 	isMine bool
 }
