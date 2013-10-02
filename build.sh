@@ -1,3 +1,9 @@
-export GOPATH="$PWD"/.gopath/
+# Where is this script located?
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-go build -race -o bin/dockctrl main/dockctrl.go
+# Build the project
+(
+	cd $DIR ;
+	export GOPATH="$PWD"/.gopath/ ;
+	go build -race -o dockctrl main/dockctrl.go
+)
