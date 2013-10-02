@@ -38,8 +38,8 @@ func (cmd *Command) Run(config TrionConfig) string {
 	}
 
 	//What folders get mounted?
-	for i := range config.Mount {
-		dockRun = dockRun("-v", config.Mount[i][0] + ":" + config.Mount[i][1] + ":" + config.Mount[i][2])
+	for i := range config.Mounts {
+		dockRun = dockRun("-v", config.Mounts[i][0] + ":" + config.Mounts[i][1] + ":" + config.Mounts[i][2])
 	}
 
 	for i := range config.Ports {

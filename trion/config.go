@@ -15,7 +15,7 @@ type TrionConfig struct {
 	Image          string   //What docker image to use
 	StartIn        string   //Which folder to start
 	Privileged     bool     //Run in privileged mode?
-	Mount      [][]string   //Array of mounts (each an array of strings: host-folder, dock-folder, "ro"/"rw" permission setting)
+	Mounts     [][]string   //Array of mounts (each an array of strings: host-folder, dock-folder, "ro"/"rw" permission setting)
 	Command      []string   //What command to run
 	Attach         bool     //Attach interactive terminal?
 	Quiet          bool     //Suppress docker output entirely?
@@ -32,7 +32,7 @@ var DefaultTrionConfig = TrionConfig {
 	"ubuntu",               //Image
 	"/",                    //StartIn
 	false,                  //Privileged
-	[][]string{},           //Mount
+	[][]string{},           //Mounts
 	[]string{"launch.sh"},  //Command
 	false,                  //Attach
 	false,                  //Quiet
@@ -100,20 +100,20 @@ func PrepareConfig(config *TrionConfig, dir string) {
 	}
 
 	//Handle mounts
-	for i := range config.Mount {
+	for i := range config.Mounts {
 
 		//Check for triple-dot ... notation, which is relative to that config's directory, not the CWD
-		if strings.Index(config.Mount[i][0], "...") != -1 {
-			config.Mount[i][0] = strings.Replace(config.Mount[i][0], "...", cwd, -1)
+		if strings.Index(config.Mounts[i][0], "...") != -1 {
+			config.Mounts[i][0] = strings.Replace(config.Mounts[i][0], "...", cwd, -1)
 		}
 
 		//Find the absolute path for each host mount
-		abs, err := filepath.Abs(config.Mount[i][0])
+		abs, err := filepath.Abs(config.Mounts[i][0])
 		if err != nil {
-			Println("Fatal: Cannot determine absolute path:", config.Mount[i][0])
+			Println("Fatal: Cannot determine absolute path:", config.Mounts[i][0])
 			os.Exit(1)
 		}
-		config.Mount[i][0] = abs
+		config.Mounts[i][0] = abs
 	}
 }
 
@@ -129,7 +129,7 @@ func AddConfig(inc, base *TrionConfig) {
 		base.StartIn = inc.StartIn
 	}
 	base.Privileged = inc.Privileged
-	base.Mount = append(base.Mount, inc.Mount ...)
+	base.Mounts = append(base.Mounts, inc.Mounts ...)
 	base.Ports = append(base.Ports, inc.Ports ...)
 	base.Environment = append(base.Environment, inc.Environment ...)
 	if len(inc.Command) != 0 {
