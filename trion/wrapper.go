@@ -11,7 +11,7 @@ const ExportPath = "./" //Where to export docker images
 
 //Helps run anyything that requires a docker connection.
 //Handles creation & cleanup in one place.
-func WithDocker(fn func(TrionConfig, *crocker.Dock, *Command) error ) error {
+func WithDocker(fn func(TrionConfig, *Command) error ) error {
 	//Load configuration, then find or start a docker
 	config := FindConfig(".")
 	dock, dir, ours := crocker.FindDock()
@@ -25,13 +25,13 @@ func WithDocker(fn func(TrionConfig, *crocker.Dock, *Command) error ) error {
 	}
 
 	//Run the closure, kill the docker if needed, and return any errors.
-	err := fn(config, dock, cmd)
+	err := fn(config, cmd)
 	dock.Slay()
 	return err
 }
 
 //Launches a docker
-func Launch(config TrionConfig, dock *crocker.Dock, cmd *Command) error {
+func Launch(config TrionConfig, cmd *Command) error {
 	//Start the docker and wait for it to finish
 	CID := cmd.Run(config)
 	cmd.Wait(CID)
@@ -45,7 +45,7 @@ func Launch(config TrionConfig, dock *crocker.Dock, cmd *Command) error {
 }
 
 //Builds a docker
-func Build(config TrionConfig, dock *crocker.Dock, cmd *Command) error {
+func Build(config TrionConfig, cmd *Command) error {
 	//Use the build command and upstream image
 	buildConfig        := config
 	buildConfig.Command = config.Build
