@@ -152,6 +152,10 @@ func (dock Dock) Dir() string {
 	return dock.dir
 }
 
+func (dock Dock) IsChildProccess() bool {
+	return dock.isMine
+}
+
 func (dock *Dock) cmd() Shfn {
 	return Sh("docker")(DefaultIO)(
 		"-H="+fmt.Sprintf("unix://%s", dock.GetSockPath()),

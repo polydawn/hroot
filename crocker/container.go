@@ -1,5 +1,12 @@
 package crocker
 
+import (
+	. "polydawn.net/gosh/psh"
+	. "fmt"
+	"os"
+	"strings"
+)
+
 /*
 	Refers to a Container process.
 	The container has been started and has an ID.
@@ -14,18 +21,63 @@ type Container struct {
 }
 
 /*
-	Launches a new Container in the given Dock.
+	Default tar filename amd image tag
 */
-func LaunchContainer(dock *Dock, command string) *Container {
+const TarFile    = "image.tar"
+const DefaultTag = "latest"
+
+/*
+	Launches a new Container in the given Dock.
+	Punting on documentation while things are in flux; see command.go struct for details.
+*/
+func Launch(dock *Dock, image string, command []string, attach bool, privileged bool, startIn string, dns []string, mounts [][]string, ports [][]string, environment [][]string) *Container {
 	dockRun := dock.cmd()("run")
 
-	// set up cidfile
+	//Where should docker write the new CID?
 	CIDfilename := CreateCIDfile()
 	dockRun = dockRun("-cidfile", CIDfilename)
 
-	//TODO: moar conf
+	//Where should the container start?
+	dockRun = dockRun("-w", startIn)
 
-	// launch
+	//Is the docker in privleged (pwn ur box) mode?
+	if (privileged) {
+		dockRun = dockRun("-privileged")
+	}
+
+	//Custom DNS servers?
+	for i := range dns {
+		dockRun = dockRun ("-dns", dns[i])
+	}
+
+	//What folders get mounted?
+	for i := range mounts {
+		dockRun = dockRun("-v", mounts[i][0] + ":" + mounts[i][1] + ":" + mounts[i][2])
+	}
+
+	for i := range ports {
+		dockRun = dockRun("-p", ports[i][0] + ":" + ports[i][1])
+	}
+
+	//What environment variables are set?
+	for i:= range environment {
+		dockRun = dockRun("-e", environment[i][0] + "=" + environment[i][1])
+	}
+
+	//Are we attaching?
+	if attach {
+		dockRun = dockRun("-i", "-t")
+	}
+
+	//Add image name
+	dockRun = dockRun(image)
+
+	//What command should it run?
+	for i := range command {
+		dockRun = dockRun(command[i])
+	}
+
+	//Poll for the CID and run the docker
 	dockRun()
 	getCID := PollCid(CIDfilename)
 
@@ -53,4 +105,72 @@ func (c *Container) Wait() {
 */
 func (c *Container) Purge() {
 	c.dock.cmd()("rm", c.id)()
+}
+
+/*
+	Executes 'docker export', after ensuring there is no image.tar in the way.
+	This is because docker will *happily* export into an existing tar.
+*/
+func (c *Container) Export(path string) {
+	tar := path + TarFile
+
+	//Check for existing file
+	file, err := os.Open(tar)
+	if (err == nil) {
+		_, err  = file.Stat()
+		file.Close()
+	}
+
+	//Delete tar if it exists
+	if err == nil {
+		Println("Warning: Output image.tar already exists. Overwriting...")
+		err = os.Remove("./image.tar")
+		if err != nil {
+			Println("Fatal: Could not delete tar file.")
+			os.Exit(1)
+		}
+	}
+
+	out, err := os.OpenFile(tar, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		panic(err);
+	}
+
+	c.dock.cmd()("export", c.id)(Opts{Out: out})()
+}
+
+/*
+	Import an image into docker's repository.
+*/
+func (c *Container) Import(path, name, tag string) {
+	tar := path + TarFile
+
+	//Open the file
+	in, err := os.Open(tar)
+	if err != nil {
+		Println("Fatal: Could not open file for import:", tar)
+	}
+
+	Println("Importing", name + ":" + tag)
+	c.dock.cmd()("import", "-", name, tag)(Opts{In: in, Out: os.Stdout })()
+}
+
+/*
+	Import an image from a docker-style image string, such as 'ubuntu:latest'
+*/
+func (c *Container) ImportFromString(path, image string) {
+	//Get the repository and tag
+	name, tag := "", ""
+	sp := strings.Split(image, ":")
+
+	//If both a name and version are specified, use them, otherwise just tag it as 'latest'
+	if len(sp) == 2 {
+		name= sp[0]
+		tag = sp[1]
+	} else {
+		name = image
+		tag = DefaultTag
+	}
+
+	c.Import(path, name, tag)
 }

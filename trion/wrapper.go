@@ -11,11 +11,10 @@ const ExportPath = "./" //Where to export docker images
 
 //Helps run anyything that requires a docker connection.
 //Handles creation & cleanup in one place.
-func WithDocker(fn func(TrionConfig, *Command) error ) error {
+func WithDocker(fn func(TrionConfig, *crocker.Dock) error ) error {
 	//Load configuration, then find or start a docker
 	config := FindConfig(".")
 	dock, dir, ours := crocker.FindDock()
-	cmd := &Command{dock.Client()}
 
 	//Announce the docker
 	if ours {
@@ -25,46 +24,54 @@ func WithDocker(fn func(TrionConfig, *Command) error ) error {
 	}
 
 	//Run the closure, kill the docker if needed, and return any errors.
-	err := fn(config, cmd)
+	err := fn(config, dock)
 	dock.Slay()
 	return err
 }
 
+//Helper function: maps a TrionConfig struct to crocker function.
+//Kinda ugly; this situation may improve once our config shenanigans solidifies a bit.
+func Run(dock *crocker.Dock, config TrionConfig) *crocker.Container {
+
+	return crocker.Launch(dock, config.Image, config.Command, config.Attach, config.Privileged, config.StartIn, config.DNS, config.Mounts, config.Ports, config.Environment)
+}
+
+
 //Launches a docker
-func Launch(config TrionConfig, cmd *Command) error {
+func Launch(config TrionConfig, dock *crocker.Dock) error {
 	//Start the docker and wait for it to finish
-	CID := cmd.Run(config)
-	cmd.Wait(CID)
+	container := Run(dock, config)
+	container.Wait()
 
 	//Remove if desired
 	if config.Purge {
-		cmd.Purge(CID)
+		container.Purge()
 	}
 
 	return nil
 }
 
 //Builds a docker
-func Build(config TrionConfig, cmd *Command) error {
+func Build(config TrionConfig, dock *crocker.Dock) error {
 	//Use the build command and upstream image
 	buildConfig        := config
 	buildConfig.Command = config.Build
 	buildConfig.Image   = config.Upstream
 
 	//Run the build
-	CID := cmd.Run(buildConfig)
-	cmd.Wait(CID)
+	container := Run(dock, buildConfig)
+	container.Wait()
 
 	//Create a tar
-	cmd.Export(CID, ExportPath)
+	container.Export(ExportPath)
 
 	//Import the built docker
 	// Todo: add --noImport option to goflags
-	cmd.Import(config, ExportPath)
+	container.ImportFromString(ExportPath, config.Image)
 
 	//Remove if desired
 	if config.Purge {
-		cmd.Purge(CID)
+		container.Purge()
 	}
 
 	return nil
