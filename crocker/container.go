@@ -1,9 +1,9 @@
 package crocker
 
 import (
-	. "polydawn.net/gosh/psh"
 	. "fmt"
 	"os"
+	. "polydawn.net/gosh/psh"
 	"strings"
 )
 
@@ -23,7 +23,7 @@ type Container struct {
 /*
 	Default tar filename amd image tag
 */
-const TarFile    = "image.tar"
+const TarFile = "image.tar"
 const DefaultTag = "latest"
 
 /*
@@ -41,13 +41,13 @@ func Launch(dock *Dock, image string, command []string, attach bool, privileged 
 	dockRun = dockRun("-w", startIn)
 
 	//Is the docker in privleged (pwn ur box) mode?
-	if (privileged) {
+	if privileged {
 		dockRun = dockRun("-privileged")
 	}
 
 	//Custom DNS servers?
 	for i := range dns {
-		dockRun = dockRun ("-dns", dns[i])
+		dockRun = dockRun("-dns", dns[i])
 	}
 
 	//What folders get mounted?
@@ -83,7 +83,7 @@ func Launch(dock *Dock, image string, command []string, attach bool, privileged 
 
 	return &Container{
 		dock: dock,
-		id: <-getCID,
+		id:   <-getCID,
 	}
 }
 
@@ -116,8 +116,8 @@ func (c *Container) Export(path string) {
 
 	//Check for existing file
 	file, err := os.Open(tar)
-	if (err == nil) {
-		_, err  = file.Stat()
+	if err == nil {
+		_, err = file.Stat()
 		file.Close()
 	}
 
@@ -133,7 +133,7 @@ func (c *Container) Export(path string) {
 
 	out, err := os.OpenFile(tar, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		panic(err);
+		panic(err)
 	}
 
 	c.dock.cmd()("export", c.id)(Opts{Out: out})()
@@ -165,7 +165,7 @@ func (c *Container) ImportFromString(path, image string) {
 
 	//If both a name and version are specified, use them, otherwise just tag it as 'latest'
 	if len(sp) == 2 {
-		name= sp[0]
+		name = sp[0]
 		tag = sp[1]
 	} else {
 		name = image

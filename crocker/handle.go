@@ -6,12 +6,12 @@ import (
 	. "fmt"
 	"io/ioutil"
 	"os"
-	"time"
 	"strings"
+	"time"
 )
 
 //Where to place & call CIDfiles
-const TempDir    = "/tmp"
+const TempDir = "/tmp"
 const TempPrefix = "trion-"
 
 //Create a temporary file for docker to print its CID to
@@ -39,7 +39,7 @@ func CreateCIDfile() string {
 //	This defeats the rather insane problem caused by docker not really writing the CIDfile at any particular time...
 func PollCid(filename string) chan string {
 	containerID := ""
-	getCID := make (chan string)
+	getCID := make(chan string)
 
 	go func() {
 		for i := 0; i <= 20; i++ {

@@ -1,32 +1,31 @@
 package trion
 
 import (
-	. "fmt"
-	. "polydawn.net/dockctrl/util"
-	"io/ioutil"
 	"encoding/json"
+	. "fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	. "polydawn.net/dockctrl/util"
 	"strings"
 )
 
 const FileName = "docker.json"
 
 type TrionConfig struct {
-	Image          string   //What docker image to use
-	StartIn        string   //Which folder to start
-	Privileged     bool     //Run in privileged mode?
-	Mounts     [][]string   //Array of mounts (each an array of strings: host-folder, dock-folder, "ro"/"rw" permission setting)
-	Command      []string   //What command to run
-	Attach         bool     //Attach interactive terminal?
-	Quiet          bool     //Suppress docker output entirely?
-	DNS          []string   //Do you want to use custom DNS servers?
-	Ports      [][]string   //What ports do you want to forward? (each an array of ints: host-port, guest-port)
-	Build        []string   //What command to run when building
-	Upstream       string   //What image to use when building
-	Purge          bool     //Delete when done?
-	Environment [][]string  //Env variables (each an array of strings: variable, value)
-	             //DAT ALIGNNMENT. SO GOOD.
+	Image       string     //What docker image to use
+	StartIn     string     //Which folder to start
+	Privileged  bool       //Run in privileged mode?
+	Mounts      [][]string //Array of mounts (each an array of strings: host-folder, dock-folder, "ro"/"rw" permission setting)
+	Command     []string   //What command to run
+	Attach      bool       //Attach interactive terminal?
+	Quiet       bool       //Suppress docker output entirely?
+	DNS         []string   //Do you want to use custom DNS servers?
+	Ports       [][]string //What ports do you want to forward? (each an array of ints: host-port, guest-port)
+	Build       []string   //What command to run when building
+	Upstream    string     //What image to use when building
+	Purge       bool       //Delete when done?
+	Environment [][]string //Env variables (each an array of strings: variable, value)
 }
 
 var DefaultTrionConfig = TrionConfig {
@@ -130,9 +129,9 @@ func AddConfig(inc, base *TrionConfig) {
 		base.StartIn = inc.StartIn
 	}
 	base.Privileged = inc.Privileged
-	base.Mounts = append(base.Mounts, inc.Mounts ...)
-	base.Ports = append(base.Ports, inc.Ports ...)
-	base.Environment = append(base.Environment, inc.Environment ...)
+	base.Mounts = append(base.Mounts, inc.Mounts...)
+	base.Ports = append(base.Ports, inc.Ports...)
+	base.Environment = append(base.Environment, inc.Environment...)
 	if len(inc.Command) != 0 {
 		base.Command = inc.Command
 	}
@@ -142,5 +141,5 @@ func AddConfig(inc, base *TrionConfig) {
 	base.Purge = inc.Purge
 	base.Attach = inc.Attach
 	base.Quiet = inc.Quiet
-	base.DNS = append(base.DNS, inc.DNS ...)
+	base.DNS = append(base.DNS, inc.DNS...)
 }

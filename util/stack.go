@@ -4,13 +4,13 @@ package util
 // From the wild internet(s)
 
 type Stack struct {
-	top *Element
+	top  *Element
 	size int
 }
 
 type Element struct {
 	value interface{}
-	next *Element
+	next  *Element
 }
 
 // Return the stack's length

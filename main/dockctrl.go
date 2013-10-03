@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/jessevdk/go-flags"
-	"polydawn.net/dockctrl/trion"
 	"os"
+	"polydawn.net/dockctrl/trion"
 )
 
 var parser = flags.NewNamedParser("dockctrl", flags.Default)
@@ -18,7 +18,6 @@ func main() {
 	}
 	os.Exit(0)
 }
-
 
 func init() {
 	// parser.AddCommand(
@@ -53,12 +52,14 @@ func init() {
 	)
 }
 
-type launchCmd struct {}
+type launchCmd struct{}
+
 func (opts *launchCmd) Execute(args []string) error {
 	return trion.WithDocker(trion.Launch)
 }
 
-type buildCmd struct {}
+type buildCmd struct{}
+
 func (opts *buildCmd) Execute(args []string) error {
 	return trion.WithDocker(trion.Build)
 }

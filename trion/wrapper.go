@@ -3,15 +3,15 @@
 package trion
 
 import (
-	"polydawn.net/dockctrl/crocker"
 	. "fmt"
+	"polydawn.net/dockctrl/crocker"
 )
 
 const ExportPath = "./" //Where to export docker images
 
 //Helps run anyything that requires a docker connection.
 //Handles creation & cleanup in one place.
-func WithDocker(fn func(TrionConfig, *crocker.Dock) error ) error {
+func WithDocker(fn func(TrionConfig, *crocker.Dock) error) error {
 	//Load configuration, then find or start a docker
 	config := FindConfig(".")
 	dock, dir, ours := crocker.FindDock()
@@ -35,7 +35,6 @@ func Run(dock *crocker.Dock, config TrionConfig) *crocker.Container {
 
 	return crocker.Launch(dock, config.Image, config.Command, config.Attach, config.Privileged, config.StartIn, config.DNS, config.Mounts, config.Ports, config.Environment)
 }
-
 
 //Launches a docker
 func Launch(config TrionConfig, dock *crocker.Dock) error {
