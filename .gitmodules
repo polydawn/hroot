@@ -4,3 +4,6 @@
 [submodule ".gopath/src/github.com/jessevdk/go-flags"]
 	path = .gopath/src/github.com/jessevdk/go-flags
 	url = https://github.com/jessevdk/go-flags.git
+[submodule ".gopath/src/github.com/coocood/assrt"]
+	path = .gopath/src/github.com/coocood/assrt
+	url = https://github.com/coocood/assrt.git
