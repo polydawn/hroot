@@ -1,6 +1,19 @@
 package crocker
 
 /*
+	Refers to a Container process.
+	The container has been started and has an ID.
+	Methods on this struct can be used to inspect and manipulate the container.
+*/
+type Container struct {
+	// reference to the daemon we launched this container with
+	dock *Dock
+
+	// id of this container
+	id string
+}
+
+/*
 	Launches a new Container in the given Dock.
 */
 func LaunchContainer(dock *Dock, command string) *Container {
@@ -20,19 +33,6 @@ func LaunchContainer(dock *Dock, command string) *Container {
 		dock: dock,
 		id: <-getCID,
 	}
-}
-
-/*
-	Refers to a Container process.
-	The container has been started and has an ID.
-	Methods on this struct can be used to inspect and manipulate the container.
-*/
-type Container struct {
-	// reference to the daemon we launched this container with
-	dock *Dock
-
-	// id of this container
-	id string
 }
 
 /*

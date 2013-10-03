@@ -14,6 +14,26 @@ import (
 const defaultDir = "/var/run" //Where a docker daemon will run by default
 const   localDir = "./dock"   //Where to start a local docker if desired
 
+type Dock struct {
+	/*
+		Absolute path to the base dir for a docker daemon.
+
+		'docker.sock' and 'docker.pid' are expected to exist immediately inside this path.
+		The daemon's working dir may also be here.
+
+		The last segment of the path is quite probably a symlink, and should be respected
+		even if dangling (unless that means making more than one directory on the far
+		side; if things are that dangling, give up).
+	 */
+	dir string
+
+	/*
+		True iff the daemon at this dock location was spawned by us.
+		Basically used to determine if Slay() should actually fire teh lazors or not.
+	 */
+	isMine bool
+}
+
 /*
 	Produces a Dock struct referring to an active docker daemon.
 	If an existing daemon can be found running, it is used; if not, one is started.
@@ -127,25 +147,6 @@ func (dock *Dock) awaitSocket(patience time.Duration) error {
 	return fmt.Errorf("timeout waiting for docker socket")
 }
 
-type Dock struct {
-	/*
-		Absolute path to the base dir for a docker daemon.
-
-		'docker.sock' and 'docker.pid' are expected to exist immediately inside this path.
-		The daemon's working dir may also be here.
-
-		The last segment of the path is quite probably a symlink, and should be respected
-		even if dangling (unless that means making more than one directory on the far
-		side; if things are that dangling, give up).
-	 */
-	dir string
-
-	/*
-		True iff the daemon at this dock location was spawned by us.
-		Basically used to determine if Slay() should actually fire teh lazors or not.
-	 */
-	isMine bool
-}
 
 func (dock Dock) Dir() string {
 	return dock.dir
