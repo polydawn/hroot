@@ -48,20 +48,6 @@ func NewDock(dir string) *Dock {
 }
 
 /*
-	Attempts to find an existing docker or starts one itself.
-	@return A docker instance, the directory it lives in, and if we started it
-*/
-func FindDock() (*Dock, string, bool) {
-	dock := loadDock(defaultDir) // Is there a default docker running?
-	if dock != nil { return dock, defaultDir, false }
-
-	dock = loadDock(localDir)    // Is there a docker running in the current folder?
-	if dock != nil { return dock, defaultDir, false }
-
-	return createDock(localDir), localDir, true //Start our own daemon
-}
-
-/*
 	Launch a new docker daemon.
 	You should try loadDock before this.  (Yes, there are inherently race conditions here.)
 */
@@ -151,7 +137,7 @@ func (dock Dock) Dir() string {
 	return dock.dir
 }
 
-func (dock Dock) IsChildProccess() bool {
+func (dock Dock) IsChildProcess() bool {
 	return dock.isMine
 }
 

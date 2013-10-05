@@ -14,13 +14,13 @@ const ExportPath = "./" //Where to export docker images
 func WithDocker(fn func(*crocker.Dock, *TrionSettings, []string) error, args []string) error {
 	//Load configuration, then find or start a docker
 	settings := FindConfig(".")
-	dock, dir, ours := crocker.FindDock()
+	dock := crocker.NewDock(".")
 
 	//Announce the docker
-	if ours {
-		Println("Started a docker in", dir)
+	if dock.IsChildProcess() {
+		Println("Started a docker in", dock.Dir())
 	} else {
-		Println("Connecting to docker", dir)
+		Println("Connecting to docker", dock.Dir())
 	}
 
 	//Run the closure, kill the docker if needed, and return any errors.
