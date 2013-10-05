@@ -33,6 +33,12 @@ func init() {
 		&runCmd{},
 	)
 	parser.AddCommand(
+		"export",
+		"export a container",
+		"export a container based on configuration in the current directory.",
+		&exportCmd{},
+	)
+	parser.AddCommand(
 		"publish",
 		"build and publish a versioned-controlled image",
 		"build a container, and place the exported tar into a git repository.",
@@ -50,4 +56,10 @@ type runCmd struct{}
 
 func (opts *runCmd) Execute(args []string) error {
 	return trion.WithDocker(trion.Run, args)
+}
+
+type exportCmd struct{}
+
+func (opts *exportCmd) Execute(args []string) error {
+	return trion.WithDocker(trion.Export, args)
 }

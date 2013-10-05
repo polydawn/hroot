@@ -55,16 +55,17 @@ func Run(dock *crocker.Dock, settings *TrionSettings, args []string) error {
 	return nil
 }
 
-//Builds a docker
-/*
-func Build(config TrionConfig, dock *crocker.Dock, args []string) error {
-	//Use the build command and upstream image
-	buildConfig        := config
-	buildConfig.Command = config.Build
-	buildConfig.Image   = config.Upstream
+//Exports the result of a target into docker.
+func Export(dock *crocker.Dock, settings *TrionSettings, args []string) error {
+	//Get the target
+	target := args[0] //TODO: replace the args with golflags!
+
+	//Get configuration
+	config := settings.GetConfig(target)
+	saveAs := settings.GetConfig(DefaultTarget).Image
 
 	//Run the build
-	container := Run(dock, buildConfig, args)
+	container := Launch(dock, config)
 	container.Wait()
 
 	//Create a tar
@@ -72,7 +73,7 @@ func Build(config TrionConfig, dock *crocker.Dock, args []string) error {
 
 	//Import the built docker
 	// Todo: add --noImport option to goflags
-	container.ImportFromString(ExportPath, config.Image)
+	container.ImportFromString(ExportPath, saveAs)
 
 	//Remove if desired
 	if config.Purge {
@@ -81,4 +82,3 @@ func Build(config TrionConfig, dock *crocker.Dock, args []string) error {
 
 	return nil
 }
-*/
