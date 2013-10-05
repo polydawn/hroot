@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/jessevdk/go-flags"
 	"os"
-	"polydawn.net/dockctrl/trion"
 )
 
 var parser = flags.NewNamedParser("dockctrl", flags.Default)
@@ -30,13 +29,13 @@ func init() {
 		"run",
 		"run a container",
 		"run a container based on configuration in the current directory.",
-		&runCmd{},
+		&runCmdOpts{},
 	)
 	parser.AddCommand(
 		"export",
 		"export a container",
 		"export a container based on configuration in the current directory.",
-		&exportCmd{},
+		&exportCmdOpts{},
 	)
 	parser.AddCommand(
 		"publish",
@@ -50,16 +49,4 @@ func init() {
 		"unpack a base image from versioned-controlled storage so that it's ready to be used to run a container.",
 		&struct{}{},
 	)
-}
-
-type runCmd struct{}
-
-func (opts *runCmd) Execute(args []string) error {
-	return trion.WithDocker(trion.Run, args)
-}
-
-type exportCmd struct{}
-
-func (opts *exportCmd) Execute(args []string) error {
-	return trion.WithDocker(trion.Export, args)
 }
