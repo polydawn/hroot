@@ -27,16 +27,10 @@ func init() {
 	// 	&whateverCmd{}
 	// )
 	parser.AddCommand(
-		"launch",
-		"launch a container",
-		"launch a container based on configuration in the current directory.",
-		&launchCmd{},
-	)
-	parser.AddCommand(
-		"build",
-		"build an image and export tar",
-		"launch a container, and after the container has completed, export a tar of the filesystem.",
-		&buildCmd{},
+		"run",
+		"run a container",
+		"run a container based on configuration in the current directory.",
+		&runCmd{},
 	)
 	parser.AddCommand(
 		"publish",
@@ -47,19 +41,13 @@ func init() {
 	parser.AddCommand(
 		"unpack",
 		"unpack a base image from versioned-controlled storage",
-		"unpack a base image from versioned-controlled storage so that it's ready to be used to launch a container.",
+		"unpack a base image from versioned-controlled storage so that it's ready to be used to run a container.",
 		&struct{}{},
 	)
 }
 
-type launchCmd struct{}
+type runCmd struct{}
 
-func (opts *launchCmd) Execute(args []string) error {
-	return trion.WithDocker(trion.Launch)
-}
-
-type buildCmd struct{}
-
-func (opts *buildCmd) Execute(args []string) error {
-	return trion.WithDocker(trion.Build)
+func (opts *runCmd) Execute(args []string) error {
+	return trion.WithDocker(trion.Run, args)
 }

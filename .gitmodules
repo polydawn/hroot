@@ -7,3 +7,6 @@
 [submodule ".gopath/src/github.com/coocood/assrt"]
 	path = .gopath/src/github.com/coocood/assrt
 	url = https://github.com/coocood/assrt.git
+[submodule ".gopath/src/github.com/BurntSushi/toml"]
+	path = .gopath/src/github.com/BurntSushi/toml
+	url = https://github.com/BurntSushi/toml
