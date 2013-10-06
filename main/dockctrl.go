@@ -41,7 +41,7 @@ func init() {
 		"publish",
 		"build and publish a versioned-controlled image",
 		"build a container, and place the exported tar into a git repository.",
-		&struct{}{},
+		&publishCmdOpts{},
 	)
 	parser.AddCommand(
 		"unpack",

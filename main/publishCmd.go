@@ -6,6 +6,7 @@ import (
 	"polydawn.net/dockctrl/confl"
 	"polydawn.net/dockctrl/dex"
 	"fmt"
+	"io"
 	"path/filepath"
 )
 
@@ -44,7 +45,7 @@ func (opts *publishCmdOpts) Execute(args []string) error {
 func Publish(dock *crocker.Dock, settings *confl.ConfigLoad, target string, graph *dex.Graph) error {
 	// Get configuration
 	config := settings.GetConfig(target)
-	//saveAs := settings.GetConfig(confl.DefaultTarget).Image
+	saveAs := settings.GetConfig(confl.DefaultTarget).Image
 
 	// Import the latest of the base lineage
 	dock.Import(graph.Load(config.Image), config.Image, "latest")
@@ -54,10 +55,11 @@ func Publish(dock *crocker.Dock, settings *confl.ConfigLoad, target string, grap
 	container.Wait()
 
 	// Export a tar of the filesystem
-	//TODO
+	exportStreamOut, exportStreamIn := io.Pipe()
+	go container.Export(exportStreamIn)
 
 	// Commit it to the image graph
-	//TODO
+	graph.Publish(exportStreamOut, saveAs, config.Image)
 
 	// Destroy temp container.  You just exported it as an image, what could you possibly need it for.
 	container.Purge()

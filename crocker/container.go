@@ -107,6 +107,7 @@ func (c *Container) Purge() {
 */
 func (c *Container) Export(writer io.Writer) {
 	c.dock.cmd()("export", c.id)(Opts{Out: writer})()
+	writer.(io.WriteCloser).Close()	//... this might be fixed by updating gosh
 }
 
 /*
