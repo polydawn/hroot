@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/jessevdk/go-flags"
 	"polydawn.net/dockctrl/crocker"
-	"polydawn.net/dockctrl/trion"
+	"polydawn.net/dockctrl/confl"
 )
 
 type runCmdOpts struct{}
@@ -13,7 +13,7 @@ func (opts *runCmdOpts) Execute(args []string) error {
 }
 
 //Launches a docker
-func Run(dock *crocker.Dock, settings *trion.TrionSettings, args []string) error {
+func Run(dock *crocker.Dock, settings *confl.ConfigLoad, args []string) error {
 	//Get the target
 	if len(args) != 1 {
 		return &flags.Error{

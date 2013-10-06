@@ -3,7 +3,7 @@ package main
 import (
 	. "fmt"
 	"polydawn.net/dockctrl/crocker"
-	"polydawn.net/dockctrl/trion"
+	"polydawn.net/dockctrl/confl"
 )
 
 /*
@@ -11,10 +11,10 @@ import (
 	Handles creation & cleanup in one place.
 	Docker daemon config is determined by looking around the cwd.
 */
-func WithDocker(fn func(*crocker.Dock, *trion.TrionSettings, []string) error, args []string) error {
+func WithDocker(fn func(*crocker.Dock, *confl.ConfigLoad, []string) error, args []string) error {
 	//Load configuration, then find or start a docker
-	settings := trion.FindConfig(".")
-	dock := crocker.NewDock(".")
+	settings := confl.NewConfigLoad(".")
+	dock := crocker.NewDock("./dock")
 
 	//Announce the docker
 	if dock.IsChildProcess() {
@@ -31,6 +31,6 @@ func WithDocker(fn func(*crocker.Dock, *trion.TrionSettings, []string) error, ar
 
 //Helper function: maps a TrionConfig struct to crocker function.
 //Kinda ugly; this situation may improve once our config shenanigans solidifies a bit.
-func Launch(dock *crocker.Dock, config trion.TrionConfig) *crocker.Container {
+func Launch(dock *crocker.Dock, config crocker.ContainerConfig) *crocker.Container {
 	return crocker.Launch(dock, config.Image, config.Command, config.Attach, config.Privileged, config.Folder, config.DNS, config.Mounts, config.Ports, config.Environment)
 }
