@@ -40,7 +40,7 @@ func Export(dock *crocker.Dock, settings *confl.ConfigLoad, target string) error
 
 	//Import the built docker
 	// Todo: add --noImport option to goflags
-	container.ImportFromString(ExportPath, saveAs)
+	dock.ImportFromFilenameTagstring(ExportPath, saveAs)
 
 	//Remove if desired
 	if config.Purge {

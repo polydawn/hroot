@@ -2,12 +2,14 @@ package crocker
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"os"
 	"path/filepath"
 	. "polydawn.net/gosh/psh"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -170,4 +172,39 @@ func (dock *Dock) daemon() Shfn {
 func (dock *Dock) Slay() {
 	if !dock.isMine { return; }
 	Sh("bash")("-c")(DefaultIO)("kill `cat \""+dock.GetPidfilePath()+"\"`")()
+}
+
+/*
+	Import an image into repository, caching the expanded form so that it's
+	ready to be used as a base filesystem for containers.
+*/
+func (dock *Dock) Import(reader io.Reader, name string, tag string) {
+	fmt.Println("Importing", name + ":" + tag)
+	dock.cmd()("import", "-", name, tag)(Opts{In: reader})()
+}
+
+func (dock *Dock) ImportFromFilename(path string, name string, tag string) {
+	in, err := os.Open(path)
+	if err != nil { panic(err) }
+	dock.Import(in, name, tag)
+}
+
+/*
+	Import an image from a docker-style image string, such as 'ubuntu:latest'
+*/
+func (dock *Dock) ImportFromFilenameTagstring(path, image string) {
+	//Get the repository and tag
+	var name, tag string
+	sp := strings.Split(image, ":")
+
+	//If both a name and version are specified, use them, otherwise just tag it as 'latest'
+	if len(sp) == 2 {
+		name = sp[0]
+		tag = sp[1]
+	} else {
+		name = image
+		tag = DefaultTag
+	}
+
+	dock.ImportFromFilename(path, name, tag)
 }

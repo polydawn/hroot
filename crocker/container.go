@@ -1,11 +1,9 @@
 package crocker
 
 import (
-	. "fmt"
 	"io"
 	"os"
 	. "polydawn.net/gosh/psh"
-	"strings"
 )
 
 /*
@@ -121,38 +119,4 @@ func (c *Container) ExportToFilename(path string) {
 	}
 
 	c.Export(out)
-}
-
-/*
-	Import an image into docker's repository.
-*/
-func (c *Container) Import(path, name, tag string) {
-	//Open the file
-	in, err := os.Open(path)
-	if err != nil {
-		Println("Fatal: Could not open file for import:", path)
-	}
-
-	Println("Importing", name + ":" + tag)
-	c.dock.cmd()("import", "-", name, tag)(Opts{In: in, Out: os.Stdout })()
-}
-
-/*
-	Import an image from a docker-style image string, such as 'ubuntu:latest'
-*/
-func (c *Container) ImportFromString(path, image string) {
-	//Get the repository and tag
-	name, tag := "", ""
-	sp := strings.Split(image, ":")
-
-	//If both a name and version are specified, use them, otherwise just tag it as 'latest'
-	if len(sp) == 2 {
-		name = sp[0]
-		tag = sp[1]
-	} else {
-		name = image
-		tag = DefaultTag
-	}
-
-	c.Import(path, name, tag)
 }
