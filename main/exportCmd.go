@@ -23,7 +23,7 @@ func (opts *exportCmdOpts) Execute(args []string) error {
 	})
 }
 
-const ExportPath = "./" //Where to export docker images
+const ExportPath = "./image.tar" //Where to export docker images
 
 //Exports the result of a target into docker.
 func Export(dock *crocker.Dock, settings *confl.ConfigLoad, target string) error {
@@ -36,7 +36,7 @@ func Export(dock *crocker.Dock, settings *confl.ConfigLoad, target string) error
 	container.Wait()
 
 	//Create a tar
-	container.Export(ExportPath)
+	container.ExportToFilename(ExportPath)
 
 	//Import the built docker
 	// Todo: add --noImport option to goflags

@@ -2,6 +2,7 @@ package crocker
 
 import (
 	. "fmt"
+	"io"
 	"os"
 	. "polydawn.net/gosh/psh"
 	"strings"
@@ -20,10 +21,6 @@ type Container struct {
 	id string
 }
 
-/*
-	Default tar filename amd image tag
-*/
-const TarFile = "image.tar"
 const DefaultTag = "latest"
 
 /*
@@ -108,47 +105,32 @@ func (c *Container) Purge() {
 }
 
 /*
-	Executes 'docker export', after ensuring there is no image.tar in the way.
-	This is because docker will *happily* export into an existing tar.
+	Streams out a tar as produced by `docker export`.
 */
-func (c *Container) Export(path string) {
-	tar := path + TarFile
+func (c *Container) Export(writer io.Writer) {
+	c.dock.cmd()("export", c.id)(Opts{Out: writer})()
+}
 
-	//Check for existing file
-	file, err := os.Open(tar)
-	if err == nil {
-		_, err = file.Stat()
-		file.Close()
-	}
-
-	//Delete tar if it exists
-	if err == nil {
-		Println("Warning: Output image.tar already exists. Overwriting...")
-		err = os.Remove("./image.tar")
-		if err != nil {
-			Println("Fatal: Could not delete tar file.")
-			os.Exit(1)
-		}
-	}
-
-	out, err := os.OpenFile(tar, os.O_WRONLY|os.O_CREATE, 0644)
+/*
+	Convenience wrapper for Export(io.Writer) but writing to a file.
+*/
+func (c *Container) ExportToFilename(path string) {
+	out, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		panic(err)
 	}
 
-	c.dock.cmd()("export", c.id)(Opts{Out: out})()
+	c.Export(out)
 }
 
 /*
 	Import an image into docker's repository.
 */
 func (c *Container) Import(path, name, tag string) {
-	tar := path + TarFile
-
 	//Open the file
-	in, err := os.Open(tar)
+	in, err := os.Open(path)
 	if err != nil {
-		Println("Fatal: Could not open file for import:", tar)
+		Println("Fatal: Could not open file for import:", path)
 	}
 
 	Println("Importing", name + ":" + tag)
