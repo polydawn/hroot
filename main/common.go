@@ -11,7 +11,7 @@ import (
 	Handles creation & cleanup in one place.
 	Docker daemon config is determined by looking around the cwd.
 */
-func WithDocker(fn func(*crocker.Dock, *confl.ConfigLoad, []string) error, args []string) error {
+func WithDocker(fn func(*crocker.Dock, *confl.ConfigLoad) error) error {
 	//Load configuration, then find or start a docker
 	settings := confl.NewConfigLoad(".")
 	dock := crocker.NewDock("./dock")
@@ -24,7 +24,7 @@ func WithDocker(fn func(*crocker.Dock, *confl.ConfigLoad, []string) error, args 
 	}
 
 	//Run the closure, kill the docker if needed, and return any errors.
-	err := fn(dock, settings, args)
+	err := fn(dock, settings)
 	dock.Slay()
 	return err
 }

@@ -9,13 +9,6 @@ import (
 type exportCmdOpts struct{}
 
 func (opts *exportCmdOpts) Execute(args []string) error {
-	return WithDocker(Export, args)
-}
-
-const ExportPath = "./" //Where to export docker images
-
-//Exports the result of a target into docker.
-func Export(dock *crocker.Dock, settings *confl.ConfigLoad, args []string) error {
 	//Get the target
 	if len(args) != 1 {
 		return &flags.Error{
@@ -25,6 +18,15 @@ func Export(dock *crocker.Dock, settings *confl.ConfigLoad, args []string) error
 	}
 	target := args[0]
 
+	return WithDocker(func(dock *crocker.Dock, settings *confl.ConfigLoad) error {
+		return Export(dock, settings, target)
+	})
+}
+
+const ExportPath = "./" //Where to export docker images
+
+//Exports the result of a target into docker.
+func Export(dock *crocker.Dock, settings *confl.ConfigLoad, target string) error {
 	//Get configuration
 	config := settings.GetConfig(target)
 	saveAs := settings.GetConfig(confl.DefaultTarget).Image

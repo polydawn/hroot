@@ -9,11 +9,6 @@ import (
 type runCmdOpts struct{}
 
 func (opts *runCmdOpts) Execute(args []string) error {
-	return WithDocker(Run, args)
-}
-
-//Launches a docker
-func Run(dock *crocker.Dock, settings *confl.ConfigLoad, args []string) error {
 	//Get the target
 	if len(args) != 1 {
 		return &flags.Error{
@@ -23,6 +18,13 @@ func Run(dock *crocker.Dock, settings *confl.ConfigLoad, args []string) error {
 	}
 	target := args[0]
 
+	return WithDocker(func(dock *crocker.Dock, settings *confl.ConfigLoad) error {
+		return Run(dock, settings, target)
+	})
+}
+
+//Launches a docker
+func Run(dock *crocker.Dock, settings *confl.ConfigLoad, target string) error {
 	//Get configuration
 	config := settings.GetConfig(target)
 
