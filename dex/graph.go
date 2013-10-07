@@ -47,6 +47,10 @@ created, if it doesn't exist), and the "ancestor" branch will also be credited a
 of the new commit.
 */
 func (g *Graph) Publish(imageStream io.Reader, lineage string, ancestor string) {
+	//Handle tags - currently, we discard them when dealing with a graph repo.
+	lineage, _  = SplitImageName(lineage)
+	ancestor, _ = SplitImageName(ancestor)
+
 	if strings.Count(g.cmd("branch", "--list", lineage).Output(), "\n") < 1 {
 		//Memo("this is a new lineage!")
 		g.cmd("checkout", "-b", lineage)()
@@ -59,6 +63,7 @@ func (g *Graph) Publish(imageStream io.Reader, lineage string, ancestor string) 
 	if err != nil {
 		panic(err)
 	}
+
 	_, err = io.Copy(out, imageStream)
 	if err != nil {
 		panic(err)
@@ -84,8 +89,8 @@ currently points to is opened and "image.tar" is read from.
 */
 func (g *Graph) Load(lineage string) io.Reader {
 	//FIXME: entirely possible to do this without doing a `git checkout`... do so
-	image, _ := SplitImageName(lineage) //Handle tags
-	g.cmd("checkout", image)()
+	lineage, _ = SplitImageName(lineage) //Handle tags
+	g.cmd("checkout", lineage)()
 
 	in, err := os.OpenFile(g.dir+"/image.tar", os.O_RDONLY, 0644)
 	if err != nil { panic(err); }
