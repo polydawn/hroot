@@ -19,8 +19,6 @@ type Container struct {
 	id string
 }
 
-const DefaultTag = "latest"
-
 /*
 	Launches a new Container in the given Dock.
 	Punting on documentation while things are in flux; see command.go struct for details.

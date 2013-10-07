@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	. "polydawn.net/pogo/gosh"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -193,18 +192,6 @@ func (dock *Dock) ImportFromFilename(path string, name string, tag string) {
 	Import an image from a docker-style image string, such as 'ubuntu:latest'
 */
 func (dock *Dock) ImportFromFilenameTagstring(path, image string) {
-	//Get the repository and tag
-	var name, tag string
-	sp := strings.Split(image, ":")
-
-	//If both a name and version are specified, use them, otherwise just tag it as 'latest'
-	if len(sp) == 2 {
-		name = sp[0]
-		tag = sp[1]
-	} else {
-		name = image
-		tag = DefaultTag
-	}
-
+	name, tag := SplitImageName(image)
 	dock.ImportFromFilename(path, name, tag)
 }

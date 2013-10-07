@@ -14,6 +14,9 @@ import (
 const TempDir = "/tmp"
 const TempPrefix = "trion-"
 
+//The default docker tag
+const DefaultTag = "latest"
+
 //Create a temporary file for docker to print its CID to
 func CreateCIDfile() string {
 	//Create a temporary file
@@ -56,4 +59,17 @@ func PollCid(filename string) chan string {
 	}()
 
 	return getCID
+}
+
+//Given an image string, returns the image name and tag.
+//	'ubuntu:12.10' -> 'ubuntu', '12.10'
+//	'ubuntu' -> 'ubuntu', 'latest'
+func SplitImageName(image string) (string, string) {
+	sp := strings.Split(image, ":")
+
+	if len(sp) == 2 {
+		return sp[0], sp[1]
+	} else {
+		return image, DefaultTag
+	}
 }
