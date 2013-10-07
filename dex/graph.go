@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	. "polydawn.net/pogo/gosh"
+	. "polydawn.net/dockctrl/crocker"
 	"strings"
 )
 
@@ -83,7 +84,9 @@ currently points to is opened and "image.tar" is read from.
 */
 func (g *Graph) Load(lineage string) io.Reader {
 	//FIXME: entirely possible to do this without doing a `git checkout`... do so
-	g.cmd("checkout", lineage)()
+	image, _ := SplitImageName(lineage) //Handle tags
+	g.cmd("checkout", image)()
+
 	in, err := os.OpenFile(g.dir+"/image.tar", os.O_RDONLY, 0644)
 	if err != nil { panic(err); }
 	return in
