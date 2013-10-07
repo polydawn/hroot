@@ -2,8 +2,8 @@ package main
 
 import (
 	. "fmt"
-	"polydawn.net/dockctrl/crocker"
 	"polydawn.net/dockctrl/confl"
+	"polydawn.net/dockctrl/crocker"
 )
 
 /*

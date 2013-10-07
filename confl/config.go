@@ -55,7 +55,7 @@ func (cs *ConfigLoad) GetConfig(target string) crocker.ContainerConfig {
 	config := crocker.DefaultContainerConfig
 
 	//For each config
-	for i := len(cs.configs) -1 ; i >= 0; i-- {
+	for i := len(cs.configs) - 1; i >= 0; i-- {
 		newConfig := cs.configs[i]
 		meta   := cs.metas[i]
 

@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/jessevdk/go-flags"
-	"polydawn.net/dockctrl/crocker"
-	"polydawn.net/dockctrl/confl"
-	"polydawn.net/dockctrl/dex"
 	"fmt"
+	"github.com/jessevdk/go-flags"
 	"io"
 	"path/filepath"
+	"polydawn.net/dockctrl/confl"
+	"polydawn.net/dockctrl/crocker"
+	"polydawn.net/dockctrl/dex"
 )
 
 type publishCmdOpts struct {
@@ -18,7 +18,7 @@ func (opts *publishCmdOpts) Execute(args []string) error {
 	//Get the target
 	if len(args) != 1 {
 		return &flags.Error{
-			Type: flags.ErrExpectedArgument,
+			Type:    flags.ErrExpectedArgument,
 			Message: "expected one positional argument, for which target to launch",
 		}
 	}

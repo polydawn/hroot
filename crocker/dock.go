@@ -145,7 +145,7 @@ func (dock Dock) IsChildProcess() bool {
 
 func (dock *Dock) cmd() Shfn {
 	return Sh("docker")(DefaultIO)(
-		"-H="+fmt.Sprintf("unix://%s", dock.GetSockPath()),
+		"-H=" + fmt.Sprintf("unix://%s", dock.GetSockPath()),
 	)
 }
 

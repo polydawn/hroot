@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/jessevdk/go-flags"
-	"polydawn.net/dockctrl/crocker"
 	"polydawn.net/dockctrl/confl"
+	"polydawn.net/dockctrl/crocker"
 )
 
 type runCmdOpts struct{}
@@ -12,7 +12,7 @@ func (opts *runCmdOpts) Execute(args []string) error {
 	//Get the target
 	if len(args) != 1 {
 		return &flags.Error{
-			Type: flags.ErrExpectedArgument,
+			Type:    flags.ErrExpectedArgument,
 			Message: "expected one positional argument, for which target to launch",
 		}
 	}

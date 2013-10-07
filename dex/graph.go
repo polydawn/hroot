@@ -1,11 +1,11 @@
 package dex
 
 import (
-	. "polydawn.net/gosh/psh"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	. "polydawn.net/gosh/psh"
 	"strings"
 )
 
