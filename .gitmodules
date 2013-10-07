@@ -1,6 +1,6 @@
-[submodule ".gopath/src/polydawn.net/gosh"]
-	path = .gopath/src/polydawn.net/gosh
-	url = https://github.com/heavenlyhash/gosh/
+[submodule ".gopath/src/polydawn.net/pogo"]
+	path = .gopath/src/polydawn.net/pogo
+	url = https://github.com/polydawn/pogo.git
 [submodule ".gopath/src/github.com/jessevdk/go-flags"]
 	path = .gopath/src/github.com/jessevdk/go-flags
 	url = https://github.com/jessevdk/go-flags.git

@@ -7,7 +7,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	. "polydawn.net/gosh/psh"
+	. "polydawn.net/pogo/gosh"
 	"strconv"
 	"strings"
 	"time"
@@ -143,13 +143,13 @@ func (dock Dock) IsChildProcess() bool {
 	return dock.isMine
 }
 
-func (dock *Dock) cmd() Shfn {
+func (dock *Dock) cmd() Command {
 	return Sh("docker")(DefaultIO)(
 		"-H=" + fmt.Sprintf("unix://%s", dock.GetSockPath()),
 	)
 }
 
-func (dock *Dock) Client() Shfn {
+func (dock *Dock) Client() Command {
 	return dock.cmd()
 }
 
@@ -161,7 +161,7 @@ func (dock *Dock) GetSockPath() string {
 	return fmt.Sprintf("%s/%s", dock.Dir(), "docker.sock")
 }
 
-func (dock *Dock) daemon() Shfn {
+func (dock *Dock) daemon() Command {
 	return dock.cmd()(
 		"-d",
 		"-g="+dock.Dir(),

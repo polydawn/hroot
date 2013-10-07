@@ -3,7 +3,7 @@ package crocker
 import (
 	"io"
 	"os"
-	. "polydawn.net/gosh/psh"
+	. "polydawn.net/pogo/gosh"
 )
 
 /*

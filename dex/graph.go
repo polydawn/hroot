@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	. "polydawn.net/gosh/psh"
+	. "polydawn.net/pogo/gosh"
 	"strings"
 )
 
@@ -18,7 +18,7 @@ type Graph struct {
 	/*
 		Cached command template for exec'ing git with this graph's cwd.
 	*/
-	cmd Shfn
+	cmd Command
 }
 
 func NewGraph(dir string) *Graph {
