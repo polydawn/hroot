@@ -43,6 +43,9 @@ func (opts *publishCmdOpts) Execute(args []string) error {
 }
 
 func Publish(dock *crocker.Dock, settings *confl.ConfigLoad, target string, graph *dex.Graph) error {
+	// Cleanse git working tree in case of unwanted unknown state
+	graph.Cleanse()
+
 	// Get configuration
 	config := settings.GetConfig(target)
 	saveAs := settings.GetConfig(confl.DefaultTarget).Image
