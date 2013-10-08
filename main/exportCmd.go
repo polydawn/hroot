@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/jessevdk/go-flags"
+	// "github.com/jessevdk/go-flags"
 	"polydawn.net/dockctrl/confl"
 	"polydawn.net/dockctrl/crocker"
 )
@@ -10,13 +10,12 @@ type exportCmdOpts struct{}
 
 func (opts *exportCmdOpts) Execute(args []string) error {
 	//Get the target
-	if len(args) != 1 {
-		return &flags.Error{
-			Type:    flags.ErrExpectedArgument,
-			Message: "expected one positional argument, for which target to launch",
-		}
+	target := ""
+	if len(args) == 1 {
+		target = args[0]
+	} else {
+		target = "build"
 	}
-	target := args[0]
 
 	return WithDocker(func(dock *crocker.Dock, settings *confl.ConfigLoad) error {
 		return Export(dock, settings, target)
