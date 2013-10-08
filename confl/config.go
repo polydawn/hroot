@@ -14,17 +14,24 @@ import (
 type ConfigLoad struct {
 	configs []ContainerConfigs
 	metas   []toml.MetaData
+	Dock    string
+	Graph   string
 }
 
 //Target name > configration mapping (used in the 'docker.toml' config files)
 type ContainerConfigs map[string]crocker.ContainerConfig
 
 const ConfigFileName = "docker.toml"
-const DefaultTarget = "default"
+const DefaultTarget  = "default"
+const DockFolder     = "dock"
+const GraphFolder    = "graph"
 
-//Recursively finds configuration files.
+//Recursively finds configuration files & folders
 func NewConfigLoad(dir string) *ConfigLoad {
-	load := &ConfigLoad{}
+	load := &ConfigLoad{
+		Dock:  dir + "/" + DockFolder,
+		Graph: dir + "/" + GraphFolder,
+	}
 
 	//Recurse up the file tree looking for configuration
 	for {
@@ -37,6 +44,14 @@ func NewConfigLoad(dir string) *ConfigLoad {
 			config, metadata := loadToml(string(buf), dir)
 			load.configs = append(load.configs, config)
 			load.metas   = append(load.metas,   metadata)
+
+			//Check for folders
+			if _, err = ioutil.ReadDir(dir + "/" + DockFolder) ; err == nil {
+				load.Dock = dir + "/" + DockFolder
+			}
+			if _, err = ioutil.ReadDir(dir + "/" + GraphFolder) ; err == nil {
+				load.Graph = dir + "/" + GraphFolder
+			}
 
 			dir = "../" + dir
 		}
