@@ -24,25 +24,24 @@ func (opts *publishCmdOpts) Execute(args []string) error {
 	}
 	target := args[0]
 
-	//Assign defaults over any zero values in the opts, and canonicalize values
-	var err error
-	if opts.Graph == "" {
-		opts.Graph = "./graph"
+	return WithDocker(func(dock *crocker.Dock, settings *confl.ConfigLoad) error {
+		return Publish(dock, settings, target, opts.Graph)
+	})
+}
+
+func Publish(dock *crocker.Dock, settings *confl.ConfigLoad, target string, graphDir string) error {
+	//If the user asked for a specific graph folder, use it, else find one
+	if graphDir == "" {
+		graphDir = settings.Graph
 	}
-	opts.Graph, err = filepath.Abs(opts.Graph)
+	graphDir, err := filepath.Abs(graphDir)
 	if err != nil {
 		return fmt.Errorf("expected graph to exist: %v", err.Error())
 	}
 
 	//Look up the graph
-	graph := dex.NewGraph(opts.Graph)
+	graph := dex.NewGraph(graphDir)
 
-	return WithDocker(func(dock *crocker.Dock, settings *confl.ConfigLoad) error {
-		return Publish(dock, settings, target, graph)
-	})
-}
-
-func Publish(dock *crocker.Dock, settings *confl.ConfigLoad, target string, graph *dex.Graph) error {
 	// Cleanse git working tree in case of unwanted unknown state
 	graph.Cleanse()
 
