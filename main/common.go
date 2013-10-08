@@ -14,7 +14,7 @@ import (
 func WithDocker(fn func(*crocker.Dock, *confl.ConfigLoad) error) error {
 	//Load configuration, then find or start a docker
 	settings := confl.NewConfigLoad(".")
-	dock := crocker.NewDock("./dock")
+	dock := crocker.NewDock(settings.Dock)
 
 	//Announce the docker
 	if dock.IsChildProcess() {
