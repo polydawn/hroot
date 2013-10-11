@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-var parser = flags.NewNamedParser("dockctrl", flags.Default)
+var parser = flags.NewNamedParser("docket", flags.Default)
 
 var EXIT_BADARGS = 1
 var EXIT_PANIC = 2

@@ -5,9 +5,9 @@ import (
 	"github.com/jessevdk/go-flags"
 	"io"
 	"path/filepath"
-	"polydawn.net/dockctrl/confl"
-	"polydawn.net/dockctrl/crocker"
-	"polydawn.net/dockctrl/dex"
+	"polydawn.net/docket/confl"
+	"polydawn.net/docket/crocker"
+	"polydawn.net/docket/dex"
 )
 
 type publishCmdOpts struct {

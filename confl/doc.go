@@ -1,5 +1,5 @@
 /*
-	This package contains the config file loading system used by dockctrl.
+	This package contains the config file loading system used by docket.
 	It produces crocker.ContainerConfig from TOML-formatted configuration files.
 
 	Config files can arranged in nested directories, will loaded recursively, with config values accumulating

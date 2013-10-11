@@ -2,8 +2,8 @@ package main
 
 import (
 	// "github.com/jessevdk/go-flags"
-	"polydawn.net/dockctrl/confl"
-	"polydawn.net/dockctrl/crocker"
+	"polydawn.net/docket/confl"
+	"polydawn.net/docket/crocker"
 )
 
 type exportCmdOpts struct{}

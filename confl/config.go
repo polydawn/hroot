@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"polydawn.net/dockctrl/crocker"
+	"polydawn.net/docket/crocker"
 	"strings"
 )
 

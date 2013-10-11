@@ -5,5 +5,5 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 (
 	cd $DIR ;
 	export GOPATH="$PWD"/.gopath/ ;
-	go build -race -o dockctrl polydawn.net/dockctrl/main
+	go build -race -o docket polydawn.net/docket/main
 )

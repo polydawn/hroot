@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	. "polydawn.net/pogo/gosh"
-	. "polydawn.net/dockctrl/crocker"
+	. "polydawn.net/docket/crocker"
 	"strings"
 )
 

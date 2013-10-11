@@ -36,7 +36,7 @@ type ContainerConfig struct {
 //Default configuration
 var DefaultContainerConfig = ContainerConfig{
 	Image:       "ubuntu",
-	Command:     []string{"/bin/echo", "Hello from dockctrl!"},
+	Command:     []string{"/bin/echo", "Hello from docket!"},
 	Folder:      "/",
 	Privileged:  false,
 	Mounts:      [][]string{},

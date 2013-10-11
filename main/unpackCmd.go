@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/jessevdk/go-flags"
 	"path/filepath"
-	"polydawn.net/dockctrl/confl"
-	"polydawn.net/dockctrl/crocker"
-	"polydawn.net/dockctrl/dex"
+	"polydawn.net/docket/confl"
+	"polydawn.net/docket/crocker"
+	"polydawn.net/docket/dex"
 )
 
 type unpackCmdOpts struct {
