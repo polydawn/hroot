@@ -47,6 +47,6 @@ func init() {
 		"unpack",
 		"unpack a base image from versioned-controlled storage",
 		"unpack a base image from versioned-controlled storage so that it's ready to be used to run a container.",
-		&struct{}{},
+		&unpackCmdOpts{},
 	)
 }
