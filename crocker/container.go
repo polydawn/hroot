@@ -109,6 +109,13 @@ func (c *Container) Export(writer io.Writer) {
 }
 
 /*
+	Commits the container.
+*/
+func (c *Container) Commit(name, tag string) {
+	c.dock.cmd()("commit", c.id, name, tag)()
+}
+
+/*
 	Convenience wrapper for Export(io.Writer) but writing to a file.
 */
 func (c *Container) ExportToFilename(path string) {

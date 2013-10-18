@@ -4,6 +4,7 @@ import (
 	. "fmt"
 	"os"
 	"polydawn.net/docket/confl"
+	"polydawn.net/docket/crocker"
 )
 
 type buildCmdOpts struct {
@@ -20,7 +21,6 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	settings := confl.NewConfigLoad(".")
 	config := settings.GetConfig(target)
 	saveAs := settings.GetDefaultImage()
-	_ = saveAs
 
 	//Right now, go-flags' default announation does not appear to work when in a sub-command.
 	//	Will investigate and hopefully remove this later.
@@ -42,8 +42,7 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 		case "docker":
 			//TODO: check that docker has the image loaded
 		case "graph", "file", "index":
-			Println("Input scheme", sourceScheme, "is not supported yet.")
-			os.Exit(1)
+			return Errorf("Source " + sourceScheme + " is not supported yet.")
 	}
 
 	//Prepare output
@@ -51,8 +50,7 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 		case "docker":
 			//TODO: tag image when done
 		case "graph", "file", "index":
-			Println("Input scheme", sourceScheme, "is not supported yet.")
-			os.Exit(1)
+			return Errorf("Destination " + sourceScheme + " is not supported yet.")
 	}
 
 	//Start or connect to a docker daemon
@@ -61,6 +59,14 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	// Launch the container and wait for it to finish
 	container := Launch(dock, config)
 	container.Wait()
+
+	//If we're not exporting to the graph, there is no commit hash from which to generate a tag.
+	//	Thus the docker import will have either a static tag (from docker.toml configuration) or the default 'latest' tag.
+	if destinationScheme == "docker" {
+		name, tag := crocker.SplitImageName(saveAs)
+		Println("Exporting to", name, tag)
+		container.Commit(name, tag)
+	}
 
 	//Remove if desired
 	if config.Purge {

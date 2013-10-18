@@ -33,6 +33,9 @@ func ParseURI(input string) (string, string) {
 	//Check that the scheme name is one we support
 	switch scheme {
 		case "graph", "file", "docker", "index": //pass
+		case "":
+			Println("Command source/destination is empty; must be one of (graph, file, docker, index)")
+			os.Exit(1)
 		default:
 			Println("Unrecognized scheme '" + scheme + "': must be one of (graph, file, docker, index)")
 			os.Exit(1)
