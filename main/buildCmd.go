@@ -2,9 +2,9 @@ package main
 
 import (
 	. "fmt"
-	"os"
 	"polydawn.net/docket/confl"
 	"polydawn.net/docket/crocker"
+	"polydawn.net/docket/dex"
 )
 
 type buildCmdOpts struct {
@@ -21,6 +21,7 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	settings := confl.NewConfigLoad(".")
 	config := settings.GetConfig(target)
 	saveAs := settings.GetDefaultImage()
+	var sourceGraph *dex.Graph
 
 	//Right now, go-flags' default announation does not appear to work when in a sub-command.
 	//	Will investigate and hopefully remove this later.
@@ -41,20 +42,29 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	switch sourceScheme {
 		case "docker":
 			//TODO: check that docker has the image loaded
-		case "graph", "file", "index":
+		case "graph":
+			//Look up the graph, and clear any unwanted state
+			sourceGraph = dex.NewGraph(settings.Graph)
+			sourceGraph.Cleanse()
+		case "file", "index":
 			return Errorf("Source " + sourceScheme + " is not supported yet.")
 	}
 
 	//Prepare output
 	switch destinationScheme {
 		case "docker":
-			//TODO: tag image when done
+			//Nothing required here until container has ran
 		case "graph", "file", "index":
 			return Errorf("Destination " + sourceScheme + " is not supported yet.")
 	}
 
 	//Start or connect to a docker daemon
 	dock := StartDocker(settings)
+
+	// Import the latest lineage
+	if sourceScheme == "graph" {
+		dock.Import(sourceGraph.Load(config.Image), config.Image, "latest")
+	}
 
 	// Launch the container and wait for it to finish
 	container := Launch(dock, config)
