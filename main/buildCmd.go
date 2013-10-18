@@ -37,8 +37,6 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	sourceScheme, sourcePath           := ParseURI(opts.Source)
 	destinationScheme, destinationPath := ParseURI(opts.Destination)
 
-	_, _ = sourcePath, destinationPath //remove later
-
 	//Prepare input
 	switch sourceScheme {
 		case "docker":
@@ -47,7 +45,12 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 			//Look up the graph, and clear any unwanted state
 			sourceGraph = dex.NewGraph(settings.Graph)
 			sourceGraph.Cleanse()
-		case "file", "index":
+		case "file":
+			//If the user did not specify an image path, set one
+			if sourcePath == "" {
+				sourcePath = "./image.tar"
+			}
+		case "index":
 			return Errorf("Source " + sourceScheme + " is not supported yet.")
 	}
 
@@ -70,6 +73,12 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 			if destinationPath == "" {
 				destinationPath = "./image.tar"
 			}
+
+			//If the user is insane and wants to overwrite his source tar, stop him.
+			//	Not at all robust (absolute paths? what are those? etc)
+			if sourceScheme == "file" && sourcePath == destinationPath {
+				return Errorf("Tar location is same for source and destination: " + sourcePath)
+			}
 		case "index":
 			return Errorf("Destination " + destinationScheme + " is not supported yet.")
 	}
@@ -77,12 +86,17 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	//Start or connect to a docker daemon
 	dock := StartDocker(settings)
 
-	// Import the latest lineage
-	if sourceScheme == "graph" {
-		dock.Import(sourceGraph.Load(config.Image), config.Image, "latest")
+	//Prepare cache
+	switch sourceScheme {
+		case "graph":
+			//Import the latest lineage
+			dock.Import(sourceGraph.Load(config.Image), config.Image, "latest")
+		case "file":
+			//Load image from file
+			dock.ImportFromFilenameTagstring(sourcePath, config.Image)
 	}
 
-	// Launch the container and wait for it to finish
+	//Launch the container and wait for it to finish
 	container := Launch(dock, config)
 	container.Wait()
 
