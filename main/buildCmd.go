@@ -2,6 +2,7 @@ package main
 
 import (
 	. "fmt"
+	"io"
 	"polydawn.net/docket/confl"
 	"polydawn.net/docket/crocker"
 	"polydawn.net/docket/dex"
@@ -21,7 +22,7 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	settings := confl.NewConfigLoad(".")
 	config := settings.GetConfig(target)
 	saveAs := settings.GetDefaultImage()
-	var sourceGraph *dex.Graph
+	var sourceGraph, destinationGraph *dex.Graph
 
 	//Right now, go-flags' default announation does not appear to work when in a sub-command.
 	//	Will investigate and hopefully remove this later.
@@ -54,8 +55,17 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	switch destinationScheme {
 		case "docker":
 			//Nothing required here until container has ran
-		case "graph", "file", "index":
-			return Errorf("Destination " + sourceScheme + " is not supported yet.")
+		case "graph":
+			//Look up the graph, and clear any unwanted state
+			destinationGraph = dex.NewGraph(settings.Graph)
+
+			//Don't run extra git commands if they'd be redundant.
+			//Right now, we're ignoring the destinationPath, so this will never fire.
+			if sourceScheme == "graph" && sourceGraph.GetDir() != destinationGraph.GetDir() {
+				destinationGraph.Cleanse()
+			}
+		case "file", "index":
+			return Errorf("Destination " + destinationScheme + " is not supported yet.")
 	}
 
 	//Start or connect to a docker daemon
@@ -70,12 +80,21 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	container := Launch(dock, config)
 	container.Wait()
 
-	//If we're not exporting to the graph, there is no commit hash from which to generate a tag.
-	//	Thus the docker import will have either a static tag (from docker.toml configuration) or the default 'latest' tag.
-	if destinationScheme == "docker" {
-		name, tag := crocker.SplitImageName(saveAs)
-		Println("Exporting to", name, tag)
-		container.Commit(name, tag)
+	//Perform any destination operations required
+	name, tag := crocker.SplitImageName(saveAs)
+	switch destinationScheme {
+		//If we're not exporting to the graph, there is no commit hash from which to generate a tag.
+		//	Thus the docker import will have either a static tag (from docker.toml) or the default 'latest' tag.
+		case "docker":
+			Println("Exporting to", name, tag)
+			container.Commit(name, tag)
+		case "graph":
+			// Export a tar of the filesystem
+			exportStreamOut, exportStreamIn := io.Pipe()
+			go container.Export(exportStreamIn)
+
+			// Commit it to the image graph
+			destinationGraph.Publish(exportStreamOut, saveAs, config.Image)
 	}
 
 	//Remove if desired

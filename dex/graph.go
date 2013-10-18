@@ -33,6 +33,13 @@ func NewGraph(dir string) *Graph {
 }
 
 /*
+
+*/
+func (g *Graph) GetDir() string {
+	return g.dir
+}
+
+/*
 Wipes uncommitted changes in the git working tree.
 */
 func (g *Graph) Cleanse() {
