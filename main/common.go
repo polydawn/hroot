@@ -2,6 +2,8 @@ package main
 
 import (
 	. "fmt"
+	"os"
+	"strings"
 	"polydawn.net/docket/confl"
 	"polydawn.net/docket/crocker"
 )
@@ -13,6 +15,30 @@ func GetTarget(args []string, defaultTarget string) string {
 	} else {
 		return defaultTarget
 	}
+}
+
+//Given a URI, return the scheme name separate from everything else
+//	See: https://en.wikipedia.org/wiki/URI_scheme#Generic_syntax
+func ParseURI(input string) (string, string) {
+	//Parse input
+	components := strings.SplitN(input, ":", 2)
+	scheme := components[0]
+
+	//Check if a path was provided
+	path := ""
+	if len(components) > 1 {
+		path = components[1]
+	}
+
+	//Check that the scheme name is one we support
+	switch scheme {
+		case "graph", "file", "docker", "index": //pass
+		default:
+			Println("Unrecognized scheme '" + scheme + "': must be one of (graph, file, docker, index)")
+			os.Exit(1)
+	}
+
+	return scheme, path
 }
 
 //Find or start a docker

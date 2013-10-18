@@ -1,6 +1,8 @@
 package main
 
 import (
+	. "fmt"
+	"os"
 	"polydawn.net/docket/confl"
 )
 
@@ -27,6 +29,30 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	}
 	if opts.Destination == "" {
 		opts.Destination = "graph"
+	}
+
+	//Parse input/output URIs
+	sourceScheme, sourcePath           := ParseURI(opts.Source)
+	destinationScheme, destinationPath := ParseURI(opts.Destination)
+
+	_, _ = sourcePath, destinationPath //remove later
+
+	//Prepare input
+	switch sourceScheme {
+		case "docker":
+			//TODO: check that docker has the image loaded
+		case "graph", "file", "index":
+			Println("Input scheme", sourceScheme, "is not supported yet.")
+			os.Exit(1)
+	}
+
+	//Prepare output
+	switch destinationScheme {
+		case "docker":
+			//TODO: tag image when done
+		case "graph", "file", "index":
+			Println("Input scheme", sourceScheme, "is not supported yet.")
+			os.Exit(1)
 	}
 
 	//Start or connect to a docker daemon
