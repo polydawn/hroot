@@ -52,6 +52,7 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	}
 
 	//Prepare output
+	name, tag := crocker.SplitImageName(saveAs)
 	switch destinationScheme {
 		case "docker":
 			//Nothing required here until container has ran
@@ -64,7 +65,12 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 			if sourceScheme == "graph" && sourceGraph.GetDir() != destinationGraph.GetDir() {
 				destinationGraph.Cleanse()
 			}
-		case "file", "index":
+		case "file":
+			//If the user did not specify an image path, set one
+			if destinationPath == "" {
+				destinationPath = "./image.tar"
+			}
+		case "index":
 			return Errorf("Destination " + destinationScheme + " is not supported yet.")
 	}
 
@@ -81,7 +87,6 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	container.Wait()
 
 	//Perform any destination operations required
-	name, tag := crocker.SplitImageName(saveAs)
 	switch destinationScheme {
 		//If we're not exporting to the graph, there is no commit hash from which to generate a tag.
 		//	Thus the docker import will have either a static tag (from docker.toml) or the default 'latest' tag.
@@ -95,6 +100,10 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 
 			// Commit it to the image graph
 			destinationGraph.Publish(exportStreamOut, saveAs, config.Image)
+		case "file":
+			//Export a tar
+			Println("Exporting to", destinationPath)
+			container.ExportToFilename(destinationPath)
 	}
 
 	//Remove if desired
