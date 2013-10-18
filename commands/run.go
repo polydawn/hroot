@@ -1,18 +1,19 @@
-package main
+package commands
 
 import (
 	"polydawn.net/docket/confl"
 	"polydawn.net/docket/dex"
+	. "polydawn.net/docket/util"
 )
 
-type runCmdOpts struct {
+type RunCmdOpts struct {
 	Source      string `short:"s" long:"source" default:"graph" description:"Container source."`
 }
 
 const DefaultRunTarget = "default"
 
 //Runs a container
-func (opts *runCmdOpts) Execute(args []string) error {
+func (opts *RunCmdOpts) Execute(args []string) error {
 	//Get configuration
 	target   := GetTarget(args, DefaultRunTarget)
 	settings := confl.NewConfigLoad(".")

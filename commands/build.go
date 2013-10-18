@@ -1,4 +1,4 @@
-package main
+package commands
 
 import (
 	. "fmt"
@@ -6,9 +6,10 @@ import (
 	"polydawn.net/docket/confl"
 	"polydawn.net/docket/crocker"
 	"polydawn.net/docket/dex"
+	. "polydawn.net/docket/util"
 )
 
-type buildCmdOpts struct {
+type BuildCmdOpts struct {
 	Source      string `short:"s" long:"source"      description:"Container source.      (default: graph)"`
 	Destination string `short:"d" long:"destination" description:"Container destination. (default: graph)"`
 	NoOp bool          `long:"noop" description:"Set the container command to /bin/true."`
@@ -17,7 +18,7 @@ type buildCmdOpts struct {
 const DefaultBuildTarget = "build"
 
 //Transforms a container
-func (opts *buildCmdOpts) Execute(args []string) error {
+func (opts *BuildCmdOpts) Execute(args []string) error {
 	//Get configuration
 	target   := GetTarget(args, DefaultBuildTarget)
 	settings := confl.NewConfigLoad(".")

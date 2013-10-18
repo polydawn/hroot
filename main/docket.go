@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/jessevdk/go-flags"
+	. "polydawn.net/docket/commands"
 	"os"
 )
 
@@ -38,12 +39,12 @@ func init() {
 		"run",
 		"Run a container",
 		"Run a container based on configuration in the current directory.",
-		&runCmdOpts{},
+		&RunCmdOpts{},
 	)
 	parser.AddCommand(
 		"build",
 		"Transform a container",
 		"Transform a container based on configuration in the current directory.",
-		&buildCmdOpts{},
+		&BuildCmdOpts{},
 	)
 }
