@@ -1,7 +1,6 @@
 package main
 
 import (
-	. "fmt"
 	"polydawn.net/docket/confl"
 	"polydawn.net/docket/dex"
 )
@@ -43,8 +42,6 @@ func (opts *runCmdOpts) Execute(args []string) error {
 			if sourcePath == "" {
 				sourcePath = "./image.tar"
 			}
-		case "index":
-			return Errorf("Source " + sourceScheme + " is not supported yet.")
 	}
 
 	//Start or connect to a docker daemon
@@ -58,6 +55,9 @@ func (opts *runCmdOpts) Execute(args []string) error {
 		case "file":
 			//Load image from file
 			dock.ImportFromFilenameTagstring(sourcePath, config.Image)
+		case "index":
+			//TODO: check that docker doesn't already have the image loaded
+			dock.Pull(config.Image)
 	}
 
 	//Run the container and wait for it to finish
