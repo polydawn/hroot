@@ -9,8 +9,8 @@ import (
 )
 
 type buildCmdOpts struct {
-	Source      string `short:"s" long:"source"      default:"graph" description:"Container source."`
-	Destination string `short:"d" long:"destination" default:"graph" description:"Container destination."`
+	Source      string `short:"s" long:"source"      description:"Container source.      (default: graph)"`
+	Destination string `short:"d" long:"destination" description:"Container destination. (default: graph)"`
 	NoOp bool          `long:"noop" description:"Set the container command to /bin/true."`
 }
 

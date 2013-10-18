@@ -27,14 +27,14 @@ func init() {
 	// )
 	parser.AddCommand(
 		"run",
-		"run a container",
-		"run a container based on configuration in the current directory.",
+		"Run a container",
+		"Run a container based on configuration in the current directory.",
 		&runCmdOpts{},
 	)
 	parser.AddCommand(
 		"build",
-		"transform a container",
-		"transform a container based on configuration in the current directory.",
+		"Transform a container",
+		"Transform a container based on configuration in the current directory.",
 		&buildCmdOpts{},
 	)
 }
