@@ -11,6 +11,7 @@ import (
 type buildCmdOpts struct {
 	Source      string `short:"s" long:"source"      default:"graph" description:"Container source."`
 	Destination string `short:"d" long:"destination" default:"graph" description:"Container destination."`
+	NoOp bool          `long:"noop" description:"Set the container command to /bin/true."`
 }
 
 const DefaultBuildTarget = "build"
@@ -23,6 +24,13 @@ func (opts *buildCmdOpts) Execute(args []string) error {
 	config := settings.GetConfig(target)
 	saveAs := settings.GetDefaultImage()
 	var sourceGraph, destinationGraph *dex.Graph
+
+	//If desired, set the command to /bin/true.
+	//We'd love to not launch the container at all, but docker's export is completely broken.
+	// 'docker export ubuntu' --> 'Error: No such container: ubuntu' --> :(
+	if opts.NoOp {
+		config.Command = []string{ "/bin/true" }
+	}
 
 	//Right now, go-flags' default announation does not appear to work when in a sub-command.
 	//	Will investigate and hopefully remove this later.
