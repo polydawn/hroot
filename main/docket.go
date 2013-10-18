@@ -32,21 +32,9 @@ func init() {
 		&runCmdOpts{},
 	)
 	parser.AddCommand(
-		"export",
-		"export a container",
-		"export a container based on configuration in the current directory.",
-		&exportCmdOpts{},
-	)
-	parser.AddCommand(
-		"publish",
-		"build and publish a versioned-controlled image",
-		"build a container, and place the exported tar into a git repository.",
-		&publishCmdOpts{},
-	)
-	parser.AddCommand(
-		"unpack",
-		"unpack a base image from versioned-controlled storage",
-		"unpack a base image from versioned-controlled storage so that it's ready to be used to run a container.",
-		&unpackCmdOpts{},
+		"build",
+		"transform a container",
+		"transform a container based on configuration in the current directory.",
+		&buildCmdOpts{},
 	)
 }

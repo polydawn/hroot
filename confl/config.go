@@ -88,6 +88,11 @@ func (cs *ConfigLoad) GetConfig(target string) crocker.ContainerConfig {
 	return config
 }
 
+//Return the default image name (convenience function)
+func (cs *ConfigLoad) GetDefaultImage() string {
+	return cs.GetConfig(DefaultTarget).Image
+}
+
 func loadToml(data, dir string) (ContainerConfigs, toml.MetaData) {
 	//Decode the file
 	var set ContainerConfigs

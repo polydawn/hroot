@@ -6,14 +6,17 @@ import (
 	"polydawn.net/docket/crocker"
 )
 
-/*
-	Helps run anything that requires a docker connection.
-	Handles creation & cleanup in one place.
-	Docker daemon config is determined by looking around the cwd.
-*/
-func WithDocker(fn func(*crocker.Dock, *confl.ConfigLoad) error) error {
-	//Load configuration, then find or start a docker
-	settings := confl.NewConfigLoad(".")
+//If the user specified a target, use that, else use the command's default target
+func GetTarget(args []string, defaultTarget string) string {
+	if len(args) >= 1 {
+		return args[0]
+	} else {
+		return defaultTarget
+	}
+}
+
+//Find or start a docker
+func StartDocker(settings *confl.ConfigLoad) *crocker.Dock {
 	dock := crocker.NewDock(settings.Dock)
 
 	//Announce the docker
@@ -23,10 +26,7 @@ func WithDocker(fn func(*crocker.Dock, *confl.ConfigLoad) error) error {
 		Println("Connecting to docker", dock.Dir())
 	}
 
-	//Run the closure, kill the docker if needed, and return any errors.
-	err := fn(dock, settings)
-	dock.Slay()
-	return err
+	return dock
 }
 
 //Helper function: maps a TrionConfig struct to crocker function.

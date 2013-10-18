@@ -1,33 +1,27 @@
 package main
 
 import (
-	// "github.com/jessevdk/go-flags"
 	"polydawn.net/docket/confl"
-	"polydawn.net/docket/crocker"
+	// "polydawn.net/docket/crocker"
 )
 
-type runCmdOpts struct{}
-
-func (opts *runCmdOpts) Execute(args []string) error {
-	//Get the target
-	target := ""
-	if len(args) == 1 {
-		target = args[0]
-	} else {
-		target = "default"
-	}
-
-	return WithDocker(func(dock *crocker.Dock, settings *confl.ConfigLoad) error {
-		return Run(dock, settings, target)
-	})
+type runCmdOpts struct {
+	Source      string `short:"s" long:"source"      default:"graph" description:"Container source."`
 }
 
-//Launches a docker
-func Run(dock *crocker.Dock, settings *confl.ConfigLoad, target string) error {
-	//Get configuration
-	config := settings.GetConfig(target)
+const DefaultRunTarget = "default"
 
-	//Start the docker and wait for it to finish
+//Runs a container
+func (opts *runCmdOpts) Execute(args []string) error {
+	//Get configuration
+	target   := GetTarget(args, DefaultRunTarget)
+	settings := confl.NewConfigLoad(".")
+	config   := settings.GetConfig(target)
+
+	//Start or connect to a docker daemon
+	dock := StartDocker(settings)
+
+	//Run the container and wait for it to finish
 	container := Launch(dock, config)
 	container.Wait()
 
@@ -35,6 +29,9 @@ func Run(dock *crocker.Dock, settings *confl.ConfigLoad, target string) error {
 	if config.Purge {
 		container.Purge()
 	}
+
+	//Stop the docker daemon if it's a child process
+	dock.Slay()
 
 	return nil
 }
