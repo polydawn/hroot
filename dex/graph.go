@@ -37,7 +37,8 @@ Wipes uncommitted changes in the git working tree.
 */
 func (g *Graph) Cleanse() {
 	g.cmd("reset")()
-	g.cmd("checkout", ".")()
+	//Temporarily don't care if 'git checkout .' fails.
+	g.cmd("checkout", ".")(Opts{OkExit:[]int{0, 1}})()
 	g.cmd("clean", "-xf")()
 }
 
