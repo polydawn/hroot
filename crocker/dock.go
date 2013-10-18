@@ -168,6 +168,10 @@ func (dock *Dock) daemon() Command {
 	)(Opts{Cwd: dock.Dir()})
 }
 
+func (dock *Dock) Pull(image string) {
+	dock.cmd()("pull", image)()
+}
+
 func (dock *Dock) Slay() {
 	if !dock.isMine { return; }
 	Sh("bash")("-c")(DefaultIO)("kill `cat \""+dock.GetPidfilePath()+"\"`")()
