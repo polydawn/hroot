@@ -47,4 +47,10 @@ func init() {
 		"Transform a container based on configuration in the current directory.",
 		&BuildCmdOpts{},
 	)
+	parser.AddCommand(
+		"version",
+		"Print docket version",
+		"Print docket version",
+		&VersionCmdOpts{},
+	)
 }
