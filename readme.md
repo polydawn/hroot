@@ -6,7 +6,28 @@ Use straightforward configuration files & git to construct, version, and distrib
 
 ## Quickstart
 
-Coming soon!
+Grab the latest [release](https://github.com/polydawn/docket/releases) and throw it on your path.
+
+*This example does not work yet, we're working on it!*
+```bash
+# Clone down some example config files
+git clone https://github.com/polydawn/boxen.git && cd boxen
+
+# Create a graph repo
+git init graph && cd graph
+git commit -m "Graph" --allow-empty && cd ../ubuntu
+
+# Download ubuntu from public index
+docket build index -s index -d graph --noop
+
+# Upgrade apt-get packages
+docket build index
+
+# Load repeatable ubuntu from git and start an interactive shell
+docket run bash
+```
+
+Now you've got a git repository tracking ubuntu!
 
 ## How do I use it?
 
@@ -16,11 +37,38 @@ This allows you to express a complex, structured ecosystem in a natural way.
 
 Configuration is split into targets, so changing from debug to production is a breeze. Check out an [example file](https://github.com/polydawn/boxen/blob/master/docker.toml).
 
-Commands:
-* **run** *target* launches a docker image.
-* **export** *target* will run a target.
-* **unpack** *image* will load an image from the graph repository into Docker.
-* **publish** *target* will update and image from the graph, then publish the changes.
+### Commands:
+<table>
+	<tr>
+		<td>run</td>
+		<td>Launch a docker image.</td>
+	</tr><tr>
+		<td>build</td>
+		<td>Do the same thing, then save the results somewhere.</td>
+	</tr>
+</table>
+
+### Sources & destinations:
+<table>
+	<tr>
+		<td>graph</td>
+		<td>A git repository used to version images <i>(default)</i></td>
+	</tr><tr>
+	<tr>
+		<td>file</td>
+		<td>A tarball created from docker export</td>
+	</tr><tr>
+	<tr>
+		<td>docker</td>
+		<td>The docker daemon</td>
+	</tr><tr>
+	<tr>
+		<td>index</td>
+		<td>The <a href="https://index.docker.io">public index</a></td>
+	</tr>
+</table>
+
+This makes it easy to load & save images in a variety of ways.
 
 ## Building from source
 
