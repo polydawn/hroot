@@ -7,6 +7,7 @@ import (
 	"polydawn.net/docket/crocker"
 	"polydawn.net/docket/dex"
 	. "polydawn.net/docket/util"
+	"polydawn.net/guitar/stream"
 )
 
 type BuildCmdOpts struct {
@@ -118,12 +119,21 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 			Println("Exporting to", name, tag)
 			container.Commit(name, tag)
 		case "graph":
-			// Export a tar of the filesystem
-			exportStreamOut, exportStreamIn := io.Pipe()
-			go container.Export(exportStreamIn)
+			//Create new branches as needed
+			destinationGraph.PreparePublish(saveAs, config.Image)
 
-			// Commit it to the image graph
-			destinationGraph.Publish(exportStreamOut, saveAs, config.Image)
+			// Export a tar of the filesystem
+			exportReader, exportWriter := io.Pipe()
+			go container.Export(exportWriter)
+
+			// Use guitar to write the tar's contents to the graph
+			err := stream.ExportToFilesystem(exportReader, destinationGraph.GetDir())
+			if err != nil {
+				return err
+			}
+
+			// Commit changes
+			destinationGraph.Publish(saveAs, config.Image)
 		case "file":
 			//Export a tar
 			Println("Exporting to", destinationPath)

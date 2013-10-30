@@ -49,12 +49,8 @@ func (g *Graph) Cleanse() {
 	g.cmd("clean", "-xf")()
 }
 
-/*
-Commits a new image.  The "lineage" branch name will be extended by this new commit (or
-created, if it doesn't exist), and the "ancestor" branch will also be credited as a parent
-of the new commit.
-*/
-func (g *Graph) Publish(imageStream io.Reader, lineage string, ancestor string) {
+// Prepares for a publish by creating a branch
+func (g *Graph) PreparePublish(lineage string, ancestor string) {
 	//Handle tags - currently, we discard them when dealing with a graph repo.
 	lineage, _  = SplitImageName(lineage)
 	ancestor, _ = SplitImageName(ancestor)
@@ -66,18 +62,19 @@ func (g *Graph) Publish(imageStream io.Reader, lineage string, ancestor string) 
 	} else {
 		g.cmd("checkout", lineage)()
 	}
+}
 
-	out, err := os.OpenFile(g.dir+"/image.tar", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		panic(err)
-	}
+/*
+Commits a new image.  The "lineage" branch name will be extended by this new commit (or
+created, if it doesn't exist), and the "ancestor" branch will also be credited as a parent
+of the new commit.
+*/
+func (g *Graph) Publish(lineage string, ancestor string) {
+	//Handle tags - currently, we discard them when dealing with a graph repo.
+	lineage, _  = SplitImageName(lineage)
+	ancestor, _ = SplitImageName(ancestor)
 
-	_, err = io.Copy(out, imageStream)
-	if err != nil {
-		panic(err)
-	}
-
-	g.cmd("add", "image.tar")()
+	g.cmd("add", "--all")()
 	g.forceMerge(ancestor, lineage)
 	g.cmd("show")()
 }
