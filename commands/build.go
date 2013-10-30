@@ -70,9 +70,8 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 			//Look up the graph, and clear any unwanted state
 			destinationGraph = dex.NewGraph(settings.Graph)
 
-			//Don't run extra git commands if they'd be redundant.
-			//Right now, we're ignoring the destinationPath, so this will never fire.
-			if sourceScheme == "graph" && sourceGraph.GetDir() != destinationGraph.GetDir() {
+			//Cleanse the graph unless it'd be redundant.
+			if !(sourceScheme == "graph" && sourceGraph.GetDir() != destinationGraph.GetDir()) {
 				destinationGraph.Cleanse()
 			}
 		case "file":
