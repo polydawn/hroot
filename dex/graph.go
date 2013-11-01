@@ -22,14 +22,80 @@ type Graph struct {
 	cmd Command
 }
 
+/*
+	Loads a Graph if there is a git repo initialized at the given dir; returns nil if a graph repo not found.
+	The dir must be the root of the working tree of the git dir.
+
+	A graph git repo is distingushed by containing branches that start with "docket/" -- this is how docket outputs branches that contain its data.
+*/
+func LoadGraph(dir string) *Graph {
+	// optimistically, set up the struct we're checking out
+	g := newGraph(dir)
+
+	// ask git what it thinks of all this.
+	if g.isRepoRoot() {
+		return g
+	} else {
+		return nil
+	}
+}
+
+/*
+	Attempts to load a Graph at the given dir, or creates a new one if no graph repo is found.
+	If a new graph is fabricated, it will be initialized by:
+	 - creating a new git repo,
+	 - making a blank root commit,
+	 - and tagging it with a branch name that declares it to be a graph repo.
+
+	Note if your cwd is already in a git repo, the new graph will not be commited, nor will it be made a submodule.
+	You're free to make it a submodule yourself, but git quite wants you to have a remote url before it accepts your submodule.
+*/
 func NewGraph(dir string) *Graph {
+	// try for a load, and if that flies, return it.
+	g := LoadGraph(dir)
+	if g != nil {
+		return g
+	}
+	g = newGraph(dir)
+
+	// if the path to this doesn't exist yet, it will now.
+	err := os.MkdirAll(g.dir, 0755)
+	if err != nil { panic(err); }
+
+	// git init
+	g.cmd("init")()
+
+	// set up basic repo to identify as graph repo
+	g.cmd("commit", "--allow-empty", "-mdocket")()
+	g.cmd("checkout", "-b", "docket/init")()
+
+	// should be good to go
+	return g
+}
+
+func newGraph(dir string) *Graph {
 	dir, err := filepath.Abs(dir)
 	if err != nil { panic(err); }
 
+	// optimistically, set up the struct.
+	// we still need to either verify or initalize git here.
 	return &Graph{
 		dir: dir,
 		cmd: Sh("git")(DefaultIO)(Opts{Cwd: dir}),
 	}
+}
+
+func (g *Graph) isRepoRoot() (v bool) {
+	defer func() {
+		// if the path doesn't even exist, launching the command will panic, and that's fine.
+		// if the path isn't within a git repo at all, it will exit with 128, gosh will panic, and that's fine.
+		if recover() != nil {
+			v = false
+		}
+	}()
+	tld := g.cmd(NullIO)("rev-parse", "--show-toplevel").Output()
+	v = (tld == g.dir+"\n")
+	return
 }
 
 /*
@@ -44,8 +110,7 @@ Wipes uncommitted changes in the git working tree.
 */
 func (g *Graph) Cleanse() {
 	g.cmd("reset")()
-	//Temporarily don't care if 'git checkout .' fails.
-	g.cmd("checkout", ".")(Opts{OkExit:[]int{0, 1}})()
+	g.cmd("reset", "--hard")()
 	g.cmd("clean", "-xf")()
 }
 
