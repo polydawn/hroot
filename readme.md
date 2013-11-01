@@ -8,20 +8,15 @@ Use straightforward configuration files & git to construct, version, and distrib
 
 Grab the latest [release](https://github.com/polydawn/docket/releases) and throw it on your path.
 
-*This example does not work yet, we're working on it!*
 ```bash
 # Clone down some example config files
-git clone https://github.com/polydawn/boxen.git && cd boxen
+git clone https://github.com/polydawn/boxen.git && cd boxen/ubuntu
 
-# Create a graph repo
-git init graph && cd graph
-git commit -m "Graph" --allow-empty && cd ../ubuntu
-
-# Download ubuntu from public index
-docket build index -s index -d graph --noop
+# Download ubuntu from public index, save into git
+docket build -s index -d graph --noop
 
 # Upgrade apt-get packages
-docket build index
+docket build
 
 # Load repeatable ubuntu from git and start an interactive shell
 docket run bash
@@ -83,8 +78,10 @@ export PATH=$PATH:/usr/local/go/bin # Add this to /etc/profile or similar
 
 Clone down Docket & throw it on your path:
 ```bash
-git clone https://github.com/polydawn/docket --recursive
-docket/build.sh
+git clone https://github.com/polydawn/docket && cd docket
+git submodule update --init
+
+./build.sh
 sudo cp docket/docket /usr/bin/docket
 ```
 
