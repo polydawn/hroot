@@ -14,7 +14,7 @@ import (
 type BuildCmdOpts struct {
 	Source      string `short:"s" long:"source"      description:"Container source.      (default: graph)"`
 	Destination string `short:"d" long:"destination" description:"Container destination. (default: graph)"`
-	NoOp bool          `long:"noop" description:"Set the container command to /bin/true."`
+	NoOp bool          `long:"noop" description:"Set the container command to /bin/true and do not modify destination image name."`
 }
 
 const DefaultBuildTarget = "build"
@@ -25,16 +25,16 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 	target   := GetTarget(args, DefaultBuildTarget)
 	settings := confl.NewConfigLoad(".")
 	config := settings.GetConfig(target)
-	saveAs := settings.GetDefaultImage()
 	var sourceGraph, destinationGraph *dex.Graph
 
-	Println("Building from", config.Image, "to", saveAs)
+	Println("Building from", config.Upstream, "to", config.Image)
 
-	//If desired, set the command to /bin/true.
+	//If desired, set the command to /bin/true and do not modify destination image name
 	//We'd love to not launch the container at all, but docker's export is completely broken.
 	// 'docker export ubuntu' --> 'Error: No such container: ubuntu' --> :(
 	if opts.NoOp {
 		config.Command = []string{ "/bin/true" }
+		config.Image = config.Upstream
 	}
 
 	//Right now, go-flags' default announation does not appear to work when in a sub-command.
@@ -50,6 +50,10 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 	sourceScheme, sourcePath           := ParseURI(opts.Source)
 	destinationScheme, destinationPath := ParseURI(opts.Destination)
 
+	//Copy of config for 'docker run'
+	runConfig := config
+	runConfig.Image = config.Upstream
+
 	//Prepare input
 	switch sourceScheme {
 		case "graph":
@@ -61,10 +65,12 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 			if sourcePath == "" {
 				sourcePath = "./image.tar"
 			}
+		case "index":
+			//If pulling from the index, use the index key instead (protect URL namespace from docker)
+			runConfig.Image = config.Index
 	}
 
 	//Prepare output
-	name, tag := crocker.SplitImageName(saveAs)
 	switch destinationScheme {
 		case "docker":
 			//Nothing required here until container has ran
@@ -95,50 +101,52 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 	dock := StartDocker(settings)
 
 	//Prepare cache
+	hasImage := dock.CheckCache(runConfig.Image)
 	switch sourceScheme {
 		case "docker":
 			//Check that docker has the image needed
-			if !dock.CheckCache(config.Image) {
-				return Errorf("Docker does not have " + config.Image + " loaded.")
+			if !hasImage {
+				return Errorf("Docker does not have " + runConfig.Image + " loaded.")
 			}
 		case "graph":
 			//Import the latest lineage
-			if dock.CheckCache(config.Image) {
-				Println("Docker already has", config.Image, "loaded, not importing from graph.")
+			if hasImage {
+				Println("Docker already has", runConfig.Image, "loaded, not importing from graph.")
 			} else {
-				dock.Import(sourceGraph.Load(config.Image), config.Image, "latest")
+				dock.Import(sourceGraph.Load(runConfig.Image), runConfig.Image, "latest")
 			}
 		case "file":
 			//If docker already has the image loaded, warn & wait first!
-			if dock.CheckCache(config.Image) {
+			if hasImage {
 				Println(
-					"\n"   + "Warning: your docker cache already has " + config.Image + " loaded." +
+					"\n"   + "Warning: your docker cache already has " + runConfig.Image + " loaded." +
 					"\n"   + "Importing will overwrite the saved image." +
 					"\n\n" + "Continuing in 10 seconds, hit Ctrl-C to cancel..")
 				time.Sleep(time.Second * 10)
 			}
 
 			//Load image from file
-			dock.ImportFromFilenameTagstring(sourcePath, config.Image)
+			dock.ImportFromFilenameTagstring(sourcePath, runConfig.Image)
 		case "index":
 			//If docker already has the image loaded, warn & wait first!
-			if dock.CheckCache(config.Image) {
+			if hasImage {
 				Println(
-					"\n"   + "Warning: your docker cache already has " + config.Image + " loaded." +
+					"\n"   + "Warning: your docker cache already has " + runConfig.Index + " loaded." +
 					"\n"   + "Pulling from the index may modify the saved image." +
-					"\n\n" + "Continuing in 10 seconds, hit Ctrl-C to cancel..")
+					"\n\n" + "Continuing in 10 seconds, hit Ctrl-C to cancel...")
 				time.Sleep(time.Second * 10)
 			}
 
 			//Download from index
-			dock.Pull(config.Image)
+			dock.Pull(config.Index)
 	}
 
 	//Launch the container and wait for it to finish
-	container := Launch(dock, config)
+	container := Launch(dock, runConfig)
 	container.Wait()
 
 	//Perform any destination operations required
+	name, tag := crocker.SplitImageName(config.Image)
 	switch destinationScheme {
 		//If we're not exporting to the graph, there is no commit hash from which to generate a tag.
 		//	Thus the docker import will have either a static tag (from docker.toml) or the default 'latest' tag.
@@ -147,7 +155,7 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 			container.Commit(name, tag)
 		case "graph":
 			//Create new branches as needed
-			destinationGraph.PreparePublish(saveAs, config.Image)
+			destinationGraph.PreparePublish(config.Image, config.Upstream)
 
 			// Export a tar of the filesystem
 			exportReader, exportWriter := io.Pipe()
@@ -160,7 +168,7 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 			}
 
 			// Commit changes
-			destinationGraph.Publish(saveAs, config.Image)
+			destinationGraph.Publish(config.Image, config.Upstream)
 		case "file":
 			//Export a tar
 			Println("Exporting to", destinationPath)
