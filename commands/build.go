@@ -175,6 +175,15 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 			container.ExportToFilename(destinationPath)
 	}
 
+	//If the image was sourced from the index and not already committed, commit it.
+	//	This is so if you run:
+	//		docket build -s index  -d graph --noop
+	//		docket build -s docker -d graph
+	//	Docker will already know about your (much cooler) image name :)
+	if sourceScheme == "index" && destinationScheme != "docker" {
+		container.Commit(name, tag)
+	}
+
 	//Remove if desired
 	if config.Purge {
 		container.Purge()
