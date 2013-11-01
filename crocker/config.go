@@ -5,6 +5,12 @@ type ContainerConfig struct {
 	//What image to use
 	Image       string     `toml:image`
 
+	//What image to build from
+	Upstream    string     `toml:upstream`
+
+	//What the image is called in the docker index
+	Index       string     `toml:index`
+
 	//What command to run
 	Command     []string   `toml:command`
 
@@ -35,7 +41,9 @@ type ContainerConfig struct {
 
 //Default configuration
 var DefaultContainerConfig = ContainerConfig{
-	Image:       "ubuntu",
+	Image:       "",
+	Upstream:    "",
+	Index:       "",
 	Command:     []string{"/bin/echo", "Hello from docket!"},
 	Folder:      "/",
 	Privileged:  false,

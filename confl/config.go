@@ -146,6 +146,14 @@ func addConfig(base *crocker.ContainerConfig, inc crocker.ContainerConfig, meta 
 		base.Image = inc.Image
 	}
 
+	if meta.IsDefined(target, "upstream") {
+		base.Upstream = inc.Upstream
+	}
+
+	if meta.IsDefined(target, "index") {
+		base.Index = inc.Index
+	}
+
 	if meta.IsDefined(target, "command") {
 		base.Command = inc.Command
 	}
