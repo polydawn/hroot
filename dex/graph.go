@@ -141,7 +141,7 @@ func (g *Graph) Publish(lineage string, ancestor string) {
 
 	g.cmd("add", "--all")()
 	g.forceMerge(ancestor, lineage)
-	g.cmd("show")(Opts{OkExit:[]int{0, 141}})()
+	// g.cmd("show")(Opts{OkExit:[]int{0, 141}})()
 }
 
 func (g *Graph) forceMerge(source string, target string) {
