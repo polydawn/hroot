@@ -5,7 +5,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net"
+	"net/http/httputil"
 	"os"
+	"path"
 	"path/filepath"
 	. "polydawn.net/pogo/gosh"
 	"strconv"
@@ -33,6 +35,11 @@ type Dock struct {
 		Basically used to determine if Slay() should actually fire teh lazors or not.
 	*/
 	isMine bool
+
+	/*
+		A socket connection to the docker for API calls
+	*/
+	sock *httputil.ClientConn
 }
 
 /*
@@ -153,11 +160,11 @@ func (dock *Dock) Client() Command {
 }
 
 func (dock *Dock) GetPidfilePath() string {
-	return fmt.Sprintf("%s/%s", dock.Dir(), "docker.pid")
+	return path.Join(dock.Dir(), "docker.pid")
 }
 
 func (dock *Dock) GetSockPath() string {
-	return fmt.Sprintf("%s/%s", dock.Dir(), "docker.sock")
+	return path.Join(dock.Dir(), "docker.sock")
 }
 
 func (dock *Dock) daemon() Command {
@@ -173,8 +180,15 @@ func (dock *Dock) Pull(image string) {
 }
 
 func (dock *Dock) Slay() {
-	if !dock.isMine { return; }
-	Sh("bash")("-c")(DefaultIO)("kill `cat \""+dock.GetPidfilePath()+"\"`")()
+	//Close the socket if it's open
+	if dock.sock != nil {
+		dock.sock.Close()
+	}
+
+	//Kill the daemon if docket started it
+	if dock.isMine {
+		Sh("bash")("-c")(DefaultIO)("kill `cat \""+dock.GetPidfilePath()+"\"`")()
+	}
 }
 
 /*

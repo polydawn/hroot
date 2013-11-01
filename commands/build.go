@@ -8,6 +8,7 @@ import (
 	"polydawn.net/docket/dex"
 	. "polydawn.net/docket/util"
 	"polydawn.net/guitar/stream"
+	"time"
 )
 
 type BuildCmdOpts struct {
@@ -26,6 +27,8 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 	config := settings.GetConfig(target)
 	saveAs := settings.GetDefaultImage()
 	var sourceGraph, destinationGraph *dex.Graph
+
+	Println("Building from", config.Image, "to", saveAs)
 
 	//If desired, set the command to /bin/true.
 	//We'd love to not launch the container at all, but docker's export is completely broken.
@@ -49,8 +52,6 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 
 	//Prepare input
 	switch sourceScheme {
-		case "docker":
-			//TODO: check that docker has the image loaded
 		case "graph":
 			//Look up the graph, and clear any unwanted state
 			sourceGraph = dex.NewGraph(settings.Graph)
@@ -71,9 +72,8 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 			//Look up the graph, and clear any unwanted state
 			destinationGraph = dex.NewGraph(settings.Graph)
 
-			//Don't run extra git commands if they'd be redundant.
-			//Right now, we're ignoring the destinationPath, so this will never fire.
-			if sourceScheme == "graph" && sourceGraph.GetDir() != destinationGraph.GetDir() {
+			//Cleanse the graph unless it'd be redundant.
+			if !(sourceScheme == "graph" && sourceGraph.GetDir() != destinationGraph.GetDir()) {
 				destinationGraph.Cleanse()
 			}
 		case "file":
@@ -96,14 +96,41 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 
 	//Prepare cache
 	switch sourceScheme {
+		case "docker":
+			//Check that docker has the image needed
+			if !dock.CheckCache(config.Image) {
+				return Errorf("Docker does not have " + config.Image + " loaded.")
+			}
 		case "graph":
 			//Import the latest lineage
-			dock.Import(sourceGraph.Load(config.Image), config.Image, "latest")
+			if dock.CheckCache(config.Image) {
+				Println("Docker already has", config.Image, "loaded, not importing from graph.")
+			} else {
+				dock.Import(sourceGraph.Load(config.Image), config.Image, "latest")
+			}
 		case "file":
+			//If docker already has the image loaded, warn & wait first!
+			if dock.CheckCache(config.Image) {
+				Println(
+					"\n"   + "Warning: your docker cache already has " + config.Image + " loaded." +
+					"\n"   + "Importing will overwrite the saved image." +
+					"\n\n" + "Continuing in 10 seconds, hit Ctrl-C to cancel..")
+				time.Sleep(time.Second * 10)
+			}
+
 			//Load image from file
 			dock.ImportFromFilenameTagstring(sourcePath, config.Image)
 		case "index":
-			//TODO: check that docker doesn't already have the image loaded
+			//If docker already has the image loaded, warn & wait first!
+			if dock.CheckCache(config.Image) {
+				Println(
+					"\n"   + "Warning: your docker cache already has " + config.Image + " loaded." +
+					"\n"   + "Pulling from the index may modify the saved image." +
+					"\n\n" + "Continuing in 10 seconds, hit Ctrl-C to cancel..")
+				time.Sleep(time.Second * 10)
+			}
+
+			//Download from index
 			dock.Pull(config.Image)
 	}
 
