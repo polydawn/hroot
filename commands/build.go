@@ -148,11 +148,6 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 	//Perform any destination operations required
 	name, tag := crocker.SplitImageName(config.Image)
 	switch destinationScheme {
-		//If we're not exporting to the graph, there is no commit hash from which to generate a tag.
-		//	Thus the docker import will have either a static tag (from docker.toml) or the default 'latest' tag.
-		case "docker":
-			Println("Exporting to", name, tag)
-			container.Commit(name, tag)
 		case "graph":
 			//Create new branches as needed
 			destinationGraph.PreparePublish(config.Image, config.Upstream)
@@ -175,14 +170,13 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 			container.ExportToFilename(destinationPath)
 	}
 
-	//If the image was sourced from the index and not already committed, commit it.
+	//Commit the image name to the cache.
 	//	This is so if you run:
 	//		docket build -s index  -d graph --noop
 	//		docket build -s docker -d graph
 	//	Docker will already know about your (much cooler) image name :)
-	if sourceScheme == "index" && destinationScheme != "docker" {
-		container.Commit(name, tag)
-	}
+	Println("Exporting to", name, tag)
+	container.Commit(name, tag)
 
 	//Remove if desired
 	if config.Purge {
