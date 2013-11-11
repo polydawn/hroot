@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	. "polydawn.net/pogo/gosh"
 	. "polydawn.net/docket/crocker"
+	"polydawn.net/docket/util"
 	"strings"
 )
 
@@ -74,7 +74,7 @@ func NewGraph(dir string) *Graph {
 }
 
 func newGraph(dir string) *Graph {
-	dir, err := filepath.Abs(dir)
+	dir, err := util.SanePath(dir)
 	if err != nil { panic(err); }
 
 	// optimistically, set up the struct.
