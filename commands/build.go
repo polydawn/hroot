@@ -109,10 +109,15 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 				return Errorf("Docker does not have " + runConfig.Image + " loaded.")
 			}
 		case "graph":
+
 			//Import the latest lineage
 			if hasImage {
 				Println("Docker already has", runConfig.Image, "loaded, not importing from graph.")
 			} else {
+				//Check if the image is in the graph
+				if !sourceGraph.HasBranch(runConfig.Image) {
+					return Errorf("Image branch name " + runConfig.Image + " not found in graph.")
+				}
 				dock.Import(sourceGraph.Load(runConfig.Image), runConfig.Image, "latest")
 			}
 		case "file":

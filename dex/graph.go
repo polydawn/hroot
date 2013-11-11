@@ -166,3 +166,10 @@ func (g *Graph) Load(lineage string) io.Reader {
 	if err != nil { panic(err); }
 	return in
 }
+
+//Checks if the graph has a branch.
+func (g *Graph) HasBranch(branch string) bool {
+	//Git magic is involved. Response will be of non-zero length if branch exists.
+	result := g.cmd("ls-remote", ".", "refs/heads/" + branch).Output()
+	return len(result) > 0
+}
