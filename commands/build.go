@@ -79,7 +79,7 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 			destinationGraph = dex.NewGraph(settings.Graph)
 
 			//Cleanse the graph unless it'd be redundant.
-			if !(sourceScheme == "graph" && sourceGraph.GetDir() != destinationGraph.GetDir()) {
+			if !(sourceScheme == "graph" && sourceGraph.GetDir() == destinationGraph.GetDir()) {
 				destinationGraph.Cleanse()
 			}
 		case "file":
