@@ -111,7 +111,7 @@ Wipes uncommitted changes in the git working tree.
 func (g *Graph) Cleanse() {
 	g.cmd("reset")()
 	g.cmd("reset", "--hard")()
-	g.cmd("clean", "-xf")()
+	g.cmd("clean", "-xfdq")()
 }
 
 // Prepares for a publish by creating a branch
