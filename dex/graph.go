@@ -150,7 +150,7 @@ func (g *Graph) forceMerge(source string, target string) {
 	commitMsg := fmt.Sprintf("updated %s<<%s", target, source)
 	mergeTree := g.cmd("commit-tree", writeTree, "-p", source, "-p", target, Opts{In: commitMsg}).Output()
 	mergeTree = strings.Trim(mergeTree, "\n")
-	g.cmd("merge", mergeTree)()
+	g.cmd("merge", "-q", mergeTree)()
 }
 
 /*
