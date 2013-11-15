@@ -12,7 +12,7 @@ import (
 //Return the absolute path and evaluate for symlinks.
 //Where we should call this (rather than just .Abs) is debatable.
 func SanePath(dir string) (string, error) {
-	dir, error := filepath.Abs(dir)
+	dir, error := filepath.Abs(filepath.Clean(dir))
 	if (error != nil) { return dir, error }
 	return filepath.EvalSymlinks(dir)
 }
