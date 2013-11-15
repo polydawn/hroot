@@ -8,6 +8,7 @@ import (
 	"polydawn.net/docket/dex"
 	. "polydawn.net/docket/util"
 	"polydawn.net/guitar/stream"
+	"sync"
 	"time"
 )
 
@@ -109,8 +110,7 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 				return Errorf("Docker does not have " + runConfig.Image + " loaded.")
 			}
 		case "graph":
-
-			//Import the latest lineage
+			//Import a tar from the filesystem
 			if hasImage {
 				Println("Docker already has", runConfig.Image, "loaded, not importing from graph.")
 			} else {
@@ -118,7 +118,21 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 				if !sourceGraph.HasBranch(runConfig.Image) {
 					return Errorf("Image branch name " + runConfig.Image + " not found in graph.")
 				}
-				dock.Import(sourceGraph.Load(runConfig.Image), runConfig.Image, "latest")
+
+				//Run import
+				importReader, importWriter := io.Pipe()
+				var wait sync.WaitGroup
+				wait.Add(1)
+				go func() {
+					dock.Import(importReader, runConfig.Image, "latest")
+					wait.Done()
+				}()
+				err := stream.ImportFromFilesystem(importWriter, sourceGraph.GetDir())
+				if err != nil {
+					return Errorf("Import from graph failed: " + err.Error())
+				}
+
+				wait.Wait()
 			}
 		case "file":
 			//If docker already has the image loaded, warn & wait first!
