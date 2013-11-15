@@ -168,6 +168,7 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 			}
 
 			// Commit changes
+			Println("Comitting to graph...")
 			destinationGraph.Publish(config.Image, config.Upstream)
 		case "file":
 			//Export a tar
