@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http/httputil"
 	"os"
-	"path"
 	"path/filepath"
 	. "polydawn.net/pogo/gosh"
 	"strconv"
@@ -160,11 +159,11 @@ func (dock *Dock) Client() Command {
 }
 
 func (dock *Dock) GetPidfilePath() string {
-	return path.Join(dock.Dir(), "docker.pid")
+	return filepath.Join(dock.Dir(), "docker.pid")
 }
 
 func (dock *Dock) GetSockPath() string {
-	return path.Join(dock.Dir(), "docker.sock")
+	return filepath.Join(dock.Dir(), "docker.sock")
 }
 
 func (dock *Dock) daemon() Command {
