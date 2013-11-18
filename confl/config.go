@@ -66,7 +66,7 @@ func NewConfigLoad(dir string) *ConfigLoad {
 
 //Extract a configuration target from loaded settings.
 //Each config will override the one after it.
-func (cs *ConfigLoad) GetConfig(target string) crocker.ContainerConfig {
+func (cs *ConfigLoad) GetConfig(target string) *crocker.ContainerConfig {
 	config := crocker.DefaultContainerConfig
 
 	//For each config
@@ -85,7 +85,7 @@ func (cs *ConfigLoad) GetConfig(target string) crocker.ContainerConfig {
 		}
 	}
 
-	return config
+	return &config
 }
 
 //Return the default image name (convenience function)
