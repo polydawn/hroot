@@ -11,10 +11,17 @@ import (
 
 //Return the absolute path and evaluate for symlinks.
 //Where we should call this (rather than just .Abs) is debatable.
-func SanePath(dir string) (string, error) {
-	dir, error := filepath.Abs(filepath.Clean(dir))
-	if (error != nil) { return dir, error }
-	return filepath.EvalSymlinks(dir)
+func SanePath(loc string) (string, error) {
+	//Get absolute representation and clean
+	loc, error := filepath.Abs(loc)
+	if error != nil { return loc, error }
+
+	//Check that the directory exists, remove symlinks from path
+	dir, base := filepath.Dir(loc), filepath.Base(loc)
+	dir, error = filepath.EvalSymlinks(dir)
+	if error != nil { return dir, error}
+
+	return filepath.Join(dir, base), nil
 }
 
 //If the user specified a target, use that, else use the command's default target
