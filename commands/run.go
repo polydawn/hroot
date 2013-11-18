@@ -20,12 +20,6 @@ func (opts *RunCmdOpts) Execute(args []string) error {
 	config   := settings.GetConfig(target)
 	var sourceGraph *dex.Graph
 
-	//Right now, go-flags' default announation does not appear to work when in a sub-command.
-	//	Will investigate and hopefully remove this later.
-	if opts.Source == "" {
-		opts.Source = "graph"
-	}
-
 	//Parse input URI
 	sourceScheme, sourcePath := ParseURI(opts.Source)
 	_ = sourcePath //remove later

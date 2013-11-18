@@ -38,15 +38,6 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 		config.Image = config.Upstream
 	}
 
-	//Right now, go-flags' default announation does not appear to work when in a sub-command.
-	//	Will investigate and hopefully remove this later.
-	if opts.Source == "" {
-		opts.Source = "graph"
-	}
-	if opts.Destination == "" {
-		opts.Destination = "graph"
-	}
-
 	//Parse input/output URIs
 	sourceScheme, sourcePath           := ParseURI(opts.Source)
 	destinationScheme, destinationPath := ParseURI(opts.Destination)

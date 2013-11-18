@@ -54,13 +54,22 @@ func init() {
 		"run",
 		"Run a container",
 		"Run a container based on configuration in the current directory.",
-		&RunCmdOpts{},
+
+		//Default settings
+		&RunCmdOpts{
+			Source:      "graph",
+		},
 	)
 	parser.AddCommand(
 		"build",
 		"Transform a container",
 		"Transform a container based on configuration in the current directory.",
-		&BuildCmdOpts{},
+
+		//Default settings
+		&BuildCmdOpts{
+			Source:      "graph",
+			Destination: "graph",
+		},
 	)
 	parser.AddCommand(
 		"version",
