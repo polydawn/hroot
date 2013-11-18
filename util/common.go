@@ -48,7 +48,13 @@ func ParseURI(input string) (string, string) {
 
 	//Check that the scheme name is one we support
 	switch scheme {
-		case "graph", "file", "docker", "index": //pass
+		case "docker", "index": //pass
+		case "graph", "file": //sanitize paths
+			path, err := SanePath(path)
+			if err {
+				Println("Could not sanitize path: " + path)
+				os.Exit(1)
+			}
 		case "":
 			Println("Command source/destination is empty; must be one of (graph, file, docker, index)")
 			os.Exit(1)
