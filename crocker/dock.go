@@ -140,11 +140,11 @@ func (dock *Dock) awaitSocket(patience time.Duration) error {
 	return fmt.Errorf("timeout waiting for docker socket")
 }
 
-func (dock Dock) Dir() string {
+func (dock *Dock) Dir() string {
 	return dock.dir
 }
 
-func (dock Dock) IsChildProcess() bool {
+func (dock *Dock) IsChildProcess() bool {
 	return dock.isMine
 }
 
