@@ -69,6 +69,9 @@ func NewGraph(dir string) *Graph {
 	g.cmd("commit", "--allow-empty", "-mdocket")()
 	g.cmd("checkout", "-b", "docket/init")()
 
+	// discard master branch.  a docket graph has no real use for it.
+	g.cmd("branch", "-D", "master")()
+
 	// should be good to go
 	return g
 }
