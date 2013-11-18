@@ -51,7 +51,7 @@ func ParseURI(input string) (string, string) {
 		case "docker", "index": //pass
 		case "graph", "file": //sanitize paths
 			path, err := SanePath(path)
-			if err {
+			if err != nil {
 				Println("Could not sanitize path: " + path)
 				os.Exit(1)
 			}
