@@ -60,6 +60,7 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 		case "graph":
 			//Look up the graph, and clear any unwanted state
 			sourceGraph = dex.NewGraph(settings.Graph)
+			Println("Opening source repository", sourceGraph.GetDir())
 			sourceGraph.Cleanse()
 		case "file":
 			//If the user did not specify an image path, set one
@@ -81,6 +82,7 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 
 			//Cleanse the graph unless it'd be redundant.
 			if !(sourceScheme == "graph" && sourceGraph.GetDir() == destinationGraph.GetDir()) {
+				Println("Opening destination repository", destinationGraph.GetDir())
 				destinationGraph.Cleanse()
 			}
 		case "file":
