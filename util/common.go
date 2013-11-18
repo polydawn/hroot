@@ -73,9 +73,3 @@ func StartDocker(settings *confl.ConfigLoad) *crocker.Dock {
 
 	return dock
 }
-
-//Helper function: maps a TrionConfig struct to crocker function.
-//Kinda ugly; this situation may improve once our config shenanigans solidifies a bit.
-func Launch(dock *crocker.Dock, config *crocker.ContainerConfig) *crocker.Container {
-	return crocker.Launch(dock, config.Image, config.Command, config.Attach, config.Privileged, config.Folder, config.DNS, config.Mounts, config.Ports, config.Environment)
-}
