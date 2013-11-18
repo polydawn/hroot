@@ -31,13 +31,32 @@ func do(fn func()) {
 	fn()
 }
 
-func TestNoGraphLoading(t *testing.T) {
+func TestLoadGraphAbsentIsNil(t *testing.T) {
 	do(func() {
 		assert := assrt.NewAssert(t)
 
+		assert.Nil(LoadGraph("."))
+
+		assert.Nil(LoadGraph("notadir"))
+	})
+}
+
+func TestNewGraphInit(t *testing.T) {
+	do(func() {
+		assert := assrt.NewAssert(t)
+
+		g := NewGraph(".")
+
+		assert.NotNil(g)
+
+		gstat, _ := os.Stat(".git")
+		assert.True(gstat.IsDir())
+
+		assert.True(g.HasBranch("docket/init"))
+
 		assert.Equal(
-			nil,
-			nil,
+			"",
+			g.cmd("ls-tree")("HEAD").Output(),
 		)
 	})
 }
