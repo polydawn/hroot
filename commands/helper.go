@@ -125,7 +125,15 @@ func (d *Docket) PrepareOutput() error {
 
 //Starts the docker daemon
 func (d *Docket) StartDocker() {
-	d.dock = StartDocker(d.settings)
+	d.dock = crocker.NewDock(d.settings.Dock)
+
+	//Announce the docker
+	if d.dock.IsChildProcess() {
+		Println("Started a docker in", d.dock.Dir())
+	} else {
+		Println("Connecting to docker", d.dock.Dir())
+	}
+
 }
 
 //Behavior when docker cache has the image

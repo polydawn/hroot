@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"polydawn.net/docket/confl"
-	"polydawn.net/docket/crocker"
 )
 
 //Return the absolute path and evaluate for symlinks.
@@ -64,18 +62,4 @@ func ParseURI(input string) (string, string) {
 	}
 
 	return scheme, path
-}
-
-//Find or start a docker
-func StartDocker(settings *confl.ConfigLoad) *crocker.Dock {
-	dock := crocker.NewDock(settings.Dock)
-
-	//Announce the docker
-	if dock.IsChildProcess() {
-		Println("Started a docker in", dock.Dir())
-	} else {
-		Println("Connecting to docker", dock.Dir())
-	}
-
-	return dock
 }
