@@ -1,73 +1,15 @@
 package confl
 
 import (
-	. "fmt"
-	"io/ioutil"
-	"path/filepath"
-	"strings"
-	"github.com/BurntSushi/toml"
-	"polydawn.net/docket/crocker"
-	. "polydawn.net/docket/util"
+	// "path/filepath"
+	// "strings"
+	// . "polydawn.net/docket/util"
 )
-
-//Hold the metadata
-type ConfigLoad struct {
-	configs []ContainerConfigs
-	metas   []toml.MetaData
-	Dock    string
-	Graph   string
-}
-
-//Target name > configration mapping (used in the 'docker.toml' config files)
-type ContainerConfigs map[string]crocker.ContainerConfig
-
-const ConfigFileName = "docker.toml"
-const DefaultTarget  = "default"
-const DockFolder     = "dock"
-const GraphFolder    = "graph"
-
-//Recursively finds configuration files & folders
-func NewConfigLoad(dir string) *ConfigLoad {
-	load := &ConfigLoad{
-		Dock:  dir + "/" + DockFolder,
-		Graph: dir + "/" + GraphFolder,
-	}
-
-	//Recurse up the file tree looking for configuration
-	for {
-		buf, err := ioutil.ReadFile(dir + "/" + ConfigFileName)
-
-		if err != nil {
-			break
-		} else {
-			//Parse file, store in slices
-			config, metadata := loadToml(string(buf), dir)
-			load.configs = append(load.configs, config)
-			load.metas   = append(load.metas,   metadata)
-
-			//Check for folders
-			if _, err = ioutil.ReadDir(dir + "/" + DockFolder) ; err == nil {
-				load.Dock = dir + "/" + DockFolder
-			}
-			if _, err = ioutil.ReadDir(dir + "/" + GraphFolder) ; err == nil {
-				load.Graph = dir + "/" + GraphFolder
-			}
-
-			dir = "../" + dir
-		}
-	}
-
-	if n := len(load.configs); n > 0 {
-		Println("Loaded", n, "config files.")
-	}
-
-	return load
-}
-
+/*
 //Extract a configuration target from loaded settings.
 //Each config will override the one after it.
-func (cs *ConfigLoad) GetConfig(target string) *crocker.ContainerConfig {
-	config := crocker.DefaultContainerConfig
+func (cs *ConfigFile) GetConfig(target string) *Settings {
+	config := DefaultSettings
 
 	//For each config
 	for i := len(cs.configs) - 1; i >= 0; i-- {
@@ -88,29 +30,9 @@ func (cs *ConfigLoad) GetConfig(target string) *crocker.ContainerConfig {
 	return &config
 }
 
-//Return the default image name (convenience function)
-func (cs *ConfigLoad) GetDefaultImage() string {
-	return cs.GetConfig(DefaultTarget).Image
-}
-
-func loadToml(data, dir string) (ContainerConfigs, toml.MetaData) {
-	//Decode the file
-	var set ContainerConfigs
-	md, err := toml.Decode(data, &set)
-
-	//Check for errors
-	if err != nil { ExitGently("Could not decode file in ", dir, err.Error()) }
-
-	//Prepare all targets
-	for _, conf := range set {
-		preprocess(&conf, dir)
-	}
-
-	return set, md
-}
 
 //Preprocess a configuration object
-func preprocess(c *crocker.ContainerConfig, dir string) {
+func preprocess(c *Settings, dir string) {
 	//Get the absolute directory this config is relative to
 	cwd, err := filepath.Abs(dir)
 	if err != nil { ExitGently("Cannot determine absolute path: ", dir) }
@@ -131,19 +53,7 @@ func preprocess(c *crocker.ContainerConfig, dir string) {
 }
 
 //Loads a configuration object, overriding the base
-func addConfig(base *crocker.ContainerConfig, inc crocker.ContainerConfig, meta toml.MetaData, target string) {
-
-	if meta.IsDefined(target, "image") {
-		base.Image = inc.Image
-	}
-
-	if meta.IsDefined(target, "upstream") {
-		base.Upstream = inc.Upstream
-	}
-
-	if meta.IsDefined(target, "index") {
-		base.Index = inc.Index
-	}
+func addConfig(base *Settings, inc Settings, meta toml.MetaData, target string) {
 
 	if meta.IsDefined(target, "command") {
 		base.Command = inc.Command
@@ -181,3 +91,4 @@ func addConfig(base *crocker.ContainerConfig, inc crocker.ContainerConfig, meta 
 		base.Environment = append(base.Environment, inc.Environment...)
 	}
 }
+*/

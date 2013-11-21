@@ -16,15 +16,17 @@ const DefaultBuildTarget = "build"
 func (opts *BuildCmdOpts) Execute(args []string) error {
 	//Load settings
 	docket := LoadDocket(args, DefaultBuildTarget, opts.Source, opts.Destination)
-	docket.image = docket.config.Upstream //We're building; launch upstream image
-	Println("Building from", docket.config.Upstream, "to", docket.config.Image)
+
+	//We're building; launch upstream image
+	docket.launchImage = docket.image.Upstream
+	Println("Building from", docket.image.Upstream, "to", docket.image.Name)
 
 	//If desired, set the command to /bin/true and do not modify destination image name
 	//We'd love to not launch the container at all, but docker's export is completely broken.
 	// 'docker export ubuntu' --> 'Error: No such container: ubuntu' --> :(
 	if opts.NoOp {
-		docket.config.Command = []string{ "/bin/true" }
-		docket.config.Image = docket.config.Upstream
+		docket.settings.Command = []string{ "/bin/true" }
+		docket.image.Name = docket.image.Upstream
 	}
 
 	//Prepare source & destination

@@ -14,7 +14,7 @@ const DefaultRunTarget = "default"
 func (opts *RunCmdOpts) Execute(args []string) error {
 	//Load settings
 	docket := LoadDocket(args, DefaultRunTarget, opts.Source, "")
-	Println("Running", docket.config.Image)
+	Println("Running", docket.image.Name)
 	docket.PrepareInput()
 
 	//Start or connect to a docker daemon
