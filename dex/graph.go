@@ -77,8 +77,7 @@ func NewGraph(dir string) *Graph {
 }
 
 func newGraph(dir string) *Graph {
-	dir, err := util.SanePath(dir)
-	if err != nil { panic(err); }
+	dir = util.SanePath(dir)
 
 	// optimistically, set up the struct.
 	// we still need to either verify or initalize git here.

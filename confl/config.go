@@ -2,12 +2,12 @@ package confl
 
 import (
 	. "fmt"
-	"github.com/BurntSushi/toml"
 	"io/ioutil"
-	"os"
 	"path/filepath"
-	"polydawn.net/docket/crocker"
 	"strings"
+	"github.com/BurntSushi/toml"
+	"polydawn.net/docket/crocker"
+	. "polydawn.net/docket/util"
 )
 
 //Hold the metadata
@@ -99,10 +99,7 @@ func loadToml(data, dir string) (ContainerConfigs, toml.MetaData) {
 	md, err := toml.Decode(data, &set)
 
 	//Check for errors
-	if err != nil {
-		Println("Fatal: could not decode file in ", dir, err)
-		os.Exit(1)
-	}
+	if err != nil { ExitGently("Could not decode file in ", dir, err.Error()) }
 
 	//Prepare all targets
 	for _, conf := range set {
@@ -116,10 +113,7 @@ func loadToml(data, dir string) (ContainerConfigs, toml.MetaData) {
 func preprocess(c *crocker.ContainerConfig, dir string) {
 	//Get the absolute directory this config is relative to
 	cwd, err := filepath.Abs(dir)
-	if err != nil {
-		Println("Fatal: Cannot determine absolute path:", dir)
-		os.Exit(1)
-	}
+	if err != nil { ExitGently("Cannot determine absolute path: ", dir) }
 
 	//Handle mounts
 	for i := range c.Mounts {
@@ -131,10 +125,7 @@ func preprocess(c *crocker.ContainerConfig, dir string) {
 
 		//Find the absolute path for each host mount
 		abs, err := filepath.Abs(c.Mounts[i][0])
-		if err != nil {
-			Println("Fatal: Cannot determine absolute path:", c.Mounts[i][0])
-			os.Exit(1)
-		}
+		if err != nil { ExitGently("Cannot determine absolute path:", c.Mounts[i][0]) }
 		c.Mounts[i][0] = abs
 	}
 }

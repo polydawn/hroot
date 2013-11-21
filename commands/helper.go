@@ -94,7 +94,7 @@ func (d *Docket) PrepareInput() {
 }
 
 //Prepare the docket output
-func (d *Docket) PrepareOutput() error {
+func (d *Docket) PrepareOutput() {
 	switch d.dest.scheme {
 		case "graph":
 			//Look up the graph, and clear any unwanted state
@@ -114,13 +114,11 @@ func (d *Docket) PrepareOutput() error {
 			//If the user is insane and wants to overwrite his source tar, stop him.
 			//	Not at all robust (absolute paths? what are those? etc)
 			if d.source.scheme == "file" && d.source.path == d.dest.path {
-				return Errorf("Tar location is same for source and destination: " + d.source.path)
+				ExitGently("Tar location is same for source and destination:", d.source.path)
 			}
 		case "index":
-			return Errorf("Destination " + d.dest.scheme + " is not supported yet.")
+			ExitGently("Destination", d.dest.scheme, "is not supported yet.")
 	}
-
-	return nil
 }
 
 //Starts the docker daemon
@@ -159,17 +157,17 @@ func (d *Docket) prepareCacheWithImage() {
 }
 
 //Behavior when docker cache doesn't have the image
-func (d *Docket) prepareCacheWithoutImage() error {
+func (d *Docket) prepareCacheWithoutImage() {
 	image := d.config.Image
 
 	switch d.source.scheme {
 		case "docker":
 			//Can't continue; specified docker as source and it doesn't have it
-			return Errorf("Docker does not have " + image + " loaded.")
+			ExitGently("Docker does not have", image, "loaded.")
 		case "graph":
 			//Check if the image is in the graph
 			if !d.source.graph.HasBranch(image) {
-				return Errorf("Image branch name " + image + " not found in graph.")
+				ExitGently("Image branch name", image, "not found in graph.")
 			}
 
 			//Pipe for I/O, and a waitgroup to make async action blocking
@@ -185,24 +183,19 @@ func (d *Docket) prepareCacheWithoutImage() error {
 
 			//Run the guitar import
 			err := stream.ImportFromFilesystem(importWriter, d.source.graph.GetDir())
-			if err != nil {
-				return Errorf("Import from graph failed: " + err.Error())
-			}
+			if err != nil { ExitGently("Import from graph failed:", err) }
 
 			wait.Wait() //Block on our gofunc
 	}
-
-	return nil
 }
 
 //Prepare the docker cache
-func (d *Docket) PrepareCache() error {
+func (d *Docket) PrepareCache() {
 	//Behavior based on if the docker cache already has an image
 	if d.dock.CheckCache(d.config.Image) {
 		d.prepareCacheWithImage()
 	} else {
-		err := d.prepareCacheWithoutImage()
-		if err != nil { return err }
+		d.prepareCacheWithoutImage()
 	}
 
 	//Now that's taken care of, normal behavior
@@ -212,8 +205,6 @@ func (d *Docket) PrepareCache() error {
 		case "index":
 			d.dock.Pull(d.config.Index) //Download from index
 	}
-
-	return nil
 }
 
 //Lanuch the container and wait for it to complete

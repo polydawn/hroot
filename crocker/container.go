@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	. "polydawn.net/pogo/gosh"
+	. "polydawn.net/docket/util"
 )
 
 /*
@@ -120,9 +121,7 @@ func (c *Container) Commit(name, tag string) {
 */
 func (c *Container) ExportToFilename(path string) {
 	out, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
-	if err != nil {
-		panic(err)
-	}
+	if err != nil { ExitGently(err) }
 
 	c.Export(out)
 }

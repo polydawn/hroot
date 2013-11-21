@@ -1,5 +1,9 @@
 package util
 
+import (
+	. "fmt"
+)
+
 //Errors
 
 type DocketError struct {
@@ -18,6 +22,6 @@ func (err DocketError) Error() string {
 }
 
 //Sugar
-func PanicString(msg string) {
-	panic(DocketError{message: msg})
+func ExitGently(a ...interface{}) {
+	panic(DocketError{message: Sprint(a)})
 }

@@ -4,11 +4,10 @@ package crocker
 
 import (
 	"encoding/json"
-	. "fmt"
 	"net"
 	"net/http/httputil"
-	"os"
 	"strings"
+	. "polydawn.net/docket/util"
 )
 
 // Engage chevrons
@@ -20,12 +19,10 @@ func (dock *Dock) Dial() {
 	// Error handling stolen directly from docker
 	if err != nil {
 		if strings.Contains(err.Error(), "connection refused") {
-			Println("Can't connect to docker daemon. Is 'docker -d' running on this host?")
+			ExitGently("Can't connect to docker daemon. Is 'docker -d' running on this host?")
 		} else {
-			Println("Connection Error:", err.Error())
+			ExitGently("Connection Error:", err.Error())
 		}
-
-		os.Exit(1)
 	}
 
 	dock.sock = httputil.NewClientConn(dial, nil)
@@ -40,10 +37,7 @@ func (dock *Dock) CheckCache(image string) bool {
 	//API call
 	data, _ := call(dock.sock, "GET", "/images/json", nil)
 	err := json.Unmarshal(data, &images)
-	if err != nil {
-		Println("Docker API error:", err.Error())
-		os.Exit(1)
-	}
+	if err != nil { ExitGently("Docker API error:", err.Error()) }
 
 	//Check if docker has image & tag
 	for _, cur := range images {

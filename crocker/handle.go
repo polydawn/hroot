@@ -3,11 +3,10 @@
 package crocker
 
 import (
-	. "fmt"
 	"io/ioutil"
-	"os"
 	"strings"
 	"time"
+	. "polydawn.net/docket/util"
 )
 
 //Where to place & call CIDfiles
@@ -21,17 +20,11 @@ const DefaultTag = "latest"
 func CreateCIDfile() string {
 	//Create a temporary file
 	CIDfileFD, err := ioutil.TempFile(TempDir, TempPrefix)
-	if err != nil {
-		Println("Error: could not create cidfile in", TempDir)
-		os.Exit(1)
-	}
+	if err != nil { ExitGently("Error: could not create cidfile in", TempDir) }
 
 	//Stat the file to get the name. Yes, this is dumb.
 	info, err := CIDfileFD.Stat()
-	if err != nil {
-		Println("Error: could not stat cidfile.")
-		os.Exit(1)
-	}
+	if err != nil { ExitGently("Error: could not stat cidfile.") }
 
 	//Release the file descriptor. This *has to happen* so docker can write to it. Yes, it is a little sad.
 	CIDfileFD.Close()
@@ -54,8 +47,7 @@ func PollCid(filename string) chan string {
 			time.Sleep(100 * time.Millisecond)
 		}
 
-		Println("Error: could not read cidfile", filename)
-		os.Exit(1)
+		ExitGently("Error: could not read cidfile", filename)
 	}()
 
 	return getCID

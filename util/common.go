@@ -1,25 +1,23 @@
 package util
 
 import (
-	. "fmt"
-	"os"
 	"path/filepath"
 	"strings"
 )
 
 //Return the absolute path and evaluate for symlinks.
 //Where we should call this (rather than just .Abs) is debatable.
-func SanePath(loc string) (string, error) {
+func SanePath(loc string) string {
 	//Get absolute representation and clean
 	loc, error := filepath.Abs(loc)
-	if error != nil { return loc, error }
+	if error != nil { ExitGently(error) }
 
 	//Check that the directory exists, remove symlinks from path
 	dir, base := filepath.Dir(loc), filepath.Base(loc)
 	dir, error = filepath.EvalSymlinks(dir)
-	if error != nil { return dir, error}
+	if error != nil { ExitGently(error) }
 
-	return filepath.Join(dir, base), nil
+	return filepath.Join(dir, base)
 }
 
 //If the user specified a target, use that, else use the command's default target
@@ -48,17 +46,11 @@ func ParseURI(input string) (string, string) {
 	switch scheme {
 		case "docker", "index": //pass
 		case "graph", "file": //sanitize paths
-			path, err := SanePath(path)
-			if err != nil {
-				Println("Could not sanitize path: " + path)
-				os.Exit(1)
-			}
+			path = SanePath(path)
 		case "":
-			Println("Command source/destination is empty; must be one of (graph, file, docker, index)")
-			os.Exit(1)
+			ExitGently("Command source/destination is empty; must be one of (graph, file, docker, index)")
 		default:
-			Println("Unrecognized scheme '" + scheme + "': must be one of (graph, file, docker, index)")
-			os.Exit(1)
+			ExitGently("Unrecognized scheme '" + scheme + "': must be one of (graph, file, docker, index)")
 	}
 
 	return scheme, path
