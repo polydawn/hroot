@@ -1,8 +1,11 @@
 # Docket
 
-Docket makes [Docker](https://www.docker.io/) easy.
+Docket provides transports for [Docker](https://www.docker.io/) images, and straightforward configuration files because launching should be one word.
 
-Use straightforward configuration files & git to construct, version, and distribute docker images.
+With Docket, Docker's image storage is treated like a cache, and Docket manages your image storage and labeling.
+Docket then does the real image management with git as a backend, which gives you unlimited history, strong hashes to verify the integrity of your images, commit messages, and effortless secure transport over all the transports git supports.
+Docket also supports tars and the mainstream Docker http repositories, allowing you to freely use the most appropriate strategy for your situation.
+
 
 ## Quickstart
 
@@ -23,6 +26,7 @@ docket run bash
 ```
 
 Now you've got a git repository tracking ubuntu!
+
 
 ## How do I use it?
 
@@ -65,6 +69,7 @@ Configuration is split into targets, so changing from debug to production is a b
 
 This makes it easy to load & save images in a variety of ways.
 
+
 ## Building from source
 
 To build Docket, you will need Go 1.1 or newer.
@@ -81,12 +86,13 @@ Clone down Docket & throw it on your path:
 git clone https://github.com/polydawn/docket && cd docket
 git submodule update --init
 
-./build.sh
+./goad build
 sudo cp docket/docket /usr/bin/docket
 ```
 
 Now you're ready to rock & roll.
 Lots of examples are available over at [Boxen](https://github.com/polydawn/boxen)!
+
 
 ## Installing Docker
 
