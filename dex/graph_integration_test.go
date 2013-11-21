@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"strings"
 	"github.com/coocood/assrt"
 )
 
@@ -93,3 +94,90 @@ func TestNewGraphInitRejectedOnDeeper(t *testing.T) {
 		NewGraph("deep/deeper")
 	})
 }
+
+func fwriteSetA(pth string) {
+	// file 'a' is just ascii text
+	if err := ioutil.WriteFile(
+		filepath.Join(pth, "a"),
+		[]byte{ 'a', 'b' },
+		0644,
+	); err != nil { panic(err); }
+
+	// file 'b' is a secret
+	if err := ioutil.WriteFile(
+		filepath.Join(pth, "b"),
+		[]byte{ 0x1, 0x2, 0x3 },
+		0640,
+	); err != nil { panic(err); }
+
+	// file 'd/d/d' is so dddeep
+	//TODO
+}
+
+func fwriteSetB(pth string) {
+	// file 'a' is unchanged
+	if err := ioutil.WriteFile(
+		filepath.Join(pth, "a"),
+		[]byte{ 'a', 'b' },
+		0644,
+	); err != nil { panic(err); }
+
+	// file 'b' is removed
+	//TODO
+
+	// add an executable file
+	//TODO
+
+	// file 'd/d/d' is renamed to 'd/e' and 'd/d' dropped
+	//TODO
+}
+
+func TestNewOrphanLineage(t *testing.T) {
+	do(func() {
+		assert := assrt.NewAssert(t)
+
+		g := NewGraph(".")
+		lineage := "line"
+		ancestor := ""
+
+		g.PreparePublish(lineage, ancestor)
+
+		fwriteSetA(g.GetDir())
+
+		g.Publish(lineage, ancestor)
+
+		assert.Equal(
+			2,
+			strings.Count(
+				g.cmd("ls-tree", "refs/heads/"+lineage).Output(),
+				"\n",
+			),
+		)
+	})
+}
+
+// func TestCleanBeforeNewLineage(t *testing.T) {
+
+// func TestLinearExtensionToLineage(t *testing.T) {
+// 	do(func() {
+// 		assert := assrt.NewAssert(t)
+
+// 		//TODO
+// 	})
+// }
+
+// func TestNewDerivedLineage(t *testing.T) {
+// 	do(func() {
+// 		assert := assrt.NewAssert(t)
+
+// 		//TODO
+// 	})
+// }
+
+// func TestDerivativeExtensionToLineage(t *testing.T) {
+// 	do(func() {
+// 		assert := assrt.NewAssert(t)
+
+// 		//TODO
+// 	})
+// }

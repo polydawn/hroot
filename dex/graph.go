@@ -124,8 +124,11 @@ func (g *Graph) PreparePublish(lineage string, ancestor string) {
 	ancestor, _ = SplitImageName(ancestor)
 
 	if strings.Count(g.cmd("branch", "--list", lineage).Output(), "\n") < 1 {
-		//Memo("this is a new lineage!")
-		g.cmd("checkout", "-b", lineage)()
+		if ancestor == "" {
+			g.cmd("checkout", "--orphan", lineage)()	//TODO: docket/image/
+		} else {
+			g.cmd("checkout", "-b", lineage)()	//TODO: docket/image/
+		}
 		g.cmd("rm", "*")
 	} else {
 		g.cmd("checkout", lineage)()
@@ -151,11 +154,15 @@ func (g *Graph) forceMerge(source string, target string) {
 	writeTree := g.cmd("write-tree").Output()
 	writeTree = strings.Trim(writeTree, "\n")
 	commitMsg := fmt.Sprintf("updated %s<<%s", target, source)
-	mergeTree := g.cmd("commit-tree", writeTree, "-p", source, "-p", target, Opts{In: commitMsg}).Output()
-	mergeTree = strings.Trim(mergeTree, "\n")
+	commitTreeCmd := g.cmd("commit-tree", writeTree, Opts{In: commitMsg})
+	if source != "" {
+		commitTreeCmd = commitTreeCmd("-p", source, "-p", target)
+	}
+	mergeTree := strings.Trim(commitTreeCmd.Output(), "\n")
 	g.cmd("merge", "-q", mergeTree)()
 }
 
+// FIXME: this function is essentially dead, since the rest of the program is now using guitar, and guitar is kind of unabashed about writing to the filesystem.
 /*
 Returns a read stream for the requested image.  Internally, the commit that the "lineage" branch ref
 currently points to is opened and "image.tar" is read from.
