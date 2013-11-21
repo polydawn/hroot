@@ -58,7 +58,8 @@ func NewGraph(dir string) *Graph {
 	}
 	g = newGraph(dir)
 
-	// if the path to this doesn't exist yet, it will now.
+	// we'll make exactly one new dir if the path doesn't exist yet.  more is probably argument error and we abort.
+	// this is actually implemented via MkdirAll here (because Mkdir errors on existing, and I can't be arsed) and letting the SaneDir check earlier blow up if we're way out.
 	err := os.MkdirAll(g.dir, 0755)
 	if err != nil { panic(err); }
 

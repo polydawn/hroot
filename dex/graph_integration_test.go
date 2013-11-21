@@ -3,6 +3,7 @@ package dex
 // Very nearly all testing for dex is integration testing, sadly; this is inevitable since we're relying on exec to use git.
 
 import (
+	"path/filepath"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -41,22 +42,54 @@ func TestLoadGraphAbsentIsNil(t *testing.T) {
 	})
 }
 
+func assertLegitGraph(assert *assrt.Assert, g *Graph) {
+	assert.NotNil(g)
+
+	gstat, _ := os.Stat(filepath.Join(g.dir,".git"))
+	assert.True(gstat.IsDir())
+
+	assert.True(g.HasBranch("docket/init"))
+
+	assert.Equal(
+		"",
+		g.cmd("ls-tree")("HEAD").Output(),
+	)
+}
+
 func TestNewGraphInit(t *testing.T) {
+	do(func() {
+		assertLegitGraph(
+			assrt.NewAssert(t),
+			NewGraph("."),
+		)
+	})
+}
+
+func TestLoadGraphEmpty(t *testing.T) {
 	do(func() {
 		assert := assrt.NewAssert(t)
 
-		g := NewGraph(".")
+		NewGraph(".")
 
-		assert.NotNil(g)
+		assertLegitGraph(assert, LoadGraph("."))
+	})
+}
 
-		gstat, _ := os.Stat(".git")
-		assert.True(gstat.IsDir())
-
-		assert.True(g.HasBranch("docket/init"))
-
-		assert.Equal(
-			"",
-			g.cmd("ls-tree")("HEAD").Output(),
+func TestNewGraphInitNewDir(t *testing.T) {
+	do(func() {
+		assertLegitGraph(
+			assrt.NewAssert(t),
+			NewGraph("deep"),
 		)
+	})
+}
+
+func TestNewGraphInitRejectedOnDeeper(t *testing.T) {
+	do(func() {
+		defer func() {
+			err := recover()
+			if err == nil { t.Fail(); }
+		}()
+		NewGraph("deep/deeper")
 	})
 }
