@@ -1,4 +1,4 @@
-package confl
+package conf
 
 // The only file that imports toml.
 // Keeps our chosen file format isolated from the rest of the system.

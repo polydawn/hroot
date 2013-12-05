@@ -13,7 +13,7 @@ packages=()
 packages+=("$prefix/crocker")
 packages+=("$prefix/dex")
 packages+=("$prefix/util")
-packages+=("$prefix/confl")
+packages+=("$prefix/conf")
 
 
 

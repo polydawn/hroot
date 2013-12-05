@@ -1,4 +1,5 @@
-package confl
+package conf
+
 import (
 	"io/ioutil"
 	"path/filepath"

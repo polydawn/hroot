@@ -1,4 +1,4 @@
-package confl
+package conf
 
 import (
 	"strings"

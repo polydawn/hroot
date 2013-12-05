@@ -7,7 +7,7 @@ import (
 	"io"
 	"sync"
 	"time"
-	"polydawn.net/docket/confl"
+	"polydawn.net/docket/conf"
 	"polydawn.net/docket/crocker"
 	"polydawn.net/docket/dex"
 	. "polydawn.net/docket/util"
@@ -34,9 +34,9 @@ type Docket struct {
 	container *crocker.Container
 
 	//Configuration
-	folders  confl.Folders
-	image    confl.Image
-	settings confl.Container
+	folders  conf.Folders
+	image    conf.Image
+	settings conf.Container
 	launchImage     string //Stored separately so we don't modify config if needed later for export.
 }
 
@@ -46,10 +46,10 @@ func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Docket
 	target   := GetTarget(args, defaultTarget)
 
 	//Load toml parser
-	parser := &confl.TomlConfigParser{}
+	parser := &conf.TomlConfigParser{}
 
 	//Parse config file
-	configuration, folders := confl.LoadConfigurationFromDisk(".", parser)
+	configuration, folders := conf.LoadConfigurationFromDisk(".", parser)
 	config := configuration.GetTargetContainer(target)
 
 	//Docket struct
