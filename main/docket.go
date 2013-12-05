@@ -21,7 +21,7 @@ func panicHandler() {
 		if err := recover(); err != nil {
 
 			if dockErr, ok := err.(DocketError) ; ok {
-				Println(dockErr.Error())
+				Print(dockErr.Error())
 				os.Exit(EXIT_BAD_USER)
 			} else {
 				Println(err)

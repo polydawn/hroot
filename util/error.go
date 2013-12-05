@@ -23,5 +23,5 @@ func (err DocketError) Error() string {
 
 //Sugar
 func ExitGently(a ...interface{}) {
-	panic(DocketError{message: Sprint(a)})
+	panic(DocketError{message: Sprintln(a...)})
 }
