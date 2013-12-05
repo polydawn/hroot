@@ -72,11 +72,11 @@ This makes it easy to load & save images in a variety of ways.
 
 ## Building from source
 
-To build Docket, you will need Go 1.1 or newer.
+To build Docket, you will need Go 1.1 or newer. We're using Go 1.2.
 Following the [golang instructions](http://golang.org/doc/install#bsd_linux) for 64-bit linux:
 
 ```bash
-curl https://go.googlecode.com/files/go1.1.2.linux-amd64.tar.gz -o golang.tar.gz
+curl https://go.googlecode.com/files/go1.2.linux-amd64.tar.gz -o golang.tar.gz
 sudo tar -C /usr/local -xzf golang.tar.gz
 export PATH=$PATH:/usr/local/go/bin # Add this to /etc/profile or similar
 ```
@@ -97,8 +97,8 @@ Lots of examples are available over at [Boxen](https://github.com/polydawn/boxen
 ## Installing Docker
 
 Docket uses [Docker](https://www.docker.io/), an excellent container helper based on LXC.
-This gives Docket all that containerization mojo.
-On Ubuntu 13.04, using the latest packaged installation (0.6.x) works fine. From their [instructions](http://docs.docker.io/en/latest/installation/ubuntulinux/):
+This gives Docket all that containerization mojo. We're using Docker 0.6.3 right now.
+From their [instructions](http://docs.docker.io/en/latest/installation/ubuntulinux/) for Ubuntu 13.04:
 
 ```bash
 sudo apt-get update
