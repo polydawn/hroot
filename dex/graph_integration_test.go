@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
-	"strings"
 	"github.com/coocood/assrt"
 )
 
@@ -74,14 +73,14 @@ func TestNewGraphInitRejectedOnDeeper(t *testing.T) {
 }
 
 func fwriteSetA(pth string) {
-	// file 'a' is just ascii text
+	// file 'a' is just ascii text with normal permissions
 	if err := ioutil.WriteFile(
 		filepath.Join(pth, "a"),
 		[]byte{ 'a', 'b' },
 		0644,
 	); err != nil { panic(err); }
 
-	// file 'b' is a secret
+	// file 'b' is binary with unusual permissions
 	if err := ioutil.WriteFile(
 		filepath.Join(pth, "b"),
 		[]byte{ 0x1, 0x2, 0x3 },
@@ -101,38 +100,40 @@ func fwriteSetB(pth string) {
 	); err != nil { panic(err); }
 
 	// file 'b' is removed
-	//TODO
+	// (you're just expected to have nuked the working tree before calling this)
 
 	// add an executable file
 	//TODO
+
+	// all of this is horseshit, and what you're really going to do is make a tar stream programatically, because that's the input guitar understands.
 
 	// file 'd/d/d' is renamed to 'd/e' and 'd/d' dropped
 	//TODO
 }
 
-func TestNewOrphanLineage(t *testing.T) {
-	do(func() {
-		assert := assrt.NewAssert(t)
+// func TestNewOrphanLineage(t *testing.T) {
+// 	do(func() {
+// 		assert := assrt.NewAssert(t)
 
-		g := NewGraph(".")
-		lineage := "line"
-		ancestor := ""
+// 		g := NewGraph(".")
+// 		lineage := "line"
+// 		ancestor := ""
 
-		g.PreparePublish(lineage, ancestor)
+// 		g.PreparePublish(lineage, ancestor)
 
-		fwriteSetA(g.GetDir())
+// 		fwriteSetA(g.GetDir())
 
-		g.Publish(lineage, ancestor)
+// 		g.Publish(lineage, ancestor)
 
-		assert.Equal(
-			2,
-			strings.Count(
-				g.cmd("ls-tree", "refs/heads/"+lineage).Output(),
-				"\n",
-			),
-		)
-	})
-}
+// 		assert.Equal(
+// 			2,
+// 			strings.Count(
+// 				g.cmd("ls-tree", "refs/heads/"+lineage).Output(),
+// 				"\n",
+// 			),
+// 		)
+// 	})
+// }
 
 // func TestCleanBeforeNewLineage(t *testing.T) {
 

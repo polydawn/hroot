@@ -2,7 +2,6 @@ package dex
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -142,54 +141,56 @@ func (g *Graph) withTempTree(fn func(cmd Command)) {
 	fn(gt)
 }
 
-/*
-
-*/
-func (g *Graph) GetDir() string {
-	return g.dir
-}
-
-/*
-Wipes uncommitted changes in the git working tree.
-*/
-func (g *Graph) Cleanse() {
-	g.cmd("reset")()
-	g.cmd("reset", "--hard")()
-	g.cmd("clean", "-xfdq")()
-}
-
-// Prepares for a publish by creating a branch
-func (g *Graph) PreparePublish(lineage string, ancestor string) {
-	//Handle tags - currently, we discard them when dealing with a graph repo.
+func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (hash string) {
+	// Handle tags - currently, we discard them when dealing with a graph repo.
 	lineage, _  = SplitImageName(lineage)
 	ancestor, _ = SplitImageName(ancestor)
 
-	if strings.Count(g.cmd("branch", "--list", lineage).Output(), "\n") < 1 {
-		if ancestor == "" {
-			g.cmd("checkout", "--orphan", lineage)()	//TODO: docket/image/
+	g.withTempTree(func(cmd Command) {
+		//
+		if strings.Count(g.cmd("branch", "--list", lineage).Output(), "\n") < 1 {
+			// this is a new lineage
+			if ancestor == "" {
+				g.cmd("checkout", "--orphan", lineage)()	//TODO: docket/image/
+			} else {
+				// there's already a branch of this name; no need to create one
+			}
 		} else {
-			g.cmd("checkout", "-b", lineage)()	//TODO: docket/image/
+			// this is an existing lineage
+			//g.cmd("checkout", lineage)() //TODO: verify that we don't need to checkout here, don't think we should because of how we force merge, but add without a head might get startled
 		}
-		g.cmd("rm", "*")
-	} else {
+
+		// apply the GraphStoreRequest to unpack the fs (read from fs.tarReader, essentially)
+		gr.place(".")	//TODO: verify that a relative path here is safe, or just replace is os.Getwd again.
+
+		// exec git add, tree write, merge, commit.
+		g.cmd("add", "--all")()
+		g.forceMerge(ancestor, lineage)
+
+		hash = ""	//FIXME
+	})
+	return
+}
+
+func (g *Graph) Load(lineage string, gr *GraphLoadRequest) (hash string) {
+	lineage, _ = SplitImageName(lineage) //Handle tags
+
+	g.withTempTree(func(cmd Command) {
+		// checkout lineage
 		g.cmd("checkout", lineage)()
-	}
+
+		//TODO: tar up the fs, resulting in a tar.Reader we set fs.tarReader to
+
+		hash = ""	//FIXME
+	})
+	return
 }
 
-/*
-Commits a new image.  The "lineage" branch name will be extended by this new commit (or
-created, if it doesn't exist), and the "ancestor" branch will also be credited as a parent
-of the new commit.
-*/
-func (g *Graph) Publish(lineage string, ancestor string) {
-	//Handle tags - currently, we discard them when dealing with a graph repo.
-	lineage, _  = SplitImageName(lineage)
-	ancestor, _ = SplitImageName(ancestor)
+// having a load-by-hash:
+//   - you can't combine it with lineage, because git doesn't really know what branches are, historically speaking.
+//       - unless we decide we're committing lineage in some structured form of the commit messages, which is possible, but not sure if want.
+//       - we could traverse up from the lineage branch ref and make sure the hash is reachable from it, but more than one ref is going to be able to reach most hashes (i.e. hashes that are pd-base will be reachable from pd-nginx).
 
-	g.cmd("add", "--all")()
-	g.forceMerge(ancestor, lineage)
-	// g.cmd("show")(Opts{OkExit:[]int{0, 141}})()
-}
 
 func (g *Graph) forceMerge(source string, target string) {
 	writeTree := g.cmd("write-tree").Output()
@@ -201,21 +202,6 @@ func (g *Graph) forceMerge(source string, target string) {
 	}
 	mergeTree := strings.Trim(commitTreeCmd.Output(), "\n")
 	g.cmd("merge", "-q", mergeTree)()
-}
-
-// FIXME: this function is essentially dead, since the rest of the program is now using guitar, and guitar is kind of unabashed about writing to the filesystem.
-/*
-Returns a read stream for the requested image.  Internally, the commit that the "lineage" branch ref
-currently points to is opened and "image.tar" is read from.
-*/
-func (g *Graph) Load(lineage string) io.Reader {
-	//FIXME: entirely possible to do this without doing a `git checkout`... do so
-	lineage, _ = SplitImageName(lineage) //Handle tags
-	g.cmd("checkout", lineage)()
-
-	in, err := os.OpenFile(g.dir+"/image.tar", os.O_RDONLY, 0644)
-	if err != nil { panic(err); }
-	return in
 }
 
 //Checks if the graph has a branch.
