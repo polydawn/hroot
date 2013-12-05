@@ -1,8 +1,9 @@
 package confl
 
 import (
+	"strings"
 	"path/filepath"
-	// "github.com/BurntSushi/toml"
+	. "polydawn.net/docket/util"
 )
 
 const DockFolder     = "dock"
@@ -48,6 +49,27 @@ type Container struct {
 
 	//Env variables (each an array of strings: variable, value)
 	Environment [][]string `toml:environment`
+}
+
+//Localize a container object to a given folder
+func (c *Container) Localize(dir string) {
+	//Get the absolute directory this config is relative to
+	cwd, err := filepath.Abs(dir)
+	if err != nil { ExitGently("Cannot determine absolute path: ", dir) }
+
+	//Handle mounts
+	for i := range c.Mounts {
+
+		//Check for triple-dot ... notation, which is relative to that config's directory, not the CWD
+		if strings.Index(c.Mounts[i][0], "...") != 1 {
+			c.Mounts[i][0] = strings.Replace(c.Mounts[i][0], "...", cwd, 1)
+		}
+
+		//Find the absolute path for each host mount
+		abs, err := filepath.Abs(c.Mounts[i][0])
+		if err != nil { ExitGently("Cannot determine absolute path:", c.Mounts[i][0]) }
+		c.Mounts[i][0] = abs
+	}
 }
 
 //Default container

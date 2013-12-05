@@ -2,8 +2,6 @@ package confl
 import (
 	"io/ioutil"
 	"path/filepath"
-	// "strings"
-	// . "polydawn.net/docket/util"
 )
 
 const ConfigFileName = "docker.toml"
@@ -33,7 +31,7 @@ func LoadConfigurationFromDisk(dir string, parser ConfigParser) (*Configuration,
 		if err == nil {
 			//Check for folders
 			dockDir  := filepath.Join(dir, DockFolder)
-			graphDir := filepath.Join(dir, DockFolder)
+			graphDir := filepath.Join(dir, GraphFolder)
 
 			if _, err := ioutil.ReadDir(dockDir) ; err == nil {
 				folders.Dock = dockDir
