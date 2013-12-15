@@ -3,7 +3,9 @@ package dex
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	. "polydawn.net/pogo/gosh"
 	. "polydawn.net/docket/crocker"
 	"polydawn.net/docket/util"
@@ -64,14 +66,16 @@ func NewGraph(dir string) *Graph {
 	if err != nil { panic(err); }
 
 	// git init
-	g.cmd("init")()
+	g.cmd("init")("--bare")()
 
-	// set up basic repo to identify as graph repo
-	g.cmd("commit", "--allow-empty", "-mdocket")()
-	g.cmd("checkout", "-b", "docket/init")()
+	g.withTempTree(func (cmd Command) {
+		// set up basic repo to identify as graph repo
+		cmd("commit", "--allow-empty", "-mdocket")()
+		cmd("checkout", "-b", "docket/init")()
 
-	// discard master branch.  a docket graph has no real use for it.
-	g.cmd("branch", "-D", "master")()
+		// discard master branch.  a docket graph has no real use for it.
+		cmd("branch", "-D", "master")()
+	})
 
 	// should be good to go
 	return g
@@ -96,9 +100,46 @@ func (g *Graph) isRepoRoot() (v bool) {
 			v = false
 		}
 	}()
-	tld := g.cmd(NullIO)("rev-parse", "--show-toplevel").Output()
-	v = (tld == g.dir+"\n")
+	revp := g.cmd(NullIO)("rev-parse", "--is-bare-repository").Output()
+	v = (revp == "true\n")
 	return
+}
+
+/*
+	Creates a temporary working tree in a new directory.  Changes the cwd to that location.
+	The directory will be empty.  The directory will be removed when your function returns.
+*/
+func (g *Graph) withTempTree(fn func(cmd Command)) {
+	// ensure zone for temp trees is established
+	tmpTreeBase := filepath.Join(g.dir, "worktrees")
+	err := os.MkdirAll(tmpTreeBase, 0755)
+	if err != nil { panic(err); }
+
+	// make temp dir for tree
+	tmpdir, err := ioutil.TempDir(tmpTreeBase, "tree.")
+	if err != nil { panic(err); }
+	defer os.RemoveAll(tmpdir)
+
+	// set cwd
+	retreat, err := os.Getwd()
+	if err != nil { panic(err); }
+	defer os.Chdir(retreat)
+	err = os.Chdir(tmpdir)
+	if err != nil { panic(err); }
+
+	// construct git command template that knows what's up
+	gt := g.cmd(
+		Opts{
+			Cwd:tmpdir,
+		},
+		Env{
+			"GIT_WORK_TREE": tmpdir,
+			"GIT_DIR": g.dir,
+		},
+	)
+
+	// go time
+	fn(gt)
 }
 
 /*

@@ -24,7 +24,7 @@ func TestLoadGraphAbsentIsNil(t *testing.T) {
 func assertLegitGraph(assert *assrt.Assert, g *Graph) {
 	assert.NotNil(g)
 
-	gstat, _ := os.Stat(filepath.Join(g.dir,".git"))
+	gstat, _ := os.Stat(filepath.Join(g.dir))
 	assert.True(gstat.IsDir())
 
 	assert.True(g.HasBranch("docket/init"))

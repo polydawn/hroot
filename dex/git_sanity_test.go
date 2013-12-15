@@ -14,8 +14,6 @@ func TestGitSeparateWorkTree(t *testing.T) {
 		assert := assrt.NewAssert(t)
 		cwd, _ := os.Getwd()
 
-		// note that currently NewGraph doesn't make a bare repo.
-		// if this goes well, might change it to do that.
 		g := NewGraph("graph.git")
 
 		// override the Cwd that Graph initialized.
@@ -26,7 +24,7 @@ func TestGitSeparateWorkTree(t *testing.T) {
 			},
 			Env{
 				"GIT_WORK_TREE":"tree",
-				"GIT_DIR":"graph.git/.git/",
+				"GIT_DIR":"graph.git/",
 			},
 		)
 
@@ -55,7 +53,7 @@ func TestGitSeparateWorkTree(t *testing.T) {
 			},
 			Env{
 				"GIT_WORK_TREE":"tree2",
-				"GIT_DIR":"graph.git/.git/",
+				"GIT_DIR":"graph.git/",
 			},
 		)
 
