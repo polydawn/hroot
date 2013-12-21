@@ -113,19 +113,16 @@ func TestTomlParser(t *testing.T) {
 	f5 = `
 	# This is where you specify run targets.
 	# Targets let you take different actions with the same container.
-	[targets]
-		[bash]
-			command = [ "/bin/bash" ]
-			dns = [ "8.8.4.4" ]
+	[targets.bash]
+		command = [ "/bin/bash" ]
+		dns = [ "8.8.4.4" ]
 	`
-	conf2 := parser().
+	conf = parser().
 		AddConfig(settings + f1 + f2,      "..").
 		AddConfig(settings + f3 + f4 + f5, "." ).
 		GetConfig()
 	expect.Settings.DNS = append(expect.Settings.DNS, "8.8.4.4")
 	expect.Settings.Command = []string{ "/bin/bash" }
-	assert.Equal(1, len(conf2.Targets))
-	assert.Equal(expect.Settings, conf2.Targets["bash"])
-	// assert.Equal(expect, conf2.GetTarget("bash"))
-
+	assert.Equal(1, len(conf.Targets))
+	assert.Equal(expect.Settings, conf.Targets["bash"])
 }

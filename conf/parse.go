@@ -22,13 +22,20 @@ func (p *TomlConfigParser) AddConfig(data, dir string) ConfigParser {
 	//Parse toml, expand relative paths, and override settings
 	conf, meta := ParseString(data)
 	conf.Settings.Localize(dir)
-	LoadContainerSettings(&p.config.Settings, &conf.Settings, meta)
+	LoadContainerSettings(&p.config.Settings, &conf.Settings, meta, "settings")
 
 	//Load image names
 	p.config.Image = conf.Image
 
 	//Load any target settings
 	p.config.Targets = conf.Targets
+
+	for x := range p.config.Targets {
+		a := p.config.Settings
+		b := p.config.Targets[x]
+		LoadContainerSettings(&a, &b, meta, "targets", x)
+		p.config.Targets[x] = a
+	}
 
 	//Chain calls
 	return p
@@ -53,44 +60,43 @@ func ParseString(data string) (*Configuration, *toml.MetaData) {
 	return &set, &md
 }
 
-const prefix = "settings"
-
 //Loads a container configuration object, overriding a base
 //This function prevents empty TOML keys (anything you didn't specify) from overriding a preset value.
-func LoadContainerSettings(base *Container, inc *Container, meta *toml.MetaData) {
-	if meta.IsDefined(prefix, "command") {
+func LoadContainerSettings(base *Container, inc *Container, meta *toml.MetaData, key ...string) {
+
+	if meta.IsDefined(append(key, "command")...) {
 		base.Command = inc.Command
 	}
 
-	if meta.IsDefined(prefix, "folder") {
+	if meta.IsDefined(append(key, "folder")...) {
 		base.Folder = inc.Folder
 	}
 
-	if meta.IsDefined(prefix, "privileged") {
+	if meta.IsDefined(append(key, "privileged")...) {
 		base.Privileged = inc.Privileged
 	}
 
-	if meta.IsDefined(prefix, "mounts") {
+	if meta.IsDefined(append(key, "mounts")...) {
 		base.Mounts = append(base.Mounts, inc.Mounts...)
 	}
 
-	if meta.IsDefined(prefix, "ports") {
+	if meta.IsDefined(append(key, "ports")...) {
 		base.Ports = append(base.Ports, inc.Ports...)
 	}
 
-	if meta.IsDefined(prefix, "dns") {
+	if meta.IsDefined(append(key, "dns")...) {
 		base.DNS = append(base.DNS, inc.DNS...)
 	}
 
-	if meta.IsDefined(prefix, "attach") {
+	if meta.IsDefined(append(key, "attach")...) {
 		base.Attach = inc.Attach
 	}
 
-	if meta.IsDefined(prefix, "purge") {
+	if meta.IsDefined(append(key, "purge")...) {
 		base.Purge = inc.Purge
 	}
 
-	if meta.IsDefined(prefix, "environment") {
+	if meta.IsDefined(append(key, "environment")...) {
 		base.Environment = append(base.Environment, inc.Environment...)
 	}
 }
