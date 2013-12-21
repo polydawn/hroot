@@ -4,38 +4,42 @@ package conf
 // Keeps our chosen file format isolated from the rest of the system.
 
 import (
-	// . "fmt"
 	"github.com/BurntSushi/toml"
 	. "polydawn.net/docket/util"
 )
 
-//Holds arrays of ParseData
 type TomlConfigParser struct {
 	config *Configuration
 }
 
-//Called from lowest folder --> highest, as configuration files are discovered
 func (p *TomlConfigParser) AddConfig(data, dir string) ConfigParser {
-	//Parse toml and expand relative paths
-	conf, meta := ParseString(data)
-	conf.Settings.Localize(dir)
-
+	//Load default configuration if no previous data
 	if p.config == nil {
 		a := DefaultConfiguration
 		p.config = &a
 	}
 
+	//Parse toml, expand relative paths, and override settings
+	conf, meta := ParseString(data)
+	conf.Settings.Localize(dir)
 	LoadContainerSettings(&p.config.Settings, &conf.Settings, meta)
+
+	//Load image names
+	p.config.Image = conf.Image
+
+	//Load any target settings
+	p.config.Targets = conf.Targets
+
+	//Chain calls
 	return p
 }
 
 func (p *TomlConfigParser) GetConfig() *Configuration {
 	if p.config == nil {
-		a := DefaultConfiguration
-		p.config = &a
+		return &DefaultConfiguration
+	} else {
+		return p.config
 	}
-
-	return p.config
 }
 
 //Parse a TOML-formatted string into a configuration struct.

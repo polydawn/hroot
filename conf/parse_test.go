@@ -15,7 +15,7 @@ func TestTomlParser(t *testing.T) {
 	assert := assrt.NewAssert(t)
 	cwd, _ := filepath.Abs(".")
 	nwd, _ := filepath.Abs("..")
-	f1, f2, f3, settings := "", "", "", "[settings]\n"
+	f1, f2, f3, f4, f5, settings := "", "", "", "", "", "[settings]\n"
 
 
 	//
@@ -30,7 +30,7 @@ func TestTomlParser(t *testing.T) {
 	//
 	f1 = `
 		# Custom DNS servers
-		dns = [ "8.8.8.8", "8.8.4.4" ]
+		dns = [ "8.8.8.8" ]
 
 		# What container folder to start in
 		folder = "/docket"
@@ -45,7 +45,7 @@ func TestTomlParser(t *testing.T) {
 		AddConfig(settings + f1, ".").
 		GetConfig()
 	expect := DefaultConfiguration //Use default fields with a few exceptions
-	expect.Settings.DNS = []string{ "8.8.8.8", "8.8.4.4" }
+	expect.Settings.DNS = []string{ "8.8.8.8" }
 	expect.Settings.Folder = "/docket"
 	expect.Settings.Attach = true
 	expect.Settings.Purge = true
@@ -81,9 +81,51 @@ func TestTomlParser(t *testing.T) {
 	`
 	conf = parser().
 		AddConfig(settings + f1 + f2, "..").
-		AddConfig(settings + f3, ".").
+		AddConfig(settings + f3,      "." ).
 		GetConfig()
 	expect.Settings.Folder = "/home"
 	assert.Equal(expect, *conf)
+
+
+	//
+	// Image names
+	//
+	f4 = `
+	[image]
+		name     = "docket.polydawn.net/ubuntu/12.04"
+		index    = "ubuntu:12.04"
+		upstream = "index.docker.IO/ubuntu/12.04"
+	`
+	conf = parser().
+			AddConfig(settings + f1 + f2, "..").
+			AddConfig(settings + f3 + f4, "." ).
+			GetConfig()
+	expect.Image.Name     = "docket.polydawn.net/ubuntu/12.04"
+	expect.Image.Index    = "ubuntu:12.04"
+	expect.Image.Upstream = "index.docker.IO/ubuntu/12.04"
+	assert.Equal(expect, *conf)
+
+
+	//
+	//	Target settings override
+	//
+
+	f5 = `
+	# This is where you specify run targets.
+	# Targets let you take different actions with the same container.
+	[targets]
+		[bash]
+			command = [ "/bin/bash" ]
+			dns = [ "8.8.4.4" ]
+	`
+	conf2 := parser().
+		AddConfig(settings + f1 + f2,      "..").
+		AddConfig(settings + f3 + f4 + f5, "." ).
+		GetConfig()
+	expect.Settings.DNS = append(expect.Settings.DNS, "8.8.4.4")
+	expect.Settings.Command = []string{ "/bin/bash" }
+	assert.Equal(1, len(conf2.Targets))
+	assert.Equal(expect.Settings, conf2.Targets["bash"])
+	// assert.Equal(expect, conf2.GetTarget("bash"))
 
 }

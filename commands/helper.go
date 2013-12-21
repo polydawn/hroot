@@ -50,7 +50,7 @@ func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Docket
 
 	//Parse config file
 	configuration, folders := conf.LoadConfigurationFromDisk(".", parser)
-	config := configuration.GetTargetContainer(target)
+	config := configuration.GetTarget(target)
 
 	//Docket struct
 	d := &Docket {

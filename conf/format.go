@@ -97,7 +97,7 @@ type Configuration struct {
 	Targets  map[string]Container `toml:targets`
 }
 
-func (c *Configuration) GetTargetContainer(target string) Container {
+func (c *Configuration) GetTarget(target string) Container {
 	return c.Targets[target]
 }
 
