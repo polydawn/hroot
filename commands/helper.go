@@ -4,8 +4,6 @@ package commands
 
 import (
 	. "fmt"
-	"io"
-	"sync"
 	"time"
 	"polydawn.net/docket/conf"
 	"polydawn.net/docket/crocker"
@@ -181,22 +179,13 @@ func (d *Docket) prepareCacheWithoutImage() {
 				ExitGently("Image branch name", image, "not found in graph.")
 			}
 
-			//Pipe for I/O, and a waitgroup to make async action blocking
-			importReader, _/*importWriter*/ := io.Pipe()
-			var wait sync.WaitGroup
-			wait.Add(1)
-
-			//Closure to run the docker import
-			go func() {
-				d.dock.Import(importReader, image, "latest")
-				wait.Done()
-			}()
-
-			//Run the guitar import
-			// err := stream.ImportFromFilesystem(importWriter, d.source.graph.GetDir())	//FIXME replace with new hotness
-			// if err != nil { ExitGently("Import from graph failed:", err) }
-
-			wait.Wait() //Block on our gofunc
+			d.dest.graph.Load(
+				d.image.Name,
+				&dex.GraphLoadRequest_Image{
+					Dock: d.dock,
+					ImageName: d.image.Name,
+				},
+			)
 	}
 }
 

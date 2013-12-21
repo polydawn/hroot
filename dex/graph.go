@@ -172,14 +172,15 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 	return
 }
 
-func (g *Graph) Load(lineage string, gr *GraphLoadRequest) (hash string) {
+func (g *Graph) Load(lineage string, gr GraphLoadRequest) (hash string) {
 	lineage, _ = SplitImageName(lineage) //Handle tags
 
 	g.withTempTree(func(cmd Command) {
 		// checkout lineage
 		g.cmd("checkout", lineage)()
 
-		//TODO: tar up the fs, resulting in a tar.Reader we set fs.tarReader to
+		// the gr consumes this filesystem and shoves it at whoever it deals with; we're actually hands free after handing over a dir.
+		gr.receive(".")	//TODO: verify that a relative path here is safe, or just replace is os.Getwd again.
 
 		hash = ""	//FIXME
 	})

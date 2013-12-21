@@ -23,7 +23,7 @@ type GraphStoreRequest_Tar struct {
 
 func (gr *GraphStoreRequest_Tar) place(path string) {
 	// Use guitar to write the tar's contents to the graph
-	err := stream.ExportToFilesystem(gr.Tarstream, path)	//FIXME: i already know this is a tarstream; guitar needs to accept those, not just bytes
+	err := stream.ExportToFilesystem(gr.Tarstream, path)
 	if err != nil { panic(err); }
 }
 
