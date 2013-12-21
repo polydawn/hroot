@@ -19,7 +19,7 @@ type TomlConfigParser struct {
 }
 
 //Called from lowest folder --> highest, as configuration files are discovered
-func (p *TomlConfigParser) AddConfig(data, dir string) {
+func (p *TomlConfigParser) AddConfig(data, dir string) ConfigParser {
 	//Parse toml and expand relative paths
 	conf, meta := ParseString(data)
 	conf.Settings.Localize(dir)
@@ -34,6 +34,8 @@ func (p *TomlConfigParser) AddConfig(data, dir string) {
 		p.targets = conf.Targets
 		p.firstFlag = true
 	}
+
+	return p
 }
 
 func (p *TomlConfigParser) GetConfig() *Configuration {

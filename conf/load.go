@@ -11,7 +11,7 @@ const ConfigFileName = "docker.toml"
 //Our implementation reads TOML files; roll your own!
 type ConfigParser interface {
 	//Called in order of file discovery (last entry is the highest parent).
-	AddConfig(data, dir string)
+	AddConfig(data, dir string) ConfigParser
 
 	//Called to get the final configuration after loading.
 	GetConfig() *Configuration
