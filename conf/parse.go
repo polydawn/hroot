@@ -4,18 +4,14 @@ package conf
 // Keeps our chosen file format isolated from the rest of the system.
 
 import (
-	. "fmt"
+	// . "fmt"
 	"github.com/BurntSushi/toml"
 	. "polydawn.net/docket/util"
 )
 
 //Holds arrays of ParseData
 type TomlConfigParser struct {
-	configs  []*Container
-	metas    []*toml.MetaData
-	image    *Image
-	targets   map[string]Container `toml:targets`
-	firstFlag bool
+	config *Configuration
 }
 
 //Called from lowest folder --> highest, as configuration files are discovered
@@ -24,44 +20,22 @@ func (p *TomlConfigParser) AddConfig(data, dir string) ConfigParser {
 	conf, meta := ParseString(data)
 	conf.Settings.Localize(dir)
 
-	//Add settings to stack
-	p.configs = append(p.configs, &conf.Settings)
-	p.metas   = append(p.metas,   meta)
-
-	//Save image & targets (from first config file only, image & targets section does not inherit)
-	if !p.firstFlag {
-		p.image  = &conf.Image
-		p.targets = conf.Targets
-		p.firstFlag = true
+	if p.config == nil {
+		a := DefaultConfiguration
+		p.config = &a
 	}
 
+	LoadContainerSettings(&p.config.Settings, &conf.Settings, meta)
 	return p
 }
 
 func (p *TomlConfigParser) GetConfig() *Configuration {
-	//Load default configuration, and return it if no configs were added
-	config := DefaultConfiguration
-	if !p.firstFlag { return &config }
-
-	//Load image name
-	config.Image = *p.image
-
-	//Inheritance starts at the highest file in your folder tree, then works down.
-	for n := len(p.configs) - 1; n >= 0; n-- {
-		//Load the settings of the new file
-		LoadContainerSettings(&config.Settings, p.configs[n], p.metas[n])
-
-		//Last conf file - load target settings
-		if n == 0 {
-
-		}
+	if p.config == nil {
+		a := DefaultConfiguration
+		p.config = &a
 	}
 
-	if n := len(p.configs); n > 0 {
-		Println("Loaded", n, "config files.")
-	}
-
-	return &config
+	return p.config
 }
 
 //Parse a TOML-formatted string into a configuration struct.

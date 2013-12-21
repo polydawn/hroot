@@ -10,17 +10,22 @@ const ConfigFileName = "docker.toml"
 //A generic interface for loading configuration.
 //Our implementation reads TOML files; roll your own!
 type ConfigParser interface {
-	//Called in order of file discovery (last entry is the highest parent).
+
+	//Parses a new configuration string.
+	//Each call should override configuration added before.
 	AddConfig(data, dir string) ConfigParser
 
 	//Called to get the final configuration after loading.
 	GetConfig() *Configuration
+
 }
 
 //Recursively finds configuration files & folders.
 func LoadConfigurationFromDisk(dir string, parser ConfigParser) (*Configuration, *Folders) {
-	//Default settings and folders
+	//Default settings, folders, and parsed data
 	folders := DefaultFolders(dir)
+	files := []string{}
+	dirs  := []string{}
 
 	//Recurse up the file tree looking for configuration
 	for {
@@ -41,13 +46,21 @@ func LoadConfigurationFromDisk(dir string, parser ConfigParser) (*Configuration,
 				folders.Graph = graphDir
 			}
 
-			//Parse file
+			//Parse file, increment folder
 			data := string(buf)
-			parser.AddConfig(data, dir)
 			dir = filepath.Join("../", dir)
+
+			//Hold data
+			files = append(files, data)
+			dirs  = append(dirs, dir)
 		} else {
 			break //If the file was not readable, done loading config
 		}
+	}
+
+	//Unroll data - we discovered them in reverse order, send each to parser
+	for n := len(files) - 1; n >= 0; n-- {
+		parser.AddConfig(files[n], dirs[n])
 	}
 
 	return parser.GetConfig(), folders

@@ -14,6 +14,7 @@ func TestTomlParser(t *testing.T) {
 	//Testing library, current directory, and some config strings
 	assert := assrt.NewAssert(t)
 	cwd, _ := filepath.Abs(".")
+	nwd, _ := filepath.Abs("..")
 	f1, f2, f3, settings := "", "", "", "[settings]\n"
 
 
@@ -40,7 +41,9 @@ func TestTomlParser(t *testing.T) {
 		# Delete the container after running
 		purge = true
 	`
-	conf = parser().AddConfig(settings + f1, ".").GetConfig()
+	conf = parser().
+		AddConfig(settings + f1, ".").
+		GetConfig()
 	expect := DefaultConfiguration //Use default fields with a few exceptions
 	expect.Settings.DNS = []string{ "8.8.8.8", "8.8.4.4" }
 	expect.Settings.Folder = "/docket"
@@ -60,9 +63,11 @@ func TestTomlParser(t *testing.T) {
 			[ "./",   "/docket",   "rw"],  # The current folder
 		]
 	`
-	conf = parser().AddConfig(settings + f1 + f2, ".").GetConfig()
+	conf = parser().
+		AddConfig(settings + f1 + f2, "..").
+		GetConfig()
 	expect.Settings.Mounts = [][]string{
-		[]string{ cwd, "/boxen",  "ro" },
+		[]string{ nwd, "/boxen",  "ro" },
 		[]string{ cwd, "/docket", "rw" },
 	}
 	assert.Equal(expect, *conf)
@@ -74,8 +79,11 @@ func TestTomlParser(t *testing.T) {
 	f3 = `
 		folder = "/home"
 	`
-	conf = parser().AddConfig(settings + f1 + f2, ".").
-		AddConfig(settings + f3, "..").GetConfig()
+	conf = parser().
+		AddConfig(settings + f1 + f2, "..").
+		AddConfig(settings + f3, ".").
+		GetConfig()
 	expect.Settings.Folder = "/home"
 	assert.Equal(expect, *conf)
+
 }
