@@ -147,17 +147,18 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 	ancestor, _ = SplitImageName(ancestor)
 
 	g.withTempTree(func(cmd Command) {
-		//
-		if strings.Count(g.cmd("branch", "--list", lineage).Output(), "\n") < 1 {
+		// check if appropriate branches already exist, and make them if necesary
+		if strings.Count(g.cmd("branch", "--list", lineage).Output(), "\n") >= 1 {
+			// this is an existing lineage
+			//g.cmd("checkout", lineage)() //TODO: verify that we don't need to checkout here, don't think we should because of how we force merge, but add without a head might get startled
+		} else {
 			// this is a new lineage
 			if ancestor == "" {
 				g.cmd("checkout", "--orphan", lineage)()	//TODO: docket/image/
 			} else {
-				// there's already a branch of this name; no need to create one
+				// there'd better already a branch of this name.
+				// if you're stating you have an ancestor that's not around, this is just a bad trip.
 			}
-		} else {
-			// this is an existing lineage
-			//g.cmd("checkout", lineage)() //TODO: verify that we don't need to checkout here, don't think we should because of how we force merge, but add without a head might get startled
 		}
 
 		// apply the GraphStoreRequest to unpack the fs (read from fs.tarReader, essentially)
