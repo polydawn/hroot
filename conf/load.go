@@ -36,24 +36,15 @@ func LoadConfigurationFromDisk(dir string, parser ConfigParser) (*Configuration,
 		//Did we succeed?
 		if err == nil {
 			//Check for folders
-			dockDir  := filepath.Join(dir, DockFolder)
-			graphDir := filepath.Join(dir, GraphFolder)
+			folders.Dock  = filepath.Join(dir, DockFolder)
+			folders.Graph = filepath.Join(dir, GraphFolder)
 
-			if _, err := ioutil.ReadDir(dockDir) ; err == nil {
-				folders.Dock = dockDir
-			}
-			if _, err := ioutil.ReadDir(graphDir) ; err == nil {
-				folders.Graph = graphDir
-			}
-
-			//Parse file
+			//Convert data to a string, save for later
 			data := string(buf)
-
-			//Hold data
 			files = append(files, data)
 			dirs  = append(dirs, dir)
 
-			//Increment folder
+			//Increment folder for next stage
 			dir = filepath.Join("../", dir)
 		} else {
 			break //If the file was not readable, done loading config
