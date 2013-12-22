@@ -5,8 +5,11 @@ package dex
 import (
 	"path/filepath"
 	"io/ioutil"
+	"bytes"
 	"os"
+	"archive/tar"
 	"testing"
+	"strings"
 	"github.com/coocood/assrt"
 )
 
@@ -111,29 +114,57 @@ func fwriteSetB(pth string) {
 	//TODO
 }
 
-// func TestNewOrphanLineage(t *testing.T) {
-// 	do(func() {
-// 		assert := assrt.NewAssert(t)
+func fsSetA() *tar.Reader {
+	var buf bytes.Buffer
+	fs := tar.NewWriter(&buf)
 
-// 		g := NewGraph(".")
-// 		lineage := "line"
-// 		ancestor := ""
+	// file 'a' is just ascii text with normal permissions
+	fs.WriteHeader(&tar.Header{
+		Name:     "a",
+		Mode:     0644,
+		Size:     2,
+		Typeflag: tar.TypeReg,
+	})
+	fs.Write([]byte{ 'a', 'b' })
 
-// 		g.PreparePublish(lineage, ancestor)
+	// file 'b' is binary with unusual permissions
+	fs.WriteHeader(&tar.Header{
+		Name:     "b",
+		Mode:     0640,
+		Size:     3,
+		Typeflag: tar.TypeReg,
+	})
+	fs.Write([]byte{ 0x1, 0x2, 0x3 })
 
-// 		fwriteSetA(g.GetDir())
+	fs.Close()
+	return tar.NewReader(&buf)
+}
 
-// 		g.Publish(lineage, ancestor)
+func TestNewOrphanLineage(t *testing.T) {
+	do(func() {
+		assert := assrt.NewAssert(t)
 
-// 		assert.Equal(
-// 			2,
-// 			strings.Count(
-// 				g.cmd("ls-tree", "refs/heads/"+lineage).Output(),
-// 				"\n",
-// 			),
-// 		)
-// 	})
-// }
+		g := NewGraph(".")
+		lineage := "line"
+		ancestor := ""
+
+		g.Publish(
+			lineage,
+			ancestor,
+			&GraphStoreRequest_Tar{
+				Tarstream: fsSetA(),
+			},
+		)
+
+		assert.Equal(
+			3,
+			strings.Count(
+				g.cmd("ls-tree", "refs/heads/"+lineage).Output(),
+				"\n",
+			),
+		)
+	})
+}
 
 // func TestCleanBeforeNewLineage(t *testing.T) {
 
