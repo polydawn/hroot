@@ -113,7 +113,7 @@ func TestTomlParser(t *testing.T) {
 	f5 = `
 	# This is where you specify run targets.
 	# Targets let you take different actions with the same container.
-	[targets.bash]
+	[target.bash]
 		command = [ "/bin/bash" ]
 		dns = [ "8.8.4.4" ]
 	`

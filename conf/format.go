@@ -94,7 +94,7 @@ type Configuration struct {
 	Settings Container            `toml:"settings"`
 
 	//A map of named targets, each representing another set of container settings
-	Targets  map[string]Container `toml:"targets"`
+	Targets  map[string]Container `toml:"target"`
 }
 
 func (c *Configuration) GetTarget(target string) Container {

@@ -33,7 +33,7 @@ func (p *TomlConfigParser) AddConfig(data, dir string) ConfigParser {
 	for x := range p.config.Targets {
 		a := p.config.Settings
 		b := p.config.Targets[x]
-		LoadContainerSettings(&a, &b, meta, "targets", x)
+		LoadContainerSettings(&a, &b, meta, "target", x)
 		p.config.Targets[x] = a
 	}
 
