@@ -46,13 +46,15 @@ func LoadConfigurationFromDisk(dir string, parser ConfigParser) (*Configuration,
 				folders.Graph = graphDir
 			}
 
-			//Parse file, increment folder
+			//Parse file
 			data := string(buf)
-			dir = filepath.Join("../", dir)
 
 			//Hold data
 			files = append(files, data)
 			dirs  = append(dirs, dir)
+
+			//Increment folder
+			dir = filepath.Join("../", dir)
 		} else {
 			break //If the file was not readable, done loading config
 		}
