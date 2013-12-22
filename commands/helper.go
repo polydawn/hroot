@@ -4,14 +4,11 @@ package commands
 
 import (
 	. "fmt"
-	"io"
-	"sync"
 	"time"
 	"polydawn.net/docket/conf"
 	"polydawn.net/docket/crocker"
 	"polydawn.net/docket/dex"
 	. "polydawn.net/docket/util"
-	"polydawn.net/guitar/stream"
 )
 
 //Holds everything needed to load/save docker images
@@ -96,8 +93,7 @@ func (d *Docket) PrepareInput() {
 		case "graph":
 			//Look up the graph, and clear any unwanted state
 			d.source.graph = dex.NewGraph(d.folders.Graph)
-			Println("Opening source repository", d.source.graph.GetDir())
-			d.source.graph.Cleanse()
+			Println("Opening source repository")
 		case "file":
 			//If the user did not specify an image path, set one
 			if d.source.path == "" {
@@ -117,10 +113,7 @@ func (d *Docket) PrepareOutput() {
 			d.dest.graph = dex.NewGraph(d.folders.Graph)
 
 			//Cleanse the graph unless it'd be redundant.
-			if !(d.source.scheme == "graph" && d.source.graph.GetDir() == d.dest.graph.GetDir()) {
-				Println("Opening destination repository", d.dest.graph.GetDir())
-				d.dest.graph.Cleanse()
-			}
+			Println("Opening destination repository")
 		case "file":
 			//If the user did not specify an image path, set one
 			if d.dest.path == "" {
@@ -186,22 +179,13 @@ func (d *Docket) prepareCacheWithoutImage() {
 				ExitGently("Image branch name", image, "not found in graph.")
 			}
 
-			//Pipe for I/O, and a waitgroup to make async action blocking
-			importReader, importWriter := io.Pipe()
-			var wait sync.WaitGroup
-			wait.Add(1)
-
-			//Closure to run the docker import
-			go func() {
-				d.dock.Import(importReader, image, "latest")
-				wait.Done()
-			}()
-
-			//Run the guitar import
-			err := stream.ImportFromFilesystem(importWriter, d.source.graph.GetDir())
-			if err != nil { ExitGently("Import from graph failed:", err) }
-
-			wait.Wait() //Block on our gofunc
+			d.dest.graph.Load(
+				d.image.Name,
+				&dex.GraphLoadRequest_Image{
+					Dock: d.dock,
+					ImageName: d.image.Name,
+				},
+			)
 	}
 }
 
@@ -239,20 +223,14 @@ func (d *Docket) Launch() {
 func (d *Docket) ExportBuild() error {
 	switch d.dest.scheme {
 		case "graph":
-			//Create new branches as needed
-			d.dest.graph.PreparePublish(d.image.Name, d.image.Upstream)
-
-			// Export a tar of the filesystem
-			exportReader, exportWriter := io.Pipe()
-			go d.container.Export(exportWriter)
-
-			// Use guitar to write the tar's contents to the graph
-			err := stream.ExportToFilesystem(exportReader, d.dest.graph.GetDir())
-			if err != nil { return err }
-
-			// Commit changes
 			Println("Comitting to graph...")
-			d.dest.graph.Publish(d.image.Name, d.image.Upstream)
+			d.dest.graph.Publish(
+				d.image.Name,
+				d.image.Upstream,
+				&dex.GraphStoreRequest_Container{
+					Container: d.container,
+				},
+			)
 		case "file":
 			//Export a tar
 			Println("Exporting to", d.dest.path)

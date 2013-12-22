@@ -10,9 +10,6 @@
 [submodule ".gopath/src/github.com/BurntSushi/toml"]
 	path = .gopath/src/github.com/BurntSushi/toml
 	url = https://github.com/BurntSushi/toml
-[submodule ".gopath/src/github.com/dotcloud/tar"]
-	path = .gopath/src/github.com/dotcloud/tar
-	url = https://github.com/dotcloud/tar
 [submodule ".gopath/src/polydawn.net/guitar"]
 	path = .gopath/src/polydawn.net/guitar
 	url = https://github.com/polydawn/guitar
