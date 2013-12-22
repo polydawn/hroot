@@ -177,8 +177,9 @@ func (g *Graph) Load(lineage string, gr GraphLoadRequest) (hash string) {
 	lineage, _ = SplitImageName(lineage) //Handle tags
 
 	g.withTempTree(func(cmd Command) {
-		// checkout lineage
-		g.cmd("checkout", lineage)()
+		// checkout lineage.
+		// "-f" because otherwise if git thinks we already had this branch checked out, this working tree is just chock full of deletes.
+		g.cmd("checkout", "-f", lineage)()
 
 		// the gr consumes this filesystem and shoves it at whoever it deals with; we're actually hands free after handing over a dir.
 		gr.receive(".")	//TODO: verify that a relative path here is safe, or just replace is os.Getwd again.
