@@ -167,7 +167,7 @@ func (d *Docket) prepareCacheWithImage() {
 
 //Behavior when docker cache doesn't have the image
 func (d *Docket) prepareCacheWithoutImage() {
-	image := d.image.Name
+	image := d.launchImage
 
 	switch d.source.scheme {
 		case "docker":
@@ -180,10 +180,10 @@ func (d *Docket) prepareCacheWithoutImage() {
 			}
 
 			d.dest.graph.Load(
-				d.image.Name,
+				image,
 				&dex.GraphLoadRequest_Image{
 					Dock: d.dock,
-					ImageName: d.image.Name,
+					ImageName: image,
 				},
 			)
 	}
