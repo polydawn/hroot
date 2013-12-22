@@ -97,10 +97,6 @@ type Configuration struct {
 	Targets  map[string]Container `toml:"target"`
 }
 
-func (c *Configuration) GetTarget(target string) Container {
-	return c.Targets[target]
-}
-
 //Default configuration
 var DefaultConfiguration = Configuration {
 	Settings: DefaultContainer,
