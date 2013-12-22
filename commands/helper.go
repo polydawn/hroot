@@ -224,9 +224,16 @@ func (d *Docket) ExportBuild() error {
 	switch d.dest.scheme {
 		case "graph":
 			Println("Comitting to graph...")
+
+			//Don't give ancestor name to graph publish if source was not the graph.
+			ancestor := d.image.Upstream
+			if d.source.scheme != "graph" {
+				ancestor = ""
+			}
+
 			d.dest.graph.Publish(
 				d.image.Name,
-				d.image.Upstream,
+				ancestor,
 				&dex.GraphStoreRequest_Container{
 					Container: d.container,
 				},
