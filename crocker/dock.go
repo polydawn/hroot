@@ -102,7 +102,7 @@ func loadDock(dir string) *Dock {
 	if err != nil { panic(err); }
 
 	// check for socket.
-	if dock.awaitSocket(20 * time.Millisecond) != nil { return nil; }
+	if dock.awaitSocket(500 * time.Millisecond) != nil { return nil; }
 
 	// alright, looks like a docker daemon.
 	return dock
