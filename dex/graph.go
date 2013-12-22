@@ -156,8 +156,7 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 			if ancestor == "" {
 				g.cmd("checkout", "--orphan", lineage)()	//TODO: docket/image/
 			} else {
-				// there'd better already a branch of this name.
-				// if you're stating you have an ancestor that's not around, this is just a bad trip.
+				g.cmd("branch", lineage, ancestor)()
 			}
 		}
 
