@@ -1,3 +1,6 @@
 
 # compiled binaries
 /docket
+
+# test case data
+/target/
