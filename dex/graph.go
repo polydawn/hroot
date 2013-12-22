@@ -34,7 +34,7 @@ func LoadGraph(dir string) *Graph {
 	g := newGraph(dir)
 
 	// ask git what it thinks of all this.
-	if g.isRepoRoot() {
+	if g.isDocketGraphRepo() {
 		return g
 	} else {
 		return nil
@@ -52,12 +52,14 @@ func LoadGraph(dir string) *Graph {
 	You're free to make it a submodule yourself, but git quite wants you to have a remote url before it accepts your submodule.
 */
 func NewGraph(dir string) *Graph {
-	// try for a load, and if that flies, return it.
-	g := LoadGraph(dir)
-	if g != nil {
+	g := newGraph(dir)
+	if g.isDocketGraphRepo() {
+		// if we can just be a load, do it
 		return g
-	}
-	g = newGraph(dir)
+	} else if g.isRepoRoot() {
+		// if this is a repo root, but didn't look like a real graph...
+		util.ExitGently("Attempted to make a docket graph at ", g.dir, ", but there is already a git repo there and it does not appear to belong to docket.")
+	} // else carry on, make it!
 
 	// we'll make exactly one new dir if the path doesn't exist yet.  more is probably argument error and we abort.
 	// this is actually implemented via MkdirAll here (because Mkdir errors on existing, and I can't be arsed) and letting the SaneDir check earlier blow up if we're way out.
@@ -216,4 +218,15 @@ func (g *Graph) HasBranch(branch string) bool {
 	//Git magic is involved. Response will be of non-zero length if branch exists.
 	result := g.cmd("ls-remote", ".", "refs/heads/" + branch).Output()
 	return len(result) > 0
+}
+
+/*
+	Check if a git repo exists and if it has the branches that declare it a docket graph.
+*/
+func (g *Graph) isDocketGraphRepo() bool {
+	if !g.isRepoRoot() { return false; }
+	if !g.HasBranch("docket/init") { return false; }
+	// We could say a docket graph shouldn't have a master branch, but we won't.
+	// We don't create one by default, but you're perfectly welcome to do so and put a readme for your coworkers in it or whatever.
+	return true
 }
