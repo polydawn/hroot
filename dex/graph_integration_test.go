@@ -140,6 +140,43 @@ func fsSetA() *tar.Reader {
 	return tar.NewReader(&buf)
 }
 
+func fsSetB() *tar.Reader {
+	var buf bytes.Buffer
+	fs := tar.NewWriter(&buf)
+
+	// file 'a' is unchanged from SetA
+	fs.WriteHeader(&tar.Header{
+		Name:     "a",
+		Mode:     0644,
+		Size:     2,
+		Typeflag: tar.TypeReg,
+	})
+	fs.Write([]byte{ 'a', 'b' })
+
+	// file 'b' is removed
+
+	// file 'e' is executable
+	fs.WriteHeader(&tar.Header{
+		Name:     "e",
+		Mode:     0755,
+		Size:     3,
+		Typeflag: tar.TypeReg,
+	})
+	fs.Write([]byte{ 'e', 'x', 'e' })
+
+	// file 'd/d/z' is deeper
+	fs.WriteHeader(&tar.Header{
+		Name:     "d/d/z",
+		Mode:     0644,
+		Size:     2,
+		Typeflag: tar.TypeReg,
+	})
+	fs.Write([]byte{ 'z', '\n' })
+
+	fs.Close()
+	return tar.NewReader(&buf)
+}
+
 func TestNewOrphanLineage(t *testing.T) {
 	do(func() {
 		assert := assrt.NewAssert(t)
@@ -166,15 +203,39 @@ func TestNewOrphanLineage(t *testing.T) {
 	})
 }
 
-// func TestCleanBeforeNewLineage(t *testing.T) {
+func TestLinearExtensionToLineage(t *testing.T) {
+	do(func() {
+		assert := assrt.NewAssert(t)
 
-// func TestLinearExtensionToLineage(t *testing.T) {
-// 	do(func() {
-// 		assert := assrt.NewAssert(t)
+		g := NewGraph(".")
+		lineage := "line"
+		ancestor := "line"
 
-// 		//TODO
-// 	})
-// }
+		g.Publish(
+			lineage,
+			"",
+			&GraphStoreRequest_Tar{
+				Tarstream: fsSetA(),
+			},
+		)
+
+		g.Publish(
+			lineage,
+			ancestor,
+			&GraphStoreRequest_Tar{
+				Tarstream: fsSetB(),
+			},
+		)
+
+		assert.Equal(
+			4,
+			strings.Count(
+				g.cmd("ls-tree", "refs/heads/"+lineage).Output(),
+				"\n",
+			),
+		)
+	})
+}
 
 // func TestNewDerivedLineage(t *testing.T) {
 // 	do(func() {
