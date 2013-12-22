@@ -74,7 +74,7 @@ func (c *Container) Localize(dir string) {
 
 //Default container
 var DefaultContainer = Container {
-	Command:     []string{"/bin/echo", "Hello from docket!"},
+	Command:     []string{},
 	Folder:      "/",
 	Privileged:  false,
 	Mounts:      [][]string{},

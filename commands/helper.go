@@ -80,7 +80,7 @@ func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Docket
 	}
 
 	//Specifying a command in the settings section has confusing implications
-	if len(d.settings.Command) > 0 {
+	if len(configuration.Settings.Command) > 0 {
 		ExitGently("Cannot specify a command in settings; instead, put them in a target!")
 	}
 
