@@ -44,6 +44,7 @@ func (gr *GraphLoadRequest_Image) receive(path string) {
 		Tarstream: tar.NewWriter(importWriter),
 	} // golang, you're bad.  why can't i one-line this.
 	wat.receive(path);
+	importWriter.Close()
 
 	// wait for docker importing on the tar byte stream to return
 	wait.Wait()
