@@ -16,13 +16,13 @@ Grab the latest [release](https://github.com/polydawn/docket/releases) and throw
 
 ```bash
 # Clone down some example config files
-git clone https://github.com/polydawn/boxen.git && cd boxen/ubuntu
+git clone https://github.com/polydawn/boxen.git && cd boxen
 
 # Download ubuntu from public index, save into git
-docket build -s index -d graph --noop
+cd ubuntu-index && docket build
 
-# Upgrade apt-get packages
-docket build
+# Build your own ubuntu image (updates apt-get)
+cd ../ubuntu    && docket build
 
 # Load repeatable ubuntu from git and start an interactive shell
 docket run bash
@@ -62,16 +62,16 @@ Docket scans up parent folders, looking for `docket.toml` files, and stops when 
 Today, we'll be using ubuntu:
 
 ```bash
-# Pop into the ubuntu folder
-cd ubuntu
+# Pop into the index ubuntu folder
+cd ubuntu-index
 ```
 
-You'll notice this next [config file](https://github.com/polydawn/boxen/blob/master/ubuntu/docket.toml) is different - it has *image* and *target* sections, with copious comments.<br/>
+You'll notice this next [config file](https://github.com/polydawn/boxen/blob/master/ubuntu-index/docket.toml) is different - it has *image* and *target* sections, with copious comments.<br/>
 We'll explain each in turn:
 
 ### Image names
 
-The image section has three entries: *name*, *upstream*, and *index*.
+The image section can have three entries: *name*, *upstream*, and *index*.
 
 <table>
 	<tr>
@@ -89,6 +89,8 @@ The image section has three entries: *name*, *upstream*, and *index*.
 		<td>Upstream</td>
 		<td>
 			<p>This image's parent - where did it get built from? This is used by the build command.</p>
+
+			<p>A configuration file has either an Upstream or an Index key, but not both.</p>
 
 			<p>Example: <code>index.docker.io/ubuntu/12.04</code>
 		</td>
@@ -124,19 +126,19 @@ We need to get ourselves an image.
 
 Most of the time, you'll want to fork & version an image from the public docker index.
 We support plain tarballs as well (more on that later), but the index can be convenient.
-This is what the ubuntu [conf file](https://github.com/polydawn/boxen/blob/master/ubuntu/docket.toml) is ready to do.
+This is what the index-ubuntu [conf file](https://github.com/polydawn/boxen/blob/master/ubuntu-index/docket.toml) is ready to do.
 
 Try the following:
 
 ```bash
 # Download ubuntu from public index, save into git
-docket build -s index -d graph --noop
+docket build
 ```
 
 This command accomplished a few things:
 
 * Docket chose the public index as the *source*, and looked there for an image called `ubuntu:12.04`
-* The `--noop` flag means we are just moving images around, so there was no build step. More on that later.
+* A small [build script](https://github.com/polydawn/boxen/blob/master/ubuntu-index/build.sh) cleaned out apt-get state from the index image that we don't want to save in history.
 * Once downloaded, Docket saved that image to the graph *destination*.
  * Odds are you didn't have a graph repository, so Docket created one for you.
 
@@ -186,13 +188,17 @@ Docket supports a few others:
 
 This makes it easy to load & save images in a variety of ways.
 Use the appropriate strategy for your situation.<br/>
-The default is `graph`; we added `-d graph` to the bootstrapping command to avoid confusion.
+
+You can set these with the `-s` and `-d` flags, otherwise Docket will choose smart defaults.
 
 ### Building an image
 
 We're now ready to fork the image we downloaded and walk our own (strongly-versioned) path.
 
 ```bash
+# Navigate to the main ubuntu folder
+cd ../ubuntu
+
 # Upgrade apt-get packages & save the new ubuntu image
 docket build
 ```
@@ -201,8 +207,7 @@ This will plug away for awhile (you're updating all the ubuntu packages!) and ac
 
 * Docket imported the image from the graph.
  * The Docker daemon now knows about `index.docker.io/ubuntu`, not just `ubuntu`.
-* Since there was no `--noop` flag this time, we ran the build step.
- * Check out the [build.sh] file in the current folder: it runs a couple scripts around apt-get.
+* The [build.sh](https://github.com/polydawn/boxen/blob/master/ubuntu/build.sh) file ran a couple scripts around apt-get, upgrading packages.
 * After building, Docket saved our new image to the graph.
  * We now have a new branch name, starting with `example.com/ubuntu`.
 
@@ -269,14 +274,6 @@ Lots of examples are available over at [Boxen](https://github.com/polydawn/boxen
 ## Installing Docker
 
 Docket uses [Docker](https://www.docker.io/), an excellent container helper based on LXC.
-This gives Docket all that containerization mojo. We're using Docker 0.6.3 right now.
-From their [instructions](http://docs.docker.io/en/latest/installation/ubuntulinux/) for Ubuntu 13.04:
+This gives Docket all that containerization mojo. We're using Docker 0.7.2 right now.
 
-```bash
-sudo apt-get update
-sudo apt-get install linux-image-extra-`uname -r`
-sudo sh -c "wget -qO- https://get.docker.io/gpg | apt-key add -"
-sudo sh -c "echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
-sudo apt-get update
-sudo apt-get install lxc-docker
-```
+Docker offers a variety of [installation instructions](http://docs.docker.io/en/latest/installation/) on their site.

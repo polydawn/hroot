@@ -89,6 +89,15 @@ func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Docket
 
 //Prepare the docket input
 func (d *Docket) PrepareInput() {
+
+	//If you're using an index key with a non-index source, or upstream key with index source, reject.
+	//Runs here (not LoadDocket) so commands have a chance to change settings.
+	if d.source.scheme == "index" && d.image.Index == "" {
+		ExitGently("You asked to pull from the index but have no index key configured.")
+	} else if d.source.scheme != "index" && d.image.Upstream == "" {
+		ExitGently("You asked to pull from the index but have no index key configured.")
+	}
+
 	switch d.source.scheme {
 		case "graph":
 			//Look up the graph, and clear any unwanted state
