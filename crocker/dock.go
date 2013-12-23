@@ -47,11 +47,16 @@ type Dock struct {
 	@param dir path to dock dir.  May be relative.
 */
 func NewDock(dir string) *Dock {
-	dock := loadDock(dir)
-	if dock == nil {
-		dock = createDock(dir)
-	}
-	return dock
+	//Temporary workaround for #29. Unconditionally use system daemon if running.
+	dock := loadDock("/var/run")
+	if dock != nil { return dock }
+
+	//Try to find a running docker in the provided folder
+	dock = loadDock(dir)
+	if dock != nil {return dock }
+
+	//All else fails; run one ourselves
+	return createDock(dir)
 }
 
 /*
