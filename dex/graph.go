@@ -200,14 +200,24 @@ func (g *Graph) Load(lineage string, gr GraphLoadRequest) (hash string) {
 
 // having a load-by-hash:
 //   - you can't combine it with lineage, because git doesn't really know what branches are, historically speaking.
-//       - unless we decide we're committing lineage in some structured form of the commit messages, which is possible, but not sure if want.
 //       - we could traverse up from the lineage branch ref and make sure the hash is reachable from it, but more than one ref is going to be able to reach most hashes (i.e. hashes that are pd-base will be reachable from pd-nginx).
+//       - unless we decide we're committing lineage in some structured form of the commit messages.
+//            - which... yes, yes we are.  the first word of any commit is going to be the image lineage name.
+//            - after the space can be anything, but we're going to default to a short description of where it came from.
+//            - additional lines can be anything you want.
+//            - if we need more attributes in the future, we'll start doing them with the git psuedo-standard of trailing "Signed-Off-By: %{name}\n" key-value pairs.
+//            - we won't validate any of this if you're not using load-by-hash.
 
 
 func (g *Graph) forceMerge(source string, target string) {
 	writeTree := g.cmd("write-tree").Output()
 	writeTree = strings.Trim(writeTree, "\n")
-	commitMsg := fmt.Sprintf("updated %s<<%s", target, source)
+	commitMsg := ""
+	if source == "" {
+		commitMsg = fmt.Sprintf("%s imported from an external source", target)
+	} else {
+		commitMsg = fmt.Sprintf("%s updated from %s", target, source)
+	}
 	commitTreeCmd := g.cmd("commit-tree", writeTree, Opts{In: commitMsg})
 	if source != "" {
 		commitTreeCmd = commitTreeCmd("-p", source, "-p", target)
