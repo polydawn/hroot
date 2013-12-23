@@ -234,6 +234,22 @@ func TestLinearExtensionToLineage(t *testing.T) {
 				"\n",
 			),
 		)
+
+		assert.Equal(
+			1,	// shows a tree
+			strings.Count(
+				g.cmd("ls-tree", "refs/heads/"+lineage, "d/d").Output(),
+				"\n",
+			),
+		)
+
+		assert.Equal(
+			1,	// shows the file
+			strings.Count(
+				g.cmd("ls-tree", "refs/heads/"+lineage, "d/d/z").Output(),
+				"\n",
+			),
+		)
 	})
 }
 
