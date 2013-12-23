@@ -7,7 +7,7 @@ Docker's image storage is treated like a cache, while Docket manages your images
 Your containers now have effortless history, strong hashes to verify integrity, git commit messages, and secure transport.
 
 Further, ditch those long config flags and express them in a file instead.
-Docket looks for a `docker.toml` file in the current directory and sets up binds, mounts, etc.
+Docket looks for a `docket.toml` file in the current directory and sets up binds, mounts, etc.
 Add that file to your project's version control and get your entire team working on the same system.
 
 ## Quickstart
@@ -42,7 +42,7 @@ Using `run` just runs an (already-built) image.
 
 ### First steps
 
-To use Docket, you need a config file in the current directory called `docker.toml`.<br/>
+To use Docket, you need a config file in the current directory called `docket.toml`.<br/>
 This file tracks all your image names and settings.
 
 Our Boxen repository has several examples, which we'll use for this tutorial.<br/>
@@ -53,12 +53,12 @@ Clone it down if you haven't already:
 git clone https://github.com/polydawn/boxen.git && cd boxen
 ```
 
-In the boxen folder, there's the first [config file](https://github.com/polydawn/boxen/blob/master/docker.toml).
+In the boxen folder, there's the first [config file](https://github.com/polydawn/boxen/blob/master/docket.toml).
 You'll notice there's only one section - `settings`.
 Here we set up a bunch of settings we want for pretty much every image: DNS servers, folder mounts, etc.
 
 Because Docket is smart, these settings apply to every image configured in Boxen.
-Docket scans up parent folders, looking for `docker.toml` files, and stops when it can't find one.
+Docket scans up parent folders, looking for `docket.toml` files, and stops when it can't find one.
 Today, we'll be using ubuntu:
 
 ```bash
@@ -66,7 +66,7 @@ Today, we'll be using ubuntu:
 cd ubuntu
 ```
 
-You'll notice this next [config file](https://github.com/polydawn/boxen/blob/master/ubuntu/docker.toml) is different - it has *image* and *target* sections, with copious comments.<br/>
+You'll notice this next [config file](https://github.com/polydawn/boxen/blob/master/ubuntu/docket.toml) is different - it has *image* and *target* sections, with copious comments.<br/>
 We'll explain each in turn:
 
 ### Image names
@@ -124,7 +124,7 @@ We need to get ourselves an image.
 
 Most of the time, you'll want to fork & version an image from the public docker index.
 We support plain tarballs as well (more on that later), but the index can be convenient.
-This is what the ubuntu [conf file](https://github.com/polydawn/boxen/blob/master/ubuntu/docker.toml) is ready to do.
+This is what the ubuntu [conf file](https://github.com/polydawn/boxen/blob/master/ubuntu/docket.toml) is ready to do.
 
 Try the following:
 
@@ -234,7 +234,7 @@ From here, we strongly recommend playing around more with the example [Boxen](ht
 There's several images pre-configured there, for example a zero-config nginx server.
 Additions to that repository are welcome!
 
-When you're ready to use Docket with your own team, simply write your own `docker.toml` file and place it in a new folder.
+When you're ready to use Docket with your own team, simply write your own `docket.toml` file and place it in a new folder.
 Build yourself an image (perhaps copying one of our `build.sh` scripts?) and share your machine with the world!
 
 

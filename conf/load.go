@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-const ConfigFileName = "docker.toml"
+const ConfigFileName = "docket.toml"
 
 //A generic interface for loading configuration.
 //Our implementation reads TOML files; roll your own!
