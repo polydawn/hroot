@@ -224,6 +224,12 @@ func TestPublishNewOrphanLineage(t *testing.T) {
 				"\n",
 			),
 		)
+
+		assert.Equal(
+			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
+			`{"Name":"b","Type":"F","Mode":640,"ModTime":"1970-01-01T00:00:00Z"}` + "\n",
+			g.cmd("show", "refs/heads/"+lineage+":"+".guitar").Output(),
+		)
 	})
 }
 
@@ -273,6 +279,13 @@ func TestPublishLinearExtensionToLineage(t *testing.T) {
 				g.cmd("ls-tree", "refs/heads/"+lineage, "d/d/z").Output(),
 				"\n",
 			),
+		)
+
+		assert.Equal(
+			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
+			`{"Name":"d/d/z","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
+			`{"Name":"e","Type":"F","Mode":755,"ModTime":"1970-01-01T00:00:00Z"}` + "\n",
+			g.cmd("show", "refs/heads/"+lineage+":"+".guitar").Output(),
 		)
 	})
 }
@@ -324,6 +337,13 @@ func TestPublishNewDerivedLineage(t *testing.T) {
 				g.cmd("ls-tree", "refs/heads/"+lineage, "d/d/z").Output(),
 				"\n",
 			),
+		)
+
+		assert.Equal(
+			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
+			`{"Name":"d/d/z","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
+			`{"Name":"e","Type":"F","Mode":755,"ModTime":"1970-01-01T00:00:00Z"}` + "\n",
+			g.cmd("show", "refs/heads/"+lineage+":"+".guitar").Output(),
 		)
 	})
 }
@@ -394,6 +414,13 @@ func TestPublishDerivativeExtensionToLineage(t *testing.T) {
 				g.cmd("ls-tree", "refs/heads/"+lineage, "d/d/").Output(),
 				"\n",
 			),
+		)
+
+		assert.Equal(
+			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
+			`{"Name":"d/d","Type":"D","Mode":755,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
+			`{"Name":"d/z","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n",
+			g.cmd("show", "refs/heads/"+lineage+":"+".guitar").Output(),
 		)
 	})
 }
