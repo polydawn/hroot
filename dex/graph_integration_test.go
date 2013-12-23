@@ -177,7 +177,7 @@ func fsSetB() *tar.Reader {
 	return tar.NewReader(&buf)
 }
 
-func TestNewOrphanLineage(t *testing.T) {
+func TestPublishNewOrphanLineage(t *testing.T) {
 	do(func() {
 		assert := assrt.NewAssert(t)
 
@@ -203,7 +203,7 @@ func TestNewOrphanLineage(t *testing.T) {
 	})
 }
 
-func TestLinearExtensionToLineage(t *testing.T) {
+func TestPublishLinearExtensionToLineage(t *testing.T) {
 	do(func() {
 		assert := assrt.NewAssert(t)
 
@@ -253,7 +253,7 @@ func TestLinearExtensionToLineage(t *testing.T) {
 	})
 }
 
-func TestNewDerivedLineage(t *testing.T) {
+func TestPublishNewDerivedLineage(t *testing.T) {
 	do(func() {
 		assert := assrt.NewAssert(t)
 
@@ -304,7 +304,7 @@ func TestNewDerivedLineage(t *testing.T) {
 	})
 }
 
-// func TestDerivativeExtensionToLineage(t *testing.T) {
+// func TestPublishDerivativeExtensionToLineage(t *testing.T) {
 // 	do(func() {
 // 		assert := assrt.NewAssert(t)
 
