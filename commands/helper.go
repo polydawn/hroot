@@ -222,7 +222,7 @@ func (d *Docket) Launch() {
 func (d *Docket) ExportBuild() error {
 	switch d.dest.scheme {
 		case "graph":
-			Println("Comitting to graph...")
+			Println("Committing to graph...")
 
 			//Don't give ancestor name to graph publish if source was not the graph.
 			ancestor := d.image.Upstream
