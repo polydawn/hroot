@@ -204,17 +204,17 @@ This will plug away for awhile (you're updating all the ubuntu packages!) and ac
 * Since there was no `--noop` flag this time, we ran the build step.
  * Check out the [build.sh] file in the current folder: it runs a couple scripts around apt-get.
 * After building, Docket saved our new image to the graph.
- * We now have a new branch name, starting with `docket.polydawn.net/ubuntu`.
+ * We now have a new branch name, starting with `example.com/ubuntu`.
 
 Your git log has a new commit listed:
 
 ```
 $ ( cd ../graph ; git log --graph --decorate )
 
-* commit 2a9c8a28220717790de7336d07f86e9857074509 (HEAD, docket.polydawn.net/ubuntu/12.04)
+* commit 2a9c8a28220717790de7336d07f86e9857074509 (HEAD, example.com/ubuntu/12.04)
 | Author: Your Name <you@example.com>
 |
-|     docket.polydawn.net/ubuntu/12.04 updated from index.docker.io/ubuntu/12.04
+|     example.com/ubuntu/12.04 updated from index.docker.io/ubuntu/12.04
 |
 * commit 7105d5622bf8118af1c13001f2b36d51a93f020e (index.docker.io/ubuntu/12.04)
   Author: Your Name <you@example.com>

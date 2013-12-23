@@ -92,7 +92,7 @@ func TestTomlParser(t *testing.T) {
 	//
 	f4 = `
 	[image]
-		name     = "docket.polydawn.net/ubuntu/12.04"
+		name     = "example.com/ubuntu/12.04"
 		index    = "ubuntu:12.04"
 		upstream = "index.docker.IO/ubuntu/12.04"
 	`
@@ -100,7 +100,7 @@ func TestTomlParser(t *testing.T) {
 			AddConfig(settings + f1 + f2, "..").
 			AddConfig(settings + f3 + f4, "." ).
 			GetConfig()
-	expect.Image.Name     = "docket.polydawn.net/ubuntu/12.04"
+	expect.Image.Name     = "example.com/ubuntu/12.04"
 	expect.Image.Index    = "ubuntu:12.04"
 	expect.Image.Upstream = "index.docker.IO/ubuntu/12.04"
 	assert.Equal(expect, *conf)
