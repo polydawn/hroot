@@ -4,7 +4,6 @@ package dex
 
 import (
 	"path/filepath"
-	"io/ioutil"
 	"bytes"
 	"os"
 	"archive/tar"
@@ -73,45 +72,6 @@ func TestNewGraphInitRejectedOnDeeper(t *testing.T) {
 		}()
 		NewGraph("deep/deeper")
 	})
-}
-
-func fwriteSetA(pth string) {
-	// file 'a' is just ascii text with normal permissions
-	if err := ioutil.WriteFile(
-		filepath.Join(pth, "a"),
-		[]byte{ 'a', 'b' },
-		0644,
-	); err != nil { panic(err); }
-
-	// file 'b' is binary with unusual permissions
-	if err := ioutil.WriteFile(
-		filepath.Join(pth, "b"),
-		[]byte{ 0x1, 0x2, 0x3 },
-		0640,
-	); err != nil { panic(err); }
-
-	// file 'd/d/d' is so dddeep
-	//TODO
-}
-
-func fwriteSetB(pth string) {
-	// file 'a' is unchanged
-	if err := ioutil.WriteFile(
-		filepath.Join(pth, "a"),
-		[]byte{ 'a', 'b' },
-		0644,
-	); err != nil { panic(err); }
-
-	// file 'b' is removed
-	// (you're just expected to have nuked the working tree before calling this)
-
-	// add an executable file
-	//TODO
-
-	// all of this is horseshit, and what you're really going to do is make a tar stream programatically, because that's the input guitar understands.
-
-	// file 'd/d/d' is renamed to 'd/e' and 'd/d' dropped
-	//TODO
 }
 
 func fsSetA() *tar.Reader {
