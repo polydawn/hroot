@@ -252,11 +252,6 @@ func (d *Docket) ExportBuild() error {
 			d.container.ExportToFilename(d.dest.path)
 	}
 
-	return nil
-}
-
-//Clean up after ourselves
-func (d *Docket) Cleanup() {
 	//Commit the image name to the docker cache.
 	//	This is so if you run:
 	//		docket build -s index  -d graph --noop
@@ -266,6 +261,11 @@ func (d *Docket) Cleanup() {
 	Println("Exporting to docker cache:", name, tag)
 	d.container.Commit(name, tag)
 
+	return nil
+}
+
+//Clean up after ourselves
+func (d *Docket) Cleanup() {
 	//Remove the container from cache if desired
 	if d.settings.Purge {
 		d.container.Purge()
