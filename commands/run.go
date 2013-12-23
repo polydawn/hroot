@@ -8,7 +8,7 @@ type RunCmdOpts struct {
 	Source      string `short:"s" long:"source" default:"graph" description:"Container source."`
 }
 
-const DefaultRunTarget = "default"
+const DefaultRunTarget = "run"
 
 //Runs a container
 func (opts *RunCmdOpts) Execute(args []string) error {

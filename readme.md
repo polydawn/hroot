@@ -1,15 +1,18 @@
 # Docket
 
-Docket provides transports for [Docker](https://www.docker.io/) images, and straightforward configuration files because launching should be one word.
+Docket provides transports and straightforward configuration files for [Docker](https://www.docker.io/).<br/>
+Strongly version your containers, then distribute them offline or over SSH & HTTP with git!
 
-With Docket, Docker's image storage is treated like a cache, and Docket manages your image storage and labeling.
-Docket then does the real image management with git as a backend, which gives you unlimited history, strong hashes to verify the integrity of your images, commit messages, and effortless secure transport over all the transports git supports.
-Docket also supports tars and the mainstream Docker http repositories, allowing you to freely use the most appropriate strategy for your situation.
+Docker's image storage is treated like a cache, while Docket manages your images using git as a persistent storage backend.
+Your containers now have effortless history, strong hashes to verify integrity, git commit messages, and secure transport.
 
+Further, ditch those long config flags and express them in a file instead.
+Docket looks for a `docker.toml` file in the current directory and sets up binds, mounts, etc.
+Add that file to your project's version control and get your entire team working on the same system.
 
 ## Quickstart
 
-Grab the latest [release](https://github.com/polydawn/docket/releases) and throw it on your path.
+Grab the latest [release](https://github.com/polydawn/docket/releases) and throw it on your path. Alternately, [build Docket from source](#building-from-source).
 
 ```bash
 # Clone down some example config files
@@ -25,54 +28,219 @@ docket build
 docket run bash
 ```
 
-Now you've got a git repository tracking ubuntu!
+You just built a git repo tracking ubuntu.
 
+A new (bare) repository called `graph` has appeared in the `boxen` folder.<br/>
+Push that anywhere and have your team clone it down!
 
 ## How do I use it?
 
-Docket configuration is recursive; each folder is a refinement of its parent.
-This allows you to express a complex, structured ecosystem in a natural way.
-[Boxen](https://github.com/polydawn/boxen) shows this off a bit by arranging example Docket files for various popular services.
+Docket provides two commands to help you maintain & use images: `build` and `run`.
 
-Configuration is split into targets, so changing from debug to production is a breeze. Check out an [example file](https://github.com/polydawn/boxen/blob/master/docker.toml).
+Using `build` will take an image from somewhere, execute a build step, and save the result.<br/>
+Using `run` just runs an (already-built) image.
 
-### Commands:
+### First steps
+
+To use Docket, you need a config file in the current directory called `docker.toml`.<br/>
+This file tracks all your image names and settings.
+
+Our Boxen repository has several examples, which we'll use for this tutorial.<br/>
+Clone it down if you haven't already:
+
+```bash
+# Clone down some prepared examples
+git clone https://github.com/polydawn/boxen.git && cd boxen
+```
+
+In the boxen folder, there's the first [config file](https://github.com/polydawn/boxen/blob/master/docker.toml).
+You'll notice there's only one section - `settings`.
+Here we set up a bunch of settings we want for pretty much every image: DNS servers, folder mounts, etc.
+
+Because Docket is smart, these settings apply to every image configured in Boxen.
+Docket scans up parent folders, looking for `docker.toml` files, and stops when it can't find one.
+Today, we'll be using ubuntu:
+
+```bash
+# Pop into the ubuntu folder
+cd ubuntu
+```
+
+You'll notice this next [config file](https://github.com/polydawn/boxen/blob/master/ubuntu/docker.toml) is different - it has *image* and *target* sections, with copious comments.<br/>
+We'll explain each in turn:
+
+### Image names
+
+The image section has three entries: *name*, *upstream*, and *index*.
+
 <table>
 	<tr>
-		<td>run</td>
-		<td>Launch a docker image.</td>
+		<th>Entry</th>
+		<th>Purpose</th>
 	</tr><tr>
-		<td>build</td>
-		<td>Do the same thing, then save the results somewhere.</td>
+	<tr>
+		<td>Name</td>
+		<td>
+			<p>The name of the image, and the name of the branch that ends up in git.</p>
+			<p>Example: <code>polydawn.net/ubuntu/12.04</code></p>
+		</td>
+	</tr>
+	<tr><tr>
+		<td>Upstream</td>
+		<td>
+			<p>This image's parent - where did it get built from? This is used by the build command.</p>
+
+			<p>Example: <code>index.docker.io/ubuntu/12.04</code>
+		</td>
+	</tr><tr>
+	<tr>
+		<td>Index</td>
+		<td>
+			<p><a href="https://index.docker.io">Docker index</a> names are not compatible with reasonable branch names.</p>
+
+			<p>A prime example is "ubuntu", which would be confusing without specifying the difference between an unmodified ubuntu and one you've saved in the graph.</p>
+
+			<p>For this reason, we store the upstream image's index alias separately, and <i>only</i> use that when pulling from the index.</p>
+
+			<p>Example: <code>ubuntu:12.04</code></p>
+		</td>
 	</tr>
 </table>
 
+### Targets
+
+Targets tell Docket what to do.
+They can be called anything, but two are special: `build` and `run`, which are the defaults used when you tell Docket to... build & run!
+
+Unlike the settings section, putting settings in a *target* only applies to that target.
+It does not affect other folders.
+
+You can put any setting in a target, but the most common usage is to set a different **command**. You'll notice that in the current folder, trying `docket run` will just echo out an example message, while `docket run bash` will launch a bash shell.
+
+Of course, neither will work right now - Docket can't find your image!
+We need to get ourselves an image.
+
+### Bootstrapping from the index
+
+Most of the time, you'll want to fork & version an image from the public docker index.
+We support plain tarballs as well (more on that later), but the index can be convenient.
+This is what the ubuntu [conf file](https://github.com/polydawn/boxen/blob/master/ubuntu/docker.toml) is ready to do.
+
+Try the following:
+
+```bash
+# Download ubuntu from public index, save into git
+docket build -s index -d graph --noop
+```
+
+This command accomplished a few things:
+
+* Docket chose the public index as the *source*, and looked there for an image called `ubuntu:12.04`
+* The `--noop` flag means we are just moving images around, so there was no build step. More on that later.
+* Once downloaded, Docket saved that image to the graph *destination*.
+ * Odds are you didn't have a graph repository, so Docket created one for you.
+
+You now have a (bare) git repository called `graph` in the `boxen` folder!<br/>
+If you check out the log, you'll have a single commit with the image's branch name:
+
+```
+* commit bd74adbb6b78d74ced2d6640c3557d411248e0be (HEAD, index.docker.io/ubuntu/12.04)
+  Author: Your Name <you@example.com>
+
+      index.docker.io/ubuntu/12.04 updated from index
+```
+
+You can push this repository anywhere & share it with the world.
+Whoever receives it can validate the hash and have a guarantee it's the same image.
+
 ### Sources & destinations:
+
+Our example used the index as a source and a local graph as the destination.
+Docket supports a few others:
+
 <table>
+<tr>
 	<tr>
-		<td>graph</td>
-		<td>A git repository used to version images <i>(default)</i></td>
+		<th>Type</th>
+		<th>Purpose</th>
 	</tr><tr>
 	<tr>
-		<td>file</td>
-		<td>A tarball created from docker export</td>
+		<td>Graph</td>
+		<td>A git repository used to version images. <i>(default)</i></td>
 	</tr><tr>
 	<tr>
-		<td>docker</td>
-		<td>The docker daemon</td>
+		<td>File</td>
+		<td>A tarball created from docker export.</td>
 	</tr><tr>
 	<tr>
-		<td>index</td>
-		<td>The <a href="https://index.docker.io">public index</a></td>
+		<td>Docker</td>
+		<td>The local docker daemon's cache.</td>
+	</tr><tr>
+	<tr>
+		<td>Index</td>
+		<td>The <a href="https://index.docker.io">public index</a>.</td>
 	</tr>
 </table>
 
 This makes it easy to load & save images in a variety of ways.
+Use the appropriate strategy for your situation.<br/>
+The default is `graph`; we added `-d graph` to the bootstrapping command to avoid confusion.
+
+### Building an image
+
+We're now ready to fork the image we downloaded and walk our own (strongly-versioned) path.
+
+```bash
+# Upgrade apt-get packages & save the new ubuntu image
+docket build
+```
+
+This will plug away for awhile (you're updating all the ubuntu packages!) and accomplish a few things:
+
+* Docket imported the image from the graph.
+ * The Docker daemon now knows about `index.docker.io/ubuntu`, not just `ubuntu`.
+* Since there was no `--noop` flag this time, we ran the build step.
+ * Check out the [build.sh] file in the current folder: it runs a couple scripts around apt-get.
+* After building, Docket saved our new image to the graph.
+ * We now have a new branch name, starting with `docket.polydawn.net/ubuntu`.
+
+Your git log has a new commit listed:
+
+```
+* commit 6320514a3a6bcb369153951b2b885f0e54cd2f7a (HEAD, docket.polydawn.net/ubuntu/12.04)
+| Author: Your Name <you@example.com>
+|
+|     docket.polydawn.net/ubuntu/12.04 updated from index.docker.io/ubuntu/12.04
+|
+* commit bd74adbb6b78d74ced2d6640c3557d411248e0be (index.docker.io/ubuntu/12.04)
+  Author: Your Name <you@example.com>
+
+      index.docker.io/ubuntu/12.04 updated from index
+```
+
+Notice how you now have two branches, named after their respective images.
+This git repository will track which image was built from where, using merges - an audit log, built into the log graph.
+
+Now you can play around with docket images. Launch a bash shell and experiment!
+
+```bash
+# Load repeatable ubuntu from git and start an interactive shell
+docket run bash
+```
+
+### What's next?
+
+From here, we strongly recommend playing around more with the example [Boxen](https://github.com/polydawn/boxen) folders.
+There's several images pre-configured there, for example a zero-config nginx server.
+Additions to that repository are welcome!
+
+When you're ready to use Docket with your own team, simply write your own `docker.toml` file and place it in a new folder.
+Build yourself an image (perhaps copying one of our `build.sh` scripts?) and share your machine with the world!
 
 
 ## Building from source
 
-To build Docket, you will need Go 1.1 or newer. We're using Go 1.2.
+To build Docket, you will need Go 1.2 or newer.
 Following the [golang instructions](http://golang.org/doc/install#bsd_linux) for 64-bit linux:
 
 ```bash
