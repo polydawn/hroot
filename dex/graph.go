@@ -149,20 +149,20 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 	ancestor, _ = SplitImageName(ancestor)
 
 	g.withTempTree(func(cmd Command) {
-		fmt.Println("starting publish", lineage, "<--", ancestor)
+		fmt.Println("Starting publish of ", lineage, " <-- ", ancestor)
 
 		// check if appropriate branches already exist, and make them if necesary
 		if strings.Count(g.cmd("branch", "--list", lineage).Output(), "\n") >= 1 {
-			fmt.Println("linage already existed")
+			fmt.Println("Lineage already existed.")
 			// this is an existing lineage
 			g.cmd("symbolic-ref", "HEAD", "refs/heads/"+lineage)()
 		} else {
 			// this is a new lineage
 			if ancestor == "" {
-				fmt.Println("new linage!  making orphan branch for it")
+				fmt.Println("New lineage!  Making orphan branch for it.")
 				g.cmd("checkout", "--orphan", lineage)()	//TODO: docket/image/
 			} else {
-				fmt.Println("new linage!  forking it from ancestor branch.")
+				fmt.Println("New lineage!  Forking it from ancestor branch.")
 				g.cmd("branch", lineage, ancestor)()
 				g.cmd("symbolic-ref", "HEAD", "refs/heads/"+lineage)()
 			}
