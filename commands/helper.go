@@ -144,9 +144,7 @@ func (d *Docket) StartDocker() {
 }
 
 //Behavior when docker cache has the image
-func (d *Docket) prepareCacheWithImage() {
-	image := d.image.Name
-
+func (d *Docket) prepareCacheWithImage(image string) {
 	switch d.source.scheme {
 		case "graph":
 			Println("Docker already has", image, "loaded, not importing from graph.")
@@ -166,9 +164,7 @@ func (d *Docket) prepareCacheWithImage() {
 }
 
 //Behavior when docker cache doesn't have the image
-func (d *Docket) prepareCacheWithoutImage() {
-	image := d.launchImage
-
+func (d *Docket) prepareCacheWithoutImage(image string) {
 	switch d.source.scheme {
 		case "docker":
 			//Can't continue; specified docker as source and it doesn't have it
@@ -191,19 +187,22 @@ func (d *Docket) prepareCacheWithoutImage() {
 
 //Prepare the docker cache
 func (d *Docket) PrepareCache() {
+	image := d.launchImage
+
 	//Behavior based on if the docker cache already has an image
-	if d.dock.CheckCache(d.image.Name) {
-		d.prepareCacheWithImage()
+	if d.dock.CheckCache(image) {
+		d.prepareCacheWithImage(image)
 	} else {
-		d.prepareCacheWithoutImage()
+		d.prepareCacheWithoutImage(image)
 	}
 
-	//Now that's taken care of, normal behavior
+	//Now that the docker cache has the image, run normal behavior
+	//Both these actions take place unconditionally, but warn the user if the cache is hot.
 	switch d.source.scheme  {
 		case "file":
-			d.dock.ImportFromFilenameTagstring(d.source.path, d.image.Name) //Load image from file
+			d.dock.ImportFromFilenameTagstring(d.source.path, image) //Load image from file
 		case "index":
-			d.dock.Pull(d.image.Index) //Download from index
+			d.dock.Pull(d.image.Index)
 	}
 }
 
