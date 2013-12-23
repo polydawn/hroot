@@ -76,7 +76,7 @@ func init() {
 
 		//Default settings
 		&BuildCmdOpts{
-			Source:      "graph",
+			Source:      "", //the build command needs to know if you explicity asked for a source, otherwise it will try some smart options.
 			Destination: "graph",
 		},
 	)

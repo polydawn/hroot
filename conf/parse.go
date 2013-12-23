@@ -4,6 +4,7 @@ package conf
 // Keeps our chosen file format isolated from the rest of the system.
 
 import (
+	"path/filepath"
 	"github.com/BurntSushi/toml"
 	. "polydawn.net/docket/util"
 )
@@ -26,6 +27,15 @@ func (p *TomlConfigParser) AddConfig(data, dir string) ConfigParser {
 
 	//Load image names
 	p.config.Image = conf.Image
+
+	//If image keys 'upstream' and 'index' are defined, reject.
+	if meta.IsDefined("image", "upstream") && meta.IsDefined("image", "index") {
+		//Try to report absolute directory
+		absDir, err := filepath.Abs(dir)
+		if err == nil { dir = absDir }
+
+		ExitGently("In", dir, ": Cannot define 'index' and 'upstream' in the same file. \nUse separate config files to produce different images.")
+	}
 
 	//Load any target settings
 	p.config.Targets = conf.Targets
