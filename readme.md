@@ -144,10 +144,12 @@ You now have a (bare) git repository called `graph` in the `boxen` folder!<br/>
 If you check out the log, you'll have a single commit with the image's branch name:
 
 ```
-* commit bd74adbb6b78d74ced2d6640c3557d411248e0be (HEAD, index.docker.io/ubuntu/12.04)
+$ ( cd ../graph ; git log --graph --decorate )
+
+* commit 7105d5622bf8118af1c13001f2b36d51a93f020e (index.docker.io/ubuntu/12.04)
   Author: Your Name <you@example.com>
 
-      index.docker.io/ubuntu/12.04 updated from index
+      index.docker.io/ubuntu/12.04 imported from an external source
 ```
 
 You can push this repository anywhere & share it with the world.
@@ -207,15 +209,17 @@ This will plug away for awhile (you're updating all the ubuntu packages!) and ac
 Your git log has a new commit listed:
 
 ```
-* commit 6320514a3a6bcb369153951b2b885f0e54cd2f7a (HEAD, docket.polydawn.net/ubuntu/12.04)
+$ ( cd ../graph ; git log --graph --decorate )
+
+* commit 2a9c8a28220717790de7336d07f86e9857074509 (HEAD, docket.polydawn.net/ubuntu/12.04)
 | Author: Your Name <you@example.com>
 |
 |     docket.polydawn.net/ubuntu/12.04 updated from index.docker.io/ubuntu/12.04
 |
-* commit bd74adbb6b78d74ced2d6640c3557d411248e0be (index.docker.io/ubuntu/12.04)
+* commit 7105d5622bf8118af1c13001f2b36d51a93f020e (index.docker.io/ubuntu/12.04)
   Author: Your Name <you@example.com>
 
-      index.docker.io/ubuntu/12.04 updated from index
+      index.docker.io/ubuntu/12.04 imported from an external source
 ```
 
 Notice how you now have two branches, named after their respective images.
