@@ -155,7 +155,8 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 		if strings.Count(g.cmd("branch", "--list", lineage).Output(), "\n") >= 1 {
 			fmt.Println("linage already existed")
 			// this is an existing lineage
-			//g.cmd("checkout", lineage)() //TODO: verify that we don't need to checkout here, don't think we should because of how we force merge, but add without a head might get startled
+			g.cmd("checkout", "-f", lineage)()
+			g.cmd("rm", "-r", ".")()
 		} else {
 			// this is a new lineage
 			if ancestor == "" {
@@ -164,7 +165,8 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 			} else {
 				fmt.Println("new linage!  forking it from ancestor branch.")
 				g.cmd("branch", lineage, ancestor)()
-				g.cmd("checkout", lineage)()
+				g.cmd("checkout", "-f", lineage)()
+				g.cmd("rm", "-r", ".")()
 			}
 		}
 

@@ -177,6 +177,70 @@ func fsSetB() *tar.Reader {
 	return tar.NewReader(&buf)
 }
 
+func fsSetA2() *tar.Reader {
+	var buf bytes.Buffer
+	fs := tar.NewWriter(&buf)
+
+	// file 'a' diffs from SetA
+	fs.WriteHeader(&tar.Header{
+		Name:     "a",
+		Mode:     0644,
+		Size:     3,
+		Typeflag: tar.TypeReg,
+	})
+	fs.Write([]byte{ 'a', '\n', 'b' })
+
+	// file 'b' is unchanged from SetA
+	fs.WriteHeader(&tar.Header{
+		Name:     "b",
+		Mode:     0640,
+		Size:     3,
+		Typeflag: tar.TypeReg,
+	})
+	fs.Write([]byte{ 0x1, 0x2, 0x3 })
+
+	fs.Close()
+	return tar.NewReader(&buf)
+}
+
+func fsSetC() *tar.Reader {
+	var buf bytes.Buffer
+	fs := tar.NewWriter(&buf)
+
+	// file 'a' diffs from SetA (and from SetA2, differently)
+	fs.WriteHeader(&tar.Header{
+		Name:     "a",
+		Mode:     0644,
+		Size:     3,
+		Typeflag: tar.TypeReg,
+	})
+	fs.Write([]byte{ 'a', '\n', 'c' })
+
+	// file 'b' is still gone
+
+	// file 'e' is deleted from SetB
+
+	// file 'd/d/z' is renamed to 'd/z'
+	fs.WriteHeader(&tar.Header{
+		Name:     "d/z",
+		Mode:     0644,
+		Size:     2,
+		Typeflag: tar.TypeReg,
+	})
+	fs.Write([]byte{ 'z', '\n' })
+
+	// and and 'd/d' is *still around* as a (empty!) dir
+	fs.WriteHeader(&tar.Header{
+		Name:     "d/d",
+		Mode:     0755,
+		Typeflag: tar.TypeDir,
+	})
+	fs.Write([]byte{ 'z', '\n' })	//FIXME: heh
+
+	fs.Close()
+	return tar.NewReader(&buf)
+}
+
 func TestPublishNewOrphanLineage(t *testing.T) {
 	do(func() {
 		assert := assrt.NewAssert(t)
@@ -304,10 +368,72 @@ func TestPublishNewDerivedLineage(t *testing.T) {
 	})
 }
 
-// func TestPublishDerivativeExtensionToLineage(t *testing.T) {
-// 	do(func() {
-// 		assert := assrt.NewAssert(t)
+func TestPublishDerivativeExtensionToLineage(t *testing.T) {
+	do(func() {
+		assert := assrt.NewAssert(t)
 
-// 		//TODO
-// 	})
-// }
+		g := NewGraph(".")
+		lineage := "ferk"
+		ancestor := "line"
+
+		// original ancestor import
+		g.Publish(
+			ancestor,
+			"",
+			&GraphStoreRequest_Tar{
+				Tarstream: fsSetA(),
+			},
+		)
+
+		// derive 1
+		g.Publish(
+			lineage,
+			ancestor,
+			&GraphStoreRequest_Tar{
+				Tarstream: fsSetB(),
+			},
+		)
+
+		// advance the ancestor
+		g.Publish(
+			ancestor,
+			ancestor,
+			&GraphStoreRequest_Tar{
+				Tarstream: fsSetA2(),
+			},
+		)
+
+		// advance the derived from the updated ancestor
+		g.Publish(
+			lineage,
+			ancestor,
+			&GraphStoreRequest_Tar{
+				Tarstream: fsSetC(),
+			},
+		)
+
+		assert.Equal(
+			3,
+			strings.Count(
+				g.cmd("ls-tree", "refs/heads/"+lineage).Output(),
+				"\n",
+			),
+		)
+
+		assert.Equal(
+			1,	// has the file.  git itself still doesn't see dirs; just guitar does that.
+			strings.Count(
+				g.cmd("ls-tree", "refs/heads/"+lineage, "d/").Output(),
+				"\n",
+			),
+		)
+
+		assert.Equal(
+			0,	// nothing here.  git itself still doesn't see dirs; just guitar does that.
+			strings.Count(
+				g.cmd("ls-tree", "refs/heads/"+lineage, "d/d/").Output(),
+				"\n",
+			),
+		)
+	})
+}
