@@ -115,9 +115,10 @@ Targets tell Docket what to do.
 They can be called anything, but two are special: `build` and `run`, which are the defaults used when you tell Docket to... build & run!
 
 Unlike the settings section, putting settings in a *target* only applies to that target.
-It does not affect other folders.
+It does not affect other folders.<br/>
+You can put any setting in a target, but the most common usage is to set a different **command**. 
 
-You can put any setting in a target, but the most common usage is to set a different **command**. You'll notice that in the current folder, trying `docket run` will just echo out an example message, while `docket run bash` will launch a bash shell.
+You'll notice that in the current folder, trying `docket run` will just echo out an example message, while `docket run bash` will launch a bash shell.
 
 Of course, neither will work right now - Docket can't find your image!
 We need to get ourselves an image.
