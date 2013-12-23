@@ -23,6 +23,11 @@ type Graph struct {
 	cmd Command
 }
 
+// strap this in only sometimes -- some git commands need this prefix to be explicit about branches instead of tags; others refuse it because they're already forcibly about branches.
+const git_branch_ref_prefix = "refs/heads/"
+const docket_ref_prefix = "docket/"
+const docket_image_ref_prefix = docket_ref_prefix+"image/"
+
 /*
 	Loads a Graph if there is a git repo initialized at the given dir; returns nil if a graph repo not found.
 	The dir must be the root of the working tree of the git dir.
@@ -72,7 +77,7 @@ func NewGraph(dir string) *Graph {
 	g.withTempTree(func (cmd Command) {
 		// set up basic repo to identify as graph repo
 		cmd("commit", "--allow-empty", "-mdocket")()
-		cmd("checkout", "-b", "docket/init")()
+		cmd("checkout", "-b", docket_ref_prefix+"init")()
 
 		// discard master branch.  a docket graph has no real use for it.
 		cmd("branch", "-D", "master")()
@@ -152,19 +157,19 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 		fmt.Println("Starting publish of ", lineage, " <-- ", ancestor)
 
 		// check if appropriate branches already exist, and make them if necesary
-		if strings.Count(g.cmd("branch", "--list", lineage).Output(), "\n") >= 1 {
+		if strings.Count(g.cmd("branch", "--list", docket_image_ref_prefix+lineage).Output(), "\n") >= 1 {
 			fmt.Println("Lineage already existed.")
 			// this is an existing lineage
-			g.cmd("symbolic-ref", "HEAD", "refs/heads/"+lineage)()
+			g.cmd("symbolic-ref", "HEAD", git_branch_ref_prefix+docket_image_ref_prefix+lineage)()
 		} else {
 			// this is a new lineage
 			if ancestor == "" {
 				fmt.Println("New lineage!  Making orphan branch for it.")
-				g.cmd("checkout", "--orphan", lineage)()	//TODO: docket/image/
+				g.cmd("checkout", "--orphan", docket_image_ref_prefix+lineage)()
 			} else {
 				fmt.Println("New lineage!  Forking it from ancestor branch.")
-				g.cmd("branch", lineage, ancestor)()
-				g.cmd("symbolic-ref", "HEAD", "refs/heads/"+lineage)()
+				g.cmd("branch", docket_image_ref_prefix+lineage, docket_image_ref_prefix+ancestor)()
+				g.cmd("symbolic-ref", "HEAD", git_branch_ref_prefix+docket_image_ref_prefix+lineage)()
 			}
 		}
 		g.cmd("reset")
@@ -219,7 +224,10 @@ func (g *Graph) forceMerge(source string, target string) {
 	}
 	commitTreeCmd := g.cmd("commit-tree", writeTree, Opts{In: commitMsg})
 	if source != "" {
-		commitTreeCmd = commitTreeCmd("-p", source, "-p", target)
+		commitTreeCmd = commitTreeCmd(
+			"-p", git_branch_ref_prefix+docket_image_ref_prefix+source,
+			"-p", git_branch_ref_prefix+docket_image_ref_prefix+target,
+		)
 	}
 	mergeTree := strings.Trim(commitTreeCmd.Output(), "\n")
 	g.cmd("merge", "-q", mergeTree)()
