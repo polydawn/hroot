@@ -126,7 +126,7 @@ We need to get ourselves an image.
 
 Most of the time, you'll want to fork & version an image from the public docker index.
 We support plain tarballs as well (more on that later), but the index can be convenient.
-This is what the index-ubuntu [conf file](https://github.com/polydawn/boxen/blob/master/ubuntu-index/docket.toml) is ready to do.
+This is what the index [conf file](https://github.com/polydawn/boxen/blob/master/ubuntu-index/docket.toml) is ready to do.
 
 Try the following:
 
