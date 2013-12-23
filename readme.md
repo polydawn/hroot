@@ -269,14 +269,6 @@ Lots of examples are available over at [Boxen](https://github.com/polydawn/boxen
 ## Installing Docker
 
 Docket uses [Docker](https://www.docker.io/), an excellent container helper based on LXC.
-This gives Docket all that containerization mojo. We're using Docker 0.6.3 right now.
-From their [instructions](http://docs.docker.io/en/latest/installation/ubuntulinux/) for Ubuntu 13.04:
+This gives Docket all that containerization mojo. We're using Docker 0.7.2 right now.
 
-```bash
-sudo apt-get update
-sudo apt-get install linux-image-extra-`uname -r`
-sudo sh -c "wget -qO- https://get.docker.io/gpg | apt-key add -"
-sudo sh -c "echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list"
-sudo apt-get update
-sudo apt-get install lxc-docker
-```
+Docker offers a variety of [installation instructions](http://docs.docker.io/en/latest/installation/) on their site.
