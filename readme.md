@@ -45,7 +45,7 @@ Using `run` just runs an (already-built) image.
 To use Docket, you need a config file in the current directory called `docket.toml`.<br/>
 This file tracks all your image names and settings.
 
-Our Boxen repository has several examples, which we'll use for this tutorial.<br/>
+Our [Boxen](https://github.com/polydawn/boxen) repository has several examples, which we'll use for this tutorial.<br/>
 Clone it down if you haven't already:
 
 ```bash
