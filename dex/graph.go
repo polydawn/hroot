@@ -155,8 +155,7 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 		if strings.Count(g.cmd("branch", "--list", lineage).Output(), "\n") >= 1 {
 			fmt.Println("linage already existed")
 			// this is an existing lineage
-			g.cmd("checkout", "-f", lineage)()
-			g.cmd("rm", "-r", ".")()
+			g.cmd("symbolic-ref", "HEAD", "refs/heads/"+lineage)()
 		} else {
 			// this is a new lineage
 			if ancestor == "" {
@@ -165,10 +164,10 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 			} else {
 				fmt.Println("new linage!  forking it from ancestor branch.")
 				g.cmd("branch", lineage, ancestor)()
-				g.cmd("checkout", "-f", lineage)()
-				g.cmd("rm", "-r", ".")()
+				g.cmd("symbolic-ref", "HEAD", "refs/heads/"+lineage)()
 			}
 		}
+		g.cmd("reset")
 
 		// apply the GraphStoreRequest to unpack the fs (read from fs.tarReader, essentially)
 		gr.place(".")	//TODO: verify that a relative path here is safe, or just replace is os.Getwd again.
