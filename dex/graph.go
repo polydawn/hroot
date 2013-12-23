@@ -164,6 +164,7 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 			} else {
 				fmt.Println("new linage!  forking it from ancestor branch.")
 				g.cmd("branch", lineage, ancestor)()
+				g.cmd("checkout", lineage)()
 			}
 		}
 

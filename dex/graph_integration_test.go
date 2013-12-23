@@ -253,13 +253,56 @@ func TestLinearExtensionToLineage(t *testing.T) {
 	})
 }
 
-// func TestNewDerivedLineage(t *testing.T) {
-// 	do(func() {
-// 		assert := assrt.NewAssert(t)
+func TestNewDerivedLineage(t *testing.T) {
+	do(func() {
+		assert := assrt.NewAssert(t)
 
-// 		//TODO
-// 	})
-// }
+		g := NewGraph(".")
+		lineage := "ferk"
+		ancestor := "line"
+
+		g.Publish(
+			ancestor,
+			"",
+			&GraphStoreRequest_Tar{
+				Tarstream: fsSetA(),
+			},
+		)
+
+		g.Publish(
+			lineage,
+			ancestor,
+			&GraphStoreRequest_Tar{
+				Tarstream: fsSetB(),
+			},
+		)
+
+		println(g.cmd("ls-tree", "refs/heads/"+lineage).Output())
+		assert.Equal(
+			4,
+			strings.Count(
+				g.cmd("ls-tree", "refs/heads/"+lineage).Output(),
+				"\n",
+			),
+		)
+
+		assert.Equal(
+			1,	// shows a tree
+			strings.Count(
+				g.cmd("ls-tree", "refs/heads/"+lineage, "d/d").Output(),
+				"\n",
+			),
+		)
+
+		assert.Equal(
+			1,	// shows the file
+			strings.Count(
+				g.cmd("ls-tree", "refs/heads/"+lineage, "d/d/z").Output(),
+				"\n",
+			),
+		)
+	})
+}
 
 // func TestDerivativeExtensionToLineage(t *testing.T) {
 // 	do(func() {
