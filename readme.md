@@ -40,6 +40,21 @@ Docket provides two commands to help you maintain & use images: `build` and `run
 Using `build` will take an image from somewhere, execute a build step, and save the result.<br/>
 Using `run` just runs an (already-built) image.
 
+### Getting started
+
+First you'll need Docker, which you can get via their [installation instructions](http://docs.docker.io/en/latest/installation/).<br/>
+Next, [download Docket](https://github.com/polydawn/docket/releases) and place it on your path:
+
+```bash
+# Run this from your download directory
+sudo cp ./docket /usr/bin/docket
+
+# Test that it's working
+docket version
+```
+
+Running containers with Docket requires root, so you'll need to use sudo or launch a root shell for most commands. You'll also need a running Docker server - if you followed the linked instructions, one should already be running for you. Docket tries to use the default server first, and starts one for you if it can't find one.
+
 ### First steps
 
 To use Docket, you need a config file in the current directory called `docket.toml`.<br/>
@@ -116,7 +131,7 @@ They can be called anything, but two are special: `build` and `run`, which are t
 
 Unlike the settings section, putting settings in a *target* only applies to that target.
 It does not affect other folders.<br/>
-You can put any setting in a target, but the most common usage is to set a different **command**. 
+You can put any setting in a target, but the most common usage is to set a different **command**.
 
 You'll notice that in the current folder, trying `docket run` will just echo out an example message, while `docket run bash` will launch a bash shell.
 
