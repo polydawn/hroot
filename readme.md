@@ -43,17 +43,17 @@ Using `run` just runs an (already-built) image.
 ### Getting started
 
 First you'll need Docker, which you can get via their [installation instructions](http://docs.docker.io/en/latest/installation/).<br/>
-Next, [download Docket](https://github.com/polydawn/docket/releases) and place it on your path:
+Next, [download Hroot](https://github.com/polydawn/hroot/releases) and place it on your path:
 
 ```bash
 # Run this from your download directory
-sudo cp ./docket /usr/bin/docket
+sudo cp ./hroot /usr/bin/hroot
 
 # Test that it's working
-docket version
+hroot version
 ```
 
-Running containers with Docket requires root, so you'll need to use sudo or launch a root shell for most commands. You'll also need a running Docker server - if you followed the linked instructions, one should already be running for you. Docket tries to use the default server first, and starts one for you if it can't find one.
+Running containers with Hroot requires root, so you'll need to use sudo or launch a root shell for most commands. You'll also need a running Docker server - if you followed the linked instructions, one should already be running for you. Hroot tries to use the default server first, and starts one for you if it can't find one.
 
 ### First steps
 
