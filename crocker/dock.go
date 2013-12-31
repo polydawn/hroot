@@ -127,7 +127,7 @@ func (dock *Dock) awaitSocket(patience time.Duration) error {
 		} else if err != nil {
 			panic(err)
 		} else if (sockStat.Mode() & os.ModeSocket) != 0 {
-			// still have to check if it's dialable; docker daemon doesn't even try to remove socket files when it's done.
+			// still have to check if it's dialable; the daemon can't reliably cleanup its socket when terminated.
 			dial, err := net.Dial("unix", dock.GetSockPath())
 			if err == nil {
 				// success!
