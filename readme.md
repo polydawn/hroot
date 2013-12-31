@@ -3,7 +3,7 @@
 Docket provides transports and straightforward configuration files for [Docker](https://www.docker.io/).<br/>
 Strongly version your containers, then distribute them offline or over SSH & HTTP with git!
 
-Docker's image storage is treated like a cache, while Docket manages your images using git as a persistent storage backend.
+Docker's image storage relies on the local filesystem for persistence, while Docket manages your images using git as a persistent storage backend.
 Your containers now have effortless history, strong hashes to verify integrity, git commit messages, and secure transport.
 
 Further, ditch those long config flags and express them in a file instead.
