@@ -10,6 +10,6 @@ type VersionCmdOpts struct { }
 
 //Version command
 func (opts *VersionCmdOpts) Execute(args []string) error {
-	Println("docket version", Version)
+	Println("hroot version", Version)
 	return nil
 }

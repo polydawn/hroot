@@ -13,15 +13,15 @@ const DefaultRunTarget = "run"
 //Runs a container
 func (opts *RunCmdOpts) Execute(args []string) error {
 	//Load settings
-	docket := LoadDocket(args, DefaultRunTarget, opts.Source, "")
-	Println("Running", docket.image.Name)
-	docket.PrepareInput()
+	hroot := LoadDocket(args, DefaultRunTarget, opts.Source, "")
+	Println("Running", hroot.image.Name)
+	hroot.PrepareInput()
 
 	//Start or connect to a docker daemon
-	docket.StartDocker()
-	docket.PrepareCache()
-	docket.Launch()
+	hroot.StartDocker()
+	hroot.PrepareCache()
+	hroot.Launch()
 
-	docket.Cleanup()
+	hroot.Cleanup()
 	return nil
 }

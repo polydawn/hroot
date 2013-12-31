@@ -6,7 +6,7 @@ package conf
 import (
 	"path/filepath"
 	"github.com/BurntSushi/toml"
-	. "polydawn.net/docket/util"
+	. "polydawn.net/hroot/util"
 )
 
 type TomlConfigParser struct {

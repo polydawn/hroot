@@ -189,7 +189,7 @@ func (dock *Dock) Slay() {
 		dock.sock.Close()
 	}
 
-	//Kill the daemon if docket started it
+	//Kill the daemon if hroot started it
 	if dock.isMine {
 		Sh("bash")("-c")(DefaultIO)("kill `cat \""+dock.GetPidfilePath()+"\"`")()
 	}

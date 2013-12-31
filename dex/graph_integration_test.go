@@ -28,7 +28,7 @@ func assertLegitGraph(assert *assrt.Assert, g *Graph) {
 	gstat, _ := os.Stat(filepath.Join(g.dir))
 	assert.True(gstat.IsDir())
 
-	assert.True(g.HasBranch("docket/init"))
+	assert.True(g.HasBranch("hroot/init"))
 
 	assert.Equal(
 		"",

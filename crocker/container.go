@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 	. "polydawn.net/pogo/gosh"
-	. "polydawn.net/docket/util"
+	. "polydawn.net/hroot/util"
 )
 
 /*

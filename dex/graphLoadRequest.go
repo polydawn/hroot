@@ -3,7 +3,7 @@ package dex;
 import (
 	"archive/tar"
 	"io"
-	"polydawn.net/docket/crocker"
+	"polydawn.net/hroot/crocker"
 	"polydawn.net/guitar/stream"
 	"sync"
 )

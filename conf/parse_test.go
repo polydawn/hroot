@@ -33,7 +33,7 @@ func TestTomlParser(t *testing.T) {
 		dns = [ "8.8.8.8" ]
 
 		# What container folder to start in
-		folder = "/docket"
+		folder = "/hroot"
 
 		# Interactive mode
 		attach = true
@@ -46,7 +46,7 @@ func TestTomlParser(t *testing.T) {
 		GetConfig()
 	expect := DefaultConfiguration //Use default fields with a few exceptions
 	expect.Settings.DNS = []string{ "8.8.8.8" }
-	expect.Settings.Folder = "/docket"
+	expect.Settings.Folder = "/hroot"
 	expect.Settings.Attach = true
 	expect.Settings.Purge = true
 	assert.Equal(expect, *conf)
@@ -60,7 +60,7 @@ func TestTomlParser(t *testing.T) {
 		#	(host folder, container folder, 'ro' or 'rw' permissions)
 		mounts = [
 			[ ".../", "/boxen",    "ro"],  # The top folder
-			[ "./",   "/docket",   "rw"],  # The current folder
+			[ "./",   "/hroot",   "rw"],  # The current folder
 		]
 	`
 	conf = parser().
@@ -68,7 +68,7 @@ func TestTomlParser(t *testing.T) {
 		GetConfig()
 	expect.Settings.Mounts = [][]string{
 		[]string{ nwd, "/boxen",  "ro" },
-		[]string{ cwd, "/docket", "rw" },
+		[]string{ cwd, "/hroot", "rw" },
 	}
 	assert.Equal(expect, *conf)
 
