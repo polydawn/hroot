@@ -9,6 +9,7 @@ import (
 	"polydawn.net/hroot/crocker"
 	"polydawn.net/hroot/dex"
 	. "polydawn.net/hroot/util"
+	guitarconf "polydawn.net/guitar/conf"
 )
 
 //Holds everything needed to load/save docker images
@@ -228,7 +229,7 @@ func (d *Hroot) Launch() {
 }
 
 //Prepare the hroot export
-func (d *Hroot) ExportBuild() error {
+func (d *Hroot) ExportBuild(forceEpoch bool) error {
 	switch d.dest.scheme {
 		case "graph":
 			Println("Committing to graph...")
@@ -244,6 +245,9 @@ func (d *Hroot) ExportBuild() error {
 				ancestor,
 				&dex.GraphStoreRequest_Container{
 					Container: d.container,
+					Settings: guitarconf.Settings{
+						Epoch: forceEpoch,
+					},
 				},
 			)
 		case "file":
