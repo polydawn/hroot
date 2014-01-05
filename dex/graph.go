@@ -189,10 +189,15 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 func (g *Graph) Load(lineage string, gr GraphLoadRequest) (hash string) {
 	lineage, _ = SplitImageName(lineage) //Handle tags
 
+	//Check if the image is in the graph so we can generate a relatively friendly error message
+	if !g.HasBranch(docket_image_ref_prefix+lineage) {	//HALP
+		util.ExitGently("Image branch name", lineage, "not found in graph.")
+	}
+
 	g.withTempTree(func(cmd Command) {
 		// checkout lineage.
 		// "-f" because otherwise if git thinks we already had this branch checked out, this working tree is just chock full of deletes.
-		g.cmd("checkout", "-f", lineage)()
+		g.cmd("checkout", "-f", git_branch_ref_prefix+docket_image_ref_prefix+lineage)()
 
 		// the gr consumes this filesystem and shoves it at whoever it deals with; we're actually hands free after handing over a dir.
 		gr.receive(".")
@@ -236,7 +241,7 @@ func (g *Graph) forceMerge(source string, target string) {
 //Checks if the graph has a branch.
 func (g *Graph) HasBranch(branch string) bool {
 	//Git magic is involved. Response will be of non-zero length if branch exists.
-	result := g.cmd("ls-remote", ".", "refs/heads/" + branch).Output()
+	result := g.cmd("ls-remote", ".", git_branch_ref_prefix + branch).Output()
 	return len(result) > 0
 }
 

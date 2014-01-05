@@ -180,11 +180,6 @@ func (d *Hroot) prepareCacheWithoutImage(image string) {
 			//Can't continue; specified docker as source and it doesn't have it
 			ExitGently("Docker does not have", image, "loaded.")
 		case "graph":
-			//Check if the image is in the graph
-			if !d.source.graph.HasBranch(image) {
-				ExitGently("Image branch name", image, "not found in graph.")
-			}
-
 			d.dest.graph.Load(
 				image,
 				&dex.GraphLoadRequest_Image{
