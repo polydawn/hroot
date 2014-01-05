@@ -19,11 +19,11 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 	sourceEmpty := false
 	if opts.Source == "" {
 		sourceEmpty = true
-		opts.Source = "graph" //set this so LoadDocket runs correctly
+		opts.Source = "graph" //set this so LoadHroot runs correctly
 	}
 
 	//Load settings
-	hroot := LoadDocket(args, DefaultBuildTarget, opts.Source, opts.Destination)
+	hroot := LoadHroot(args, DefaultBuildTarget, opts.Source, opts.Destination)
 
 	//We're building; launch upstream image
 	hroot.launchImage = hroot.image.Upstream

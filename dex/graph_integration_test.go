@@ -225,7 +225,7 @@ func TestPublishNewOrphanLineage(t *testing.T) {
 		assert.Equal(
 			3,
 			strings.Count(
-				g.cmd("ls-tree", git_branch_ref_prefix+docket_image_ref_prefix+lineage).Output(),
+				g.cmd("ls-tree", git_branch_ref_prefix+hroot_image_ref_prefix+lineage).Output(),
 				"\n",
 			),
 		)
@@ -233,7 +233,7 @@ func TestPublishNewOrphanLineage(t *testing.T) {
 		assert.Equal(
 			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-12T13:48:20Z"}` + "\n" +
 			`{"Name":"b","Type":"F","Mode":640}` + "\n",
-			g.cmd("show", git_branch_ref_prefix+docket_image_ref_prefix+lineage+":"+".guitar").Output(),
+			g.cmd("show", git_branch_ref_prefix+hroot_image_ref_prefix+lineage+":"+".guitar").Output(),
 		)
 	})
 }
@@ -265,7 +265,7 @@ func TestPublishLinearExtensionToLineage(t *testing.T) {
 		assert.Equal(
 			4,
 			strings.Count(
-				g.cmd("ls-tree", git_branch_ref_prefix+docket_image_ref_prefix+lineage).Output(),
+				g.cmd("ls-tree", git_branch_ref_prefix+hroot_image_ref_prefix+lineage).Output(),
 				"\n",
 			),
 		)
@@ -273,7 +273,7 @@ func TestPublishLinearExtensionToLineage(t *testing.T) {
 		assert.Equal(
 			1,	// shows a tree
 			strings.Count(
-				g.cmd("ls-tree", git_branch_ref_prefix+docket_image_ref_prefix+lineage, "d/d").Output(),
+				g.cmd("ls-tree", git_branch_ref_prefix+hroot_image_ref_prefix+lineage, "d/d").Output(),
 				"\n",
 			),
 		)
@@ -281,7 +281,7 @@ func TestPublishLinearExtensionToLineage(t *testing.T) {
 		assert.Equal(
 			1,	// shows the file
 			strings.Count(
-				g.cmd("ls-tree", git_branch_ref_prefix+docket_image_ref_prefix+lineage, "d/d/z").Output(),
+				g.cmd("ls-tree", git_branch_ref_prefix+hroot_image_ref_prefix+lineage, "d/d/z").Output(),
 				"\n",
 			),
 		)
@@ -290,7 +290,7 @@ func TestPublishLinearExtensionToLineage(t *testing.T) {
 			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-12T13:48:20Z"}` + "\n" +
 			`{"Name":"d/d/z","Type":"F","Mode":644}` + "\n" +
 			`{"Name":"e","Type":"F","Mode":755}` + "\n",
-			g.cmd("show", git_branch_ref_prefix+docket_image_ref_prefix+lineage+":"+".guitar").Output(),
+			g.cmd("show", git_branch_ref_prefix+hroot_image_ref_prefix+lineage+":"+".guitar").Output(),
 		)
 	})
 }
@@ -319,11 +319,11 @@ func TestPublishNewDerivedLineage(t *testing.T) {
 			},
 		)
 
-		println(g.cmd("ls-tree", git_branch_ref_prefix+docket_image_ref_prefix+lineage).Output())
+		println(g.cmd("ls-tree", git_branch_ref_prefix+hroot_image_ref_prefix+lineage).Output())
 		assert.Equal(
 			4,
 			strings.Count(
-				g.cmd("ls-tree", git_branch_ref_prefix+docket_image_ref_prefix+lineage).Output(),
+				g.cmd("ls-tree", git_branch_ref_prefix+hroot_image_ref_prefix+lineage).Output(),
 				"\n",
 			),
 		)
@@ -331,7 +331,7 @@ func TestPublishNewDerivedLineage(t *testing.T) {
 		assert.Equal(
 			1,	// shows a tree
 			strings.Count(
-				g.cmd("ls-tree", git_branch_ref_prefix+docket_image_ref_prefix+lineage, "d/d").Output(),
+				g.cmd("ls-tree", git_branch_ref_prefix+hroot_image_ref_prefix+lineage, "d/d").Output(),
 				"\n",
 			),
 		)
@@ -339,7 +339,7 @@ func TestPublishNewDerivedLineage(t *testing.T) {
 		assert.Equal(
 			1,	// shows the file
 			strings.Count(
-				g.cmd("ls-tree", git_branch_ref_prefix+docket_image_ref_prefix+lineage, "d/d/z").Output(),
+				g.cmd("ls-tree", git_branch_ref_prefix+hroot_image_ref_prefix+lineage, "d/d/z").Output(),
 				"\n",
 			),
 		)
@@ -348,7 +348,7 @@ func TestPublishNewDerivedLineage(t *testing.T) {
 			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-12T13:48:20Z"}` + "\n" +
 			`{"Name":"d/d/z","Type":"F","Mode":644}` + "\n" +
 			`{"Name":"e","Type":"F","Mode":755}` + "\n",
-			g.cmd("show", git_branch_ref_prefix+docket_image_ref_prefix+lineage+":"+".guitar").Output(),
+			g.cmd("show", git_branch_ref_prefix+hroot_image_ref_prefix+lineage+":"+".guitar").Output(),
 		)
 	})
 }
@@ -400,7 +400,7 @@ func TestPublishDerivativeExtensionToLineage(t *testing.T) {
 		assert.Equal(
 			3,
 			strings.Count(
-				g.cmd("ls-tree", git_branch_ref_prefix+docket_image_ref_prefix+lineage).Output(),
+				g.cmd("ls-tree", git_branch_ref_prefix+hroot_image_ref_prefix+lineage).Output(),
 				"\n",
 			),
 		)
@@ -408,7 +408,7 @@ func TestPublishDerivativeExtensionToLineage(t *testing.T) {
 		assert.Equal(
 			1,	// has the file.  git itself still doesn't see dirs; just guitar does that.
 			strings.Count(
-				g.cmd("ls-tree", git_branch_ref_prefix+docket_image_ref_prefix+lineage, "d/").Output(),
+				g.cmd("ls-tree", git_branch_ref_prefix+hroot_image_ref_prefix+lineage, "d/").Output(),
 				"\n",
 			),
 		)
@@ -416,7 +416,7 @@ func TestPublishDerivativeExtensionToLineage(t *testing.T) {
 		assert.Equal(
 			0,	// nothing here.  git itself still doesn't see dirs; just guitar does that.
 			strings.Count(
-				g.cmd("ls-tree", git_branch_ref_prefix+docket_image_ref_prefix+lineage, "d/d/").Output(),
+				g.cmd("ls-tree", git_branch_ref_prefix+hroot_image_ref_prefix+lineage, "d/d/").Output(),
 				"\n",
 			),
 		)
@@ -425,7 +425,7 @@ func TestPublishDerivativeExtensionToLineage(t *testing.T) {
 			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-03-01T00:41:40Z"}` + "\n" +
 			`{"Name":"d/d","Type":"D","Mode":755}` + "\n" +
 			`{"Name":"d/z","Type":"F","Mode":644}` + "\n",
-			g.cmd("show", git_branch_ref_prefix+docket_image_ref_prefix+lineage+":"+".guitar").Output(),
+			g.cmd("show", git_branch_ref_prefix+hroot_image_ref_prefix+lineage+":"+".guitar").Output(),
 		)
 	})
 }

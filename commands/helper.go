@@ -39,7 +39,7 @@ type Hroot struct {
 }
 
 //Create a hroot struct
-func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Hroot {
+func LoadHroot(args []string, defaultTarget, sourceURI, destURI string) *Hroot {
 	//If there was no target specified, override it
 	target   := GetTarget(args, defaultTarget)
 
@@ -92,7 +92,7 @@ func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Hroot 
 func (d *Hroot) PrepareInput() {
 
 	//If you're using an index key with a non-index source, or upstream key with index source, reject.
-	//Runs here (not LoadDocket) so commands have a chance to change settings.
+	//Runs here (not LoadHroot) so commands have a chance to change settings.
 	if d.source.scheme == "index" && d.image.Index == "" {
 		ExitGently("You asked to pull from the index but have no index key configured.")
 	} else if d.source.scheme != "index" && d.image.Upstream == "" {

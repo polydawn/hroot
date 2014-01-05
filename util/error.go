@@ -6,22 +6,22 @@ import (
 
 //Errors
 
-type DocketError struct {
+type HrootError struct {
 	cause error
 	message string
 }
 
 //Returns nested error
-func (err DocketError) Cause() error {
+func (err HrootError) Cause() error {
 	return err.cause
 }
 
 //Golang stdlib func
-func (err DocketError) Error() string {
+func (err HrootError) Error() string {
 	return err.message
 }
 
 //Sugar
 func ExitGently(a ...interface{}) {
-	panic(DocketError{message: Sprintln(a...)})
+	panic(HrootError{message: Sprintln(a...)})
 }

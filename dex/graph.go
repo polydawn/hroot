@@ -25,8 +25,8 @@ type Graph struct {
 
 // strap this in only sometimes -- some git commands need this prefix to be explicit about branches instead of tags; others refuse it because they're already forcibly about branches.
 const git_branch_ref_prefix = "refs/heads/"
-const docket_ref_prefix = "hroot/"
-const docket_image_ref_prefix = docket_ref_prefix+"image/"
+const hroot_ref_prefix = "hroot/"
+const hroot_image_ref_prefix = hroot_ref_prefix+"image/"
 
 /*
 	Loads a Graph if there is a git repo initialized at the given dir; returns nil if a graph repo not found.
@@ -39,7 +39,7 @@ func LoadGraph(dir string) *Graph {
 	g := newGraph(dir)
 
 	// ask git what it thinks of all this.
-	if g.isDocketGraphRepo() {
+	if g.isHrootGraphRepo() {
 		return g
 	} else {
 		return nil
@@ -58,7 +58,7 @@ func LoadGraph(dir string) *Graph {
 */
 func NewGraph(dir string) *Graph {
 	g := newGraph(dir)
-	if g.isDocketGraphRepo() {
+	if g.isHrootGraphRepo() {
 		// if we can just be a load, do it
 		return g
 	} else if g.isRepoRoot() {
@@ -76,8 +76,8 @@ func NewGraph(dir string) *Graph {
 
 	g.withTempTree(func (cmd Command) {
 		// set up basic repo to identify as graph repo
-		cmd("commit", "--allow-empty", "-mdocket")()
-		cmd("checkout", "-b", docket_ref_prefix+"init")()
+		cmd("commit", "--allow-empty", "-mhroot")()
+		cmd("checkout", "-b", hroot_ref_prefix+"init")()
 
 		// discard master branch.  a hroot graph has no real use for it.
 		cmd("branch", "-D", "master")()
@@ -157,19 +157,19 @@ func (g *Graph) Publish(lineage string, ancestor string, gr GraphStoreRequest) (
 		fmt.Println("Starting publish of ", lineage, " <-- ", ancestor)
 
 		// check if appropriate branches already exist, and make them if necesary
-		if strings.Count(g.cmd("branch", "--list", docket_image_ref_prefix+lineage).Output(), "\n") >= 1 {
+		if strings.Count(g.cmd("branch", "--list", hroot_image_ref_prefix+lineage).Output(), "\n") >= 1 {
 			fmt.Println("Lineage already existed.")
 			// this is an existing lineage
-			g.cmd("symbolic-ref", "HEAD", git_branch_ref_prefix+docket_image_ref_prefix+lineage)()
+			g.cmd("symbolic-ref", "HEAD", git_branch_ref_prefix+hroot_image_ref_prefix+lineage)()
 		} else {
 			// this is a new lineage
 			if ancestor == "" {
 				fmt.Println("New lineage!  Making orphan branch for it.")
-				g.cmd("checkout", "--orphan", docket_image_ref_prefix+lineage)()
+				g.cmd("checkout", "--orphan", hroot_image_ref_prefix+lineage)()
 			} else {
 				fmt.Println("New lineage!  Forking it from ancestor branch.")
-				g.cmd("branch", docket_image_ref_prefix+lineage, docket_image_ref_prefix+ancestor)()
-				g.cmd("symbolic-ref", "HEAD", git_branch_ref_prefix+docket_image_ref_prefix+lineage)()
+				g.cmd("branch", hroot_image_ref_prefix+lineage, hroot_image_ref_prefix+ancestor)()
+				g.cmd("symbolic-ref", "HEAD", git_branch_ref_prefix+hroot_image_ref_prefix+lineage)()
 			}
 		}
 		g.cmd("reset")
@@ -190,14 +190,14 @@ func (g *Graph) Load(lineage string, gr GraphLoadRequest) (hash string) {
 	lineage, _ = SplitImageName(lineage) //Handle tags
 
 	//Check if the image is in the graph so we can generate a relatively friendly error message
-	if !g.HasBranch(docket_image_ref_prefix+lineage) {	//HALP
+	if !g.HasBranch(hroot_image_ref_prefix+lineage) {	//HALP
 		util.ExitGently("Image branch name", lineage, "not found in graph.")
 	}
 
 	g.withTempTree(func(cmd Command) {
 		// checkout lineage.
 		// "-f" because otherwise if git thinks we already had this branch checked out, this working tree is just chock full of deletes.
-		g.cmd("checkout", "-f", git_branch_ref_prefix+docket_image_ref_prefix+lineage)()
+		g.cmd("checkout", "-f", git_branch_ref_prefix+hroot_image_ref_prefix+lineage)()
 
 		// the gr consumes this filesystem and shoves it at whoever it deals with; we're actually hands free after handing over a dir.
 		gr.receive(".")
@@ -230,8 +230,8 @@ func (g *Graph) forceMerge(source string, target string) {
 	commitTreeCmd := g.cmd("commit-tree", writeTree, Opts{In: commitMsg})
 	if source != "" {
 		commitTreeCmd = commitTreeCmd(
-			"-p", git_branch_ref_prefix+docket_image_ref_prefix+source,
-			"-p", git_branch_ref_prefix+docket_image_ref_prefix+target,
+			"-p", git_branch_ref_prefix+hroot_image_ref_prefix+source,
+			"-p", git_branch_ref_prefix+hroot_image_ref_prefix+target,
 		)
 	}
 	mergeTree := strings.Trim(commitTreeCmd.Output(), "\n")
@@ -248,7 +248,7 @@ func (g *Graph) HasBranch(branch string) bool {
 /*
 	Check if a git repo exists and if it has the branches that declare it a hroot graph.
 */
-func (g *Graph) isDocketGraphRepo() bool {
+func (g *Graph) isHrootGraphRepo() bool {
 	if !g.isRepoRoot() { return false; }
 	if !g.HasBranch("hroot/init") { return false; }
 	// We could say a hroot graph shouldn't have a master branch, but we won't.
