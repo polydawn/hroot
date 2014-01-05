@@ -1,14 +1,14 @@
 package commands
 
-//Helper struct holds all the state & shared functionality you need to run a docket command.
+//Helper struct holds all the state & shared functionality you need to run a hroot command.
 
 import (
 	. "fmt"
 	"time"
-	"polydawn.net/docket/conf"
-	"polydawn.net/docket/crocker"
-	"polydawn.net/docket/dex"
-	. "polydawn.net/docket/util"
+	"polydawn.net/hroot/conf"
+	"polydawn.net/hroot/crocker"
+	"polydawn.net/hroot/dex"
+	. "polydawn.net/hroot/util"
 )
 
 //Holds everything needed to load/save docker images
@@ -18,8 +18,8 @@ type ImagePath struct {
 	graph *dex.Graph //Graph (if desired)
 }
 
-//Holds everything needed to run a docket command
-type Docket struct {
+//Holds everything needed to run a hroot command
+type Hroot struct {
 	//Source and destination URIs
 	source    ImagePath
 	dest      ImagePath
@@ -37,8 +37,8 @@ type Docket struct {
 	launchImage     string //Stored separately so we don't modify config if needed later for export.
 }
 
-//Create a docket struct
-func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Docket {
+//Create a hroot struct
+func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Hroot {
 	//If there was no target specified, override it
 	target   := GetTarget(args, defaultTarget)
 
@@ -49,8 +49,8 @@ func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Docket
 	configuration, folders := conf.LoadConfigurationFromDisk(".", parser)
 	config := configuration.Targets[target]
 
-	//Docket struct
-	d := &Docket {
+	//Hroot struct
+	d := &Hroot {
 		folders:     *folders,
 		image:       configuration.Image,
 		settings:    config,
@@ -87,8 +87,8 @@ func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Docket
 	return d
 }
 
-//Prepare the docket input
-func (d *Docket) PrepareInput() {
+//Prepare the hroot input
+func (d *Hroot) PrepareInput() {
 
 	//If you're using an index key with a non-index source, or upstream key with index source, reject.
 	//Runs here (not LoadDocket) so commands have a chance to change settings.
@@ -114,8 +114,8 @@ func (d *Docket) PrepareInput() {
 	}
 }
 
-//Prepare the docket output
-func (d *Docket) PrepareOutput() {
+//Prepare the hroot output
+func (d *Hroot) PrepareOutput() {
 	switch d.dest.scheme {
 		case "graph":
 			//Look up the graph, and clear any unwanted state
@@ -140,7 +140,7 @@ func (d *Docket) PrepareOutput() {
 }
 
 //Starts the docker daemon
-func (d *Docket) StartDocker() {
+func (d *Hroot) StartDocker() {
 	d.dock = crocker.NewDock(d.folders.Dock)
 
 	//Announce the docker
@@ -153,7 +153,7 @@ func (d *Docket) StartDocker() {
 }
 
 //Behavior when docker cache has the image
-func (d *Docket) prepareCacheWithImage(image string) {
+func (d *Hroot) prepareCacheWithImage(image string) {
 	switch d.source.scheme {
 		case "graph":
 			Println("Docker already has", image, "loaded, not importing from graph.")
@@ -173,7 +173,7 @@ func (d *Docket) prepareCacheWithImage(image string) {
 }
 
 //Behavior when docker cache doesn't have the image
-func (d *Docket) prepareCacheWithoutImage(image string) {
+func (d *Hroot) prepareCacheWithoutImage(image string) {
 	switch d.source.scheme {
 		case "docker":
 			//Can't continue; specified docker as source and it doesn't have it
@@ -195,7 +195,7 @@ func (d *Docket) prepareCacheWithoutImage(image string) {
 }
 
 //Prepare the docker cache
-func (d *Docket) PrepareCache() {
+func (d *Hroot) PrepareCache() {
 	image := d.launchImage
 
 	//Behavior based on if the docker cache already has an image
@@ -216,7 +216,7 @@ func (d *Docket) PrepareCache() {
 }
 
 //Lanuch the container and wait for it to complete
-func (d *Docket) Launch() {
+func (d *Hroot) Launch() {
 	Println("Launching container.")
 	c := d.settings
 
@@ -227,8 +227,8 @@ func (d *Docket) Launch() {
 	d.container.Wait()
 }
 
-//Prepare the docket export
-func (d *Docket) ExportBuild() error {
+//Prepare the hroot export
+func (d *Hroot) ExportBuild() error {
 	switch d.dest.scheme {
 		case "graph":
 			Println("Committing to graph...")
@@ -254,8 +254,8 @@ func (d *Docket) ExportBuild() error {
 
 	//Commit the image name to the docker cache.
 	//	This is so if you run:
-	//		docket build -s index  -d graph --noop
-	//		docket build -s docker -d graph
+	//		hroot build -s index  -d graph --noop
+	//		hroot build -s docker -d graph
 	//	Docker will already know about your (much cooler) image name :)
 	name, tag := crocker.SplitImageName(d.image.Name)
 	Println("Exporting to docker cache:", name, tag)
@@ -265,7 +265,7 @@ func (d *Docket) ExportBuild() error {
 }
 
 //Clean up after ourselves
-func (d *Docket) Cleanup() {
+func (d *Hroot) Cleanup() {
 	//Remove the container from cache if desired
 	if d.settings.Purge {
 		d.container.Purge()

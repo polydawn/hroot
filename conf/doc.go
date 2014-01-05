@@ -1,5 +1,5 @@
 /*
-	This package contains the config file loading system used by docket.
+	This package contains the config file loading system used by hroot.
 	It produces conf.Settings from TOML-formatted configuration files.
 
 	Config files can arranged in nested directories, will loaded recursively, with config values accumulating

@@ -9,7 +9,7 @@ import (
 	"net/http"
 	. "net/http/httputil"
 	"strings"
-	. "polydawn.net/docket/util"
+	. "polydawn.net/hroot/util"
 )
 
 // Much of this logic is stolen directly from https://github.com/dotcloud/docker/blob/master/commands.go

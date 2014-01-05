@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-const ConfigFileName = "docket.toml"
+const ConfigFileName = "hroot.toml"
 
 //A generic interface for loading configuration.
 //Our implementation reads TOML files; roll your own!

@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	. "polydawn.net/pogo/gosh"
-	. "polydawn.net/docket/crocker"
-	"polydawn.net/docket/util"
+	. "polydawn.net/hroot/crocker"
+	"polydawn.net/hroot/util"
 	"strings"
 )
 
@@ -25,14 +25,14 @@ type Graph struct {
 
 // strap this in only sometimes -- some git commands need this prefix to be explicit about branches instead of tags; others refuse it because they're already forcibly about branches.
 const git_branch_ref_prefix = "refs/heads/"
-const docket_ref_prefix = "docket/"
+const docket_ref_prefix = "hroot/"
 const docket_image_ref_prefix = docket_ref_prefix+"image/"
 
 /*
 	Loads a Graph if there is a git repo initialized at the given dir; returns nil if a graph repo not found.
 	The dir must be the root of the working tree of the git dir.
 
-	A graph git repo is distingushed by containing branches that start with "docket/" -- this is how docket outputs branches that contain its data.
+	A graph git repo is distingushed by containing branches that start with "hroot/" -- this is how hroot outputs branches that contain its data.
 */
 func LoadGraph(dir string) *Graph {
 	// optimistically, set up the struct we're checking out
@@ -63,7 +63,7 @@ func NewGraph(dir string) *Graph {
 		return g
 	} else if g.isRepoRoot() {
 		// if this is a repo root, but didn't look like a real graph...
-		util.ExitGently("Attempted to make a docket graph at ", g.dir, ", but there is already a git repo there and it does not appear to belong to docket.")
+		util.ExitGently("Attempted to make a hroot graph at ", g.dir, ", but there is already a git repo there and it does not appear to belong to hroot.")
 	} // else carry on, make it!
 
 	// we'll make exactly one new dir if the path doesn't exist yet.  more is probably argument error and we abort.
@@ -79,7 +79,7 @@ func NewGraph(dir string) *Graph {
 		cmd("commit", "--allow-empty", "-mdocket")()
 		cmd("checkout", "-b", docket_ref_prefix+"init")()
 
-		// discard master branch.  a docket graph has no real use for it.
+		// discard master branch.  a hroot graph has no real use for it.
 		cmd("branch", "-D", "master")()
 	})
 
@@ -241,12 +241,12 @@ func (g *Graph) HasBranch(branch string) bool {
 }
 
 /*
-	Check if a git repo exists and if it has the branches that declare it a docket graph.
+	Check if a git repo exists and if it has the branches that declare it a hroot graph.
 */
 func (g *Graph) isDocketGraphRepo() bool {
 	if !g.isRepoRoot() { return false; }
-	if !g.HasBranch("docket/init") { return false; }
-	// We could say a docket graph shouldn't have a master branch, but we won't.
+	if !g.HasBranch("hroot/init") { return false; }
+	// We could say a hroot graph shouldn't have a master branch, but we won't.
 	// We don't create one by default, but you're perfectly welcome to do so and put a readme for your coworkers in it or whatever.
 	return true
 }

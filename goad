@@ -8,7 +8,7 @@ export BASEDIR="$PWD"
 
 
 
-prefix="polydawn.net/docket"
+prefix="polydawn.net/hroot"
 packages=()
 packages+=("$prefix/crocker")
 packages+=("$prefix/dex")
@@ -18,14 +18,14 @@ packages+=("$prefix/conf")
 
 
 function build {
-	go build -race -o docket $prefix/main
+	go build -race -o hroot $prefix/main
 }
 
 
 
 function test {
 	echo "${packages[@]}" | xargs go test -race
-	# `go help packages` claims that "polydawn.net/docket/..." is a valid way to ask to test all packages.
+	# `go help packages` claims that "polydawn.net/hroot/..." is a valid way to ask to test all packages.
 	# evidentally this is a lie.
 }
 

@@ -22,38 +22,38 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 	}
 
 	//Load settings
-	docket := LoadDocket(args, DefaultBuildTarget, opts.Source, opts.Destination)
+	hroot := LoadDocket(args, DefaultBuildTarget, opts.Source, opts.Destination)
 
 	//We're building; launch upstream image
-	docket.launchImage = docket.image.Upstream
-	Println("Building from", docket.image.Upstream, "to", docket.image.Name)
+	hroot.launchImage = hroot.image.Upstream
+	Println("Building from", hroot.image.Upstream, "to", hroot.image.Name)
 
 	//If the user did not explicitly ask for a source type, try a smart default
-	if sourceEmpty && docket.image.Index != "" {
-		docket.source.scheme = "index"
-	} else if sourceEmpty && docket.image.Upstream != "" {
-		docket.source.scheme = "graph"
+	if sourceEmpty && hroot.image.Index != "" {
+		hroot.source.scheme = "index"
+	} else if sourceEmpty && hroot.image.Upstream != "" {
+		hroot.source.scheme = "graph"
 	}
 
 	//If desired, set the command to /bin/true and do not modify destination image name
 	//We'd love to not launch the container at all, but docker's export is completely broken.
 	// 'docker export ubuntu' --> 'Error: No such container: ubuntu' --> :(
 	if opts.NoOp {
-		docket.settings.Command = []string{ "/bin/true" }
+		hroot.settings.Command = []string{ "/bin/true" }
 	}
 
 	//Prepare source & destination
-	docket.PrepareInput()
-	docket.PrepareOutput()
+	hroot.PrepareInput()
+	hroot.PrepareOutput()
 
 	//Start or connect to a docker daemon
-	docket.StartDocker()
-	docket.PrepareCache()
-	docket.Launch()
+	hroot.StartDocker()
+	hroot.PrepareCache()
+	hroot.Launch()
 
 	//Perform any destination operations required
-	docket.ExportBuild()
+	hroot.ExportBuild()
 
-	docket.Cleanup()
+	hroot.Cleanup()
 	return nil
 }

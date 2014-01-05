@@ -3,7 +3,7 @@ package conf
 import (
 	"strings"
 	"path/filepath"
-	. "polydawn.net/docket/util"
+	. "polydawn.net/hroot/util"
 )
 
 const DockFolder     = "dock"
@@ -85,7 +85,7 @@ var DefaultContainer = Container {
 	Environment: [][]string{},
 }
 
-//Docket configuration
+//Hroot configuration
 type Configuration struct {
 	//The image struct
 	Image    Image                `toml:"image"`

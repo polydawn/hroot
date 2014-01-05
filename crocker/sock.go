@@ -7,7 +7,7 @@ import (
 	"net"
 	"net/http/httputil"
 	"strings"
-	. "polydawn.net/docket/util"
+	. "polydawn.net/hroot/util"
 )
 
 // Engage chevrons

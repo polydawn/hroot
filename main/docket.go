@@ -4,11 +4,11 @@ import (
 	. "fmt"
 	"os"
 	"github.com/jessevdk/go-flags"
-	. "polydawn.net/docket/commands"
-	. "polydawn.net/docket/util"
+	. "polydawn.net/hroot/commands"
+	. "polydawn.net/hroot/util"
 )
 
-var parser = flags.NewNamedParser("docket", flags.Default | flags.HelpFlag)
+var parser = flags.NewNamedParser("hroot", flags.Default | flags.HelpFlag)
 
 const EXIT_BADARGS = 1
 const EXIT_BAD_USER = 10
@@ -25,7 +25,7 @@ func panicHandler() {
 				os.Exit(EXIT_BAD_USER)
 			} else {
 				Println(err)
-				Println("\n" + "Docket crashed! This could be a problem with docker or git, or docket itself." + "\n" + "To see more about what went wrong, turn on stack traces by running:" + "\n\n" + "export DEBUG=1" + "\n\n" + "Feel free to contact the developers for help:" + "\n" + "https://github.com/polydawn/docket" + "\n")
+				Println("\n" + "Hroot crashed! This could be a problem with docker or git, or hroot itself." + "\n" + "To see more about what went wrong, turn on stack traces by running:" + "\n\n" + "export DEBUG=1" + "\n\n" + "Feel free to contact the developers for help:" + "\n" + "https://github.com/polydawn/hroot" + "\n")
 				os.Exit(EXIT_PANIC)
 			}
 
@@ -82,8 +82,8 @@ func init() {
 	)
 	parser.AddCommand(
 		"version",
-		"Print docket version",
-		"Print docket version",
+		"Print hroot version",
+		"Print hroot version",
 		&VersionCmdOpts{},
 	)
 }
