@@ -8,6 +8,7 @@ import (
 	"os"
 	"archive/tar"
 	"testing"
+	"time"
 	"strings"
 	"github.com/coocood/assrt"
 )
@@ -84,6 +85,7 @@ func fsSetA() *tar.Reader {
 		Mode:     0644,
 		Size:     2,
 		Typeflag: tar.TypeReg,
+		ModTime:  time.Unix(1000100, 5000),
 	})
 	fs.Write([]byte{ 'a', 'b' })
 
@@ -110,6 +112,7 @@ func fsSetB() *tar.Reader {
 		Mode:     0644,
 		Size:     2,
 		Typeflag: tar.TypeReg,
+		ModTime:  time.Unix(1000100, 5000),
 	})
 	fs.Write([]byte{ 'a', 'b' })
 
@@ -147,6 +150,7 @@ func fsSetA2() *tar.Reader {
 		Mode:     0644,
 		Size:     3,
 		Typeflag: tar.TypeReg,
+		ModTime:  time.Unix(1200100, 5000),
 	})
 	fs.Write([]byte{ 'a', '\n', 'b' })
 
@@ -173,6 +177,7 @@ func fsSetC() *tar.Reader {
 		Mode:     0644,
 		Size:     3,
 		Typeflag: tar.TypeReg,
+		ModTime:  time.Unix(5100100, 5000),
 	})
 	fs.Write([]byte{ 'a', '\n', 'c' })
 
@@ -226,8 +231,8 @@ func TestPublishNewOrphanLineage(t *testing.T) {
 		)
 
 		assert.Equal(
-			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
-			`{"Name":"b","Type":"F","Mode":640,"ModTime":"1970-01-01T00:00:00Z"}` + "\n",
+			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-12T13:48:20Z"}` + "\n" +
+			`{"Name":"b","Type":"F","Mode":640}` + "\n",
 			g.cmd("show", git_branch_ref_prefix+docket_image_ref_prefix+lineage+":"+".guitar").Output(),
 		)
 	})
@@ -282,9 +287,9 @@ func TestPublishLinearExtensionToLineage(t *testing.T) {
 		)
 
 		assert.Equal(
-			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
-			`{"Name":"d/d/z","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
-			`{"Name":"e","Type":"F","Mode":755,"ModTime":"1970-01-01T00:00:00Z"}` + "\n",
+			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-12T13:48:20Z"}` + "\n" +
+			`{"Name":"d/d/z","Type":"F","Mode":644}` + "\n" +
+			`{"Name":"e","Type":"F","Mode":755}` + "\n",
 			g.cmd("show", git_branch_ref_prefix+docket_image_ref_prefix+lineage+":"+".guitar").Output(),
 		)
 	})
@@ -340,9 +345,9 @@ func TestPublishNewDerivedLineage(t *testing.T) {
 		)
 
 		assert.Equal(
-			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
-			`{"Name":"d/d/z","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
-			`{"Name":"e","Type":"F","Mode":755,"ModTime":"1970-01-01T00:00:00Z"}` + "\n",
+			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-12T13:48:20Z"}` + "\n" +
+			`{"Name":"d/d/z","Type":"F","Mode":644}` + "\n" +
+			`{"Name":"e","Type":"F","Mode":755}` + "\n",
 			g.cmd("show", git_branch_ref_prefix+docket_image_ref_prefix+lineage+":"+".guitar").Output(),
 		)
 	})
@@ -417,9 +422,9 @@ func TestPublishDerivativeExtensionToLineage(t *testing.T) {
 		)
 
 		assert.Equal(
-			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
-			`{"Name":"d/d","Type":"D","Mode":755,"ModTime":"1970-01-01T00:00:00Z"}` + "\n" +
-			`{"Name":"d/z","Type":"F","Mode":644,"ModTime":"1970-01-01T00:00:00Z"}` + "\n",
+			`{"Name":"a","Type":"F","Mode":644,"ModTime":"1970-03-01T00:41:40Z"}` + "\n" +
+			`{"Name":"d/d","Type":"D","Mode":755}` + "\n" +
+			`{"Name":"d/z","Type":"F","Mode":644}` + "\n",
 			g.cmd("show", git_branch_ref_prefix+docket_image_ref_prefix+lineage+":"+".guitar").Output(),
 		)
 	})
