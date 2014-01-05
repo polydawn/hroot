@@ -8,6 +8,7 @@ type BuildCmdOpts struct {
 	Source      string `short:"s" long:"source"      description:"Container source.      (default: graph)"`
 	Destination string `short:"d" long:"destination" description:"Container destination. (default: graph)"`
 	NoOp bool          `long:"noop" description:"Set the container command to /bin/true."`
+	Epoch       bool   `long:"epoch" description:"Force all file modtimes to epoch."`
 }
 
 const DefaultBuildTarget = "build"
@@ -18,11 +19,11 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 	sourceEmpty := false
 	if opts.Source == "" {
 		sourceEmpty = true
-		opts.Source = "graph" //set this so LoadDocket runs correctly
+		opts.Source = "graph" //set this so LoadHroot runs correctly
 	}
 
 	//Load settings
-	hroot := LoadDocket(args, DefaultBuildTarget, opts.Source, opts.Destination)
+	hroot := LoadHroot(args, DefaultBuildTarget, opts.Source, opts.Destination)
 
 	//We're building; launch upstream image
 	hroot.launchImage = hroot.image.Upstream
@@ -52,7 +53,7 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 	hroot.Launch()
 
 	//Perform any destination operations required
-	hroot.ExportBuild()
+	hroot.ExportBuild(opts.Epoch)
 
 	hroot.Cleanup()
 	return nil

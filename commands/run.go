@@ -13,7 +13,7 @@ const DefaultRunTarget = "run"
 //Runs a container
 func (opts *RunCmdOpts) Execute(args []string) error {
 	//Load settings
-	hroot := LoadDocket(args, DefaultRunTarget, opts.Source, "")
+	hroot := LoadHroot(args, DefaultRunTarget, opts.Source, "")
 	Println("Running", hroot.image.Name)
 	hroot.PrepareInput()
 

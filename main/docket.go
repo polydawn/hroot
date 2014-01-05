@@ -20,7 +20,7 @@ func panicHandler() {
 	if len(os.Getenv("DEBUG")) == 0 {
 		if err := recover(); err != nil {
 
-			if dockErr, ok := err.(DocketError) ; ok {
+			if dockErr, ok := err.(HrootError) ; ok {
 				Print(dockErr.Error())
 				os.Exit(EXIT_BAD_USER)
 			} else {

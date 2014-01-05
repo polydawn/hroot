@@ -9,6 +9,7 @@ import (
 	"polydawn.net/hroot/crocker"
 	"polydawn.net/hroot/dex"
 	. "polydawn.net/hroot/util"
+	guitarconf "polydawn.net/guitar/conf"
 )
 
 //Holds everything needed to load/save docker images
@@ -38,7 +39,7 @@ type Hroot struct {
 }
 
 //Create a hroot struct
-func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Hroot {
+func LoadHroot(args []string, defaultTarget, sourceURI, destURI string) *Hroot {
 	//If there was no target specified, override it
 	target   := GetTarget(args, defaultTarget)
 
@@ -91,7 +92,7 @@ func LoadDocket(args []string, defaultTarget, sourceURI, destURI string) *Hroot 
 func (d *Hroot) PrepareInput() {
 
 	//If you're using an index key with a non-index source, or upstream key with index source, reject.
-	//Runs here (not LoadDocket) so commands have a chance to change settings.
+	//Runs here (not LoadHroot) so commands have a chance to change settings.
 	if d.source.scheme == "index" && d.image.Index == "" {
 		ExitGently("You asked to pull from the index but have no index key configured.")
 	} else if d.source.scheme != "index" && d.image.Upstream == "" {
@@ -179,11 +180,6 @@ func (d *Hroot) prepareCacheWithoutImage(image string) {
 			//Can't continue; specified docker as source and it doesn't have it
 			ExitGently("Docker does not have", image, "loaded.")
 		case "graph":
-			//Check if the image is in the graph
-			if !d.source.graph.HasBranch(image) {
-				ExitGently("Image branch name", image, "not found in graph.")
-			}
-
 			d.dest.graph.Load(
 				image,
 				&dex.GraphLoadRequest_Image{
@@ -228,7 +224,7 @@ func (d *Hroot) Launch() {
 }
 
 //Prepare the hroot export
-func (d *Hroot) ExportBuild() error {
+func (d *Hroot) ExportBuild(forceEpoch bool) error {
 	switch d.dest.scheme {
 		case "graph":
 			Println("Committing to graph...")
@@ -244,6 +240,9 @@ func (d *Hroot) ExportBuild() error {
 				ancestor,
 				&dex.GraphStoreRequest_Container{
 					Container: d.container,
+					Settings: guitarconf.Settings{
+						Epoch: forceEpoch,
+					},
 				},
 			)
 		case "file":
