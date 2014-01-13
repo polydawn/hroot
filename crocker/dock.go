@@ -52,11 +52,7 @@ func NewDock(dir string) *Dock {
 	if dock != nil { return dock }
 
 	//Try to find a running docker in the provided folder
-	dock = loadDock(dir)
-	if dock != nil {return dock }
-
-	//All else fails; run one ourselves
-	return createDock(dir)
+	return loadDock(dir)
 }
 
 /*

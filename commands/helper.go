@@ -143,6 +143,9 @@ func (d *Hroot) PrepareOutput() {
 //Starts the docker daemon
 func (d *Hroot) StartDocker() {
 	d.dock = crocker.NewDock(d.folders.Dock)
+	if d.dock != nil {
+		ExitGently("Could not connect to docker. Is docker running?")
+	}
 
 	//Announce the docker
 	if d.dock.IsChildProcess() {
