@@ -5,6 +5,7 @@ import (
 )
 
 type RunCmdOpts struct {
+	DockerH     string `short:"H"                    description:"Where to connect to docker daemon."`
 	Source      string `short:"s" long:"source" default:"graph" description:"Container source."`
 }
 
@@ -18,7 +19,7 @@ func (opts *RunCmdOpts) Execute(args []string) error {
 	hroot.PrepareInput()
 
 	//Start or connect to a docker daemon
-	hroot.StartDocker()
+	hroot.StartDocker(opts.DockerH)
 	hroot.PrepareCache()
 	hroot.Launch()
 

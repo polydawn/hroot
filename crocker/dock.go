@@ -1,219 +1,156 @@
 package crocker
 
 import (
-	"fmt"
+	"bytes"
+	"encoding/json"
+	. "fmt"
 	"io"
 	"io/ioutil"
 	"net"
+	"net/http"
 	"net/http/httputil"
 	"os"
-	"path/filepath"
-	. "polydawn.net/pogo/gosh"
-	"strconv"
+	"strings"
 	"time"
+	. "polydawn.net/pogo/gosh"
+	. "polydawn.net/hroot/util"
 )
 
-const defaultDir = "/var/run" //Where a docker daemon will run by default
-const localDir = "./dock"     //Where to start a local docker if desired
+const defaultSock = "unix:///var/run/docker.sock" //Where a docker daemon will run by default
+const waitDuraction = 500 * time.Millisecond      //How long to wait for docker to create a socket
+const pollDuraction = 10 * time.Millisecond       //How long to wait between polling for socket
+const ApiVersion = "1.4"                          //Docker api version
+const ServerVersion = "0.6.3"                     //Docker header version so its log can complain :)
 
+//A struct representing a connection to a docker daemon
 type Dock struct {
-	/*
-		Absolute path to the base dir for a docker daemon.
-
-		'docker.sock' and 'docker.pid' are expected to exist immediately inside this path.
-		The daemon's working dir may also be here.
-
-		The last segment of the path is quite probably a symlink, and should be respected
-		even if dangling (unless that means making more than one directory on the far
-		side; if things are that dangling, give up).
-	*/
-	dir string
-
-	/*
-		True iff the daemon at this dock location was spawned by us.
-		Basically used to determine if Slay() should actually fire teh lazors or not.
-	*/
-	isMine bool
-
-	/*
-		A socket connection to the docker for API calls
-	*/
+	//A socket connection to the docker for API calls
 	sock *httputil.ClientConn
+
+	//The docket URI (used in -H flag passthrough for exec wrapping)
+	sockURI string
 }
 
-/*
-	Produces a Dock struct referring to an active docker daemon.
-	If an existing daemon can be found running, it is used; if not, one is started.
-	@param dir path to dock dir.  May be relative.
-*/
-func NewDock(dir string) *Dock {
-	//Temporary workaround for #29. Unconditionally use system daemon if running.
-	dock := loadDock("/var/run")
-	if dock != nil { return dock }
-
-	//Try to find a running docker in the provided folder
-	dock = loadDock(dir)
-	if dock != nil {return dock }
-
-	//All else fails; run one ourselves
-	return createDock(dir)
-}
-
-/*
-	Launch a new docker daemon.
-	You should try loadDock before this.  (Yes, there are inherently race conditions here.)
-*/
-func createDock(dir string) *Dock {
-	dir, err := filepath.Abs(dir)
-	if err != nil { panic(err); }
-
-	dock := &Dock{
-		dir:    dir,
-		isMine: true,
+// Engage chevrons
+func Dial(uri string) *Dock {
+	//If no socket path was specified, use the default
+	if uri == "" {
+		uri = defaultSock
 	}
-	Sh("mkdir")("-p")(DefaultIO)(dock.Dir())()
-	dock.daemon().Start()
-	dock.awaitSocket(250 * time.Millisecond)
-	return dock
-}
+	Println("Connecting to", uri)
 
-/*
-	Check for what looks like an existing docker daemon setup, and return a Dock if one is found.
-	We do a basic check if the pidfile and socket are present, and check if pid is stale, and that's it.
-	No dialing or protocol negotiation is performed at this stage.
-*/
-func loadDock(dir string) *Dock {
-	dir, err := filepath.Abs(dir)
-	if err != nil { panic(err); }
+	//Golang wants a network type and path.
+	//Docker's -H flag wants a full URI.
+	//Dial takes a URI and temporarily converts for Golang's sake.
+	sp := strings.Split(uri, "://")
+	if len(sp) != 2 { ExitGently("Socket path must be a full URI, example: unix:///var/run/docker.sock") }
+	sockType := sp[0]
+	sockPath := sp[1]
 
-	dock := &Dock{
-		dir: dir,
-		isMine: false,
-	}
-
-	// check pidfile presence.
-	pidfileStat, err := os.Stat(dock.GetPidfilePath())
-	if os.IsNotExist(err) { return nil; }
-	if err != nil { panic(err); }
-	if !pidfileStat.Mode().IsRegular() { return nil; }
-
-	// check for process.
-	pidfileBlob, err := ioutil.ReadFile(dock.GetPidfilePath())
-	if os.IsNotExist(err) { return nil; }
-	if err != nil { panic(err); }
-	pid, err := strconv.Atoi(string(pidfileBlob))
-	if err != nil { panic(err); }
-	_, err = os.FindProcess(pid)
-	if err != nil { panic(err); }
-
-	// check for socket.
-	if dock.awaitSocket(500 * time.Millisecond) != nil { return nil; }
-
-	// alright, looks like a docker daemon.
-	return dock
-}
-
-/*
-	Check/wait for existence of docker.sock.
-*/
-func (dock *Dock) awaitSocket(patience time.Duration) error {
-	timeout := time.Now().Add(patience)
+	//Set flags for expiry
+	timeout := time.Now().Add(waitDuraction)
 	done := false
+
+	//Loop until success or timeout
 	for !done {
+		//Update timeout flag
 		done = time.Now().After(timeout)
-		sockStat, err := os.Stat(dock.GetSockPath())
-		if os.IsNotExist(err) {
-			// continue
-		} else if err != nil {
-			panic(err)
-		} else if (sockStat.Mode() & os.ModeSocket) != 0 {
-			// still have to check if it's dialable; the daemon can't reliably cleanup its socket when terminated.
-			dial, err := net.Dial("unix", dock.GetSockPath())
-			if err == nil {
-				// success!
-				dial.Close()
-				return nil
+
+		//If the URI is a unix socket, do some extra sanity checks
+		if sockType == "unix" {
+			//Attempt to stat the socket
+			sockStat, err := os.Stat(sockPath)
+			if os.IsNotExist(err) {
+				// The socket does not exist yet, continue waiting
+				continue
+			} else if err != nil {
+				//Some other stat error, should not happen
+				panic(err)
+			} else if (sockStat.Mode() & os.ModeSocket) == 0 {
+				//That's no sock!
+				ExitGently("The path", uri, "is not a socket!")
 			}
-		} else {
-			// file exists but isn't socket; do not want
-			return fmt.Errorf("not a socket in place of docker socket")
 		}
+
+		// Try to dial out
+		dial, err := net.Dial(sockType, sockPath)
+
+		//If the socket is live, we're finished
+		if err == nil {
+			return &Dock {
+				sock: httputil.NewClientConn(dial, nil), //open http connection
+				sockURI: uri,                            //socket URI
+			}
+		} else if strings.Contains(err.Error(), "permission denied"){
+			ExitGently("You don't have permission to write to the docker socket. Try running as root.")
+		}
+
+		//Wait for a bit before checking again
 		if !done {
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(pollDuraction)
 		}
 	}
-	return fmt.Errorf("timeout waiting for docker socket")
+
+	ExitGently("Can't connect to docker daemon. Is 'docker -d' running on this host?")
+	return nil
 }
 
-func (dock *Dock) Dir() string {
-	return dock.dir
-}
-
-func (dock *Dock) IsChildProcess() bool {
-	return dock.isMine
-}
-
-func (dock *Dock) cmd() Command {
-	return Sh("docker")(DefaultIO)(
-		"-H=" + fmt.Sprintf("unix://%s", dock.GetSockPath()),
-	)
-}
-
-func (dock *Dock) Client() Command {
-	return dock.cmd()
-}
-
-func (dock *Dock) GetPidfilePath() string {
-	return filepath.Join(dock.Dir(), "docker.pid")
-}
-
-func (dock *Dock) GetSockPath() string {
-	return filepath.Join(dock.Dir(), "docker.sock")
-}
-
-func (dock *Dock) daemon() Command {
-	return dock.cmd()(
-		"-d",
-		"-g="+dock.Dir(),
-		"-p="+dock.GetPidfilePath(),
-	)(Opts{Cwd: dock.Dir()})
-}
-
-func (dock *Dock) Pull(image string) {
-	dock.cmd()("pull", image)()
-}
-
-func (dock *Dock) Slay() {
-	//Close the socket if it's open
+//Close the socket if it's open
+func (dock *Dock) Close() {
 	if dock.sock != nil {
 		dock.sock.Close()
 	}
+}
 
-	//Kill the daemon if hroot started it
-	if dock.isMine {
-		Sh("bash")("-c")(DefaultIO)("kill `cat \""+dock.GetPidfilePath()+"\"`")()
+//Returns a gosh command struct for use in exec-wrapping docker
+func (dock *Dock) Cmd() Command {
+	return Sh("docker")(DefaultIO)("-H=" + dock.sockURI)
+}
+
+// Hit the docker daemon with an HTTP request, returns response byte array
+func (dock *Dock) Call(method, path string, data interface{}) ([]byte, int) {
+	//Encode data if needed
+	var params io.Reader
+	if data != nil {
+			buf, err := json.Marshal(data)
+			if err != nil { ExitGently("JSON marshalling failed: " + err.Error()) }
+			params = bytes.NewBuffer(buf)
 	}
-}
 
-/*
-	Import an image into repository, caching the expanded form so that it's
-	ready to be used as a base filesystem for containers.
-*/
-func (dock *Dock) Import(reader io.Reader, name string, tag string) {
-	fmt.Println("Importing", name + ":" + tag)
-	dock.cmd()("import", "-", name, tag)(Opts{In: reader})()
-}
+	//Create the request
+	req, err := http.NewRequest(method, Sprintf("/v%s%s", ApiVersion, path), params)
+	if err != nil {
+			ExitGently("Could not create request: " + err.Error())
+	}
 
-func (dock *Dock) ImportFromFilename(path string, name string, tag string) {
-	in, err := os.Open(path)
-	if err != nil { panic(err) }
-	dock.Import(in, name, tag)
-}
+	//Headers
+	req.Header.Set("User-Agent", "Docker-Client/" + ServerVersion)
+	if data != nil {
+			req.Header.Set("Content-Type", "application/json")
+	} else if method == "POST" {
+			req.Header.Set("Content-Type", "plain/text")
+	}
 
-/*
-	Import an image from a docker-style image string, such as 'ubuntu:latest'
-*/
-func (dock *Dock) ImportFromFilenameTagstring(path, image string) {
-	name, tag := SplitImageName(image)
-	dock.ImportFromFilename(path, name, tag)
+	resp, err := dock.sock.Do(req)
+	if err != nil {
+			if strings.Contains(err.Error(), "connection refused") {
+					ExitGently("Can't connect to docker daemon. Is 'docker -d' running on this host?")
+			}
+			ExitGently("Couldn't connect to docker: " + err.Error())
+	}
+
+	//Read in response
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil { ExitGently("Could not read response: " + err.Error()) }
+
+	//Check error code
+	if resp.StatusCode < 200 || resp.StatusCode >= 400 {
+			if len(body) == 0 {
+					ExitGently("Bad return: " + http.StatusText(resp.StatusCode))
+			}
+			ExitGently("Bad return: " + string(body))
+	}
+
+	return body, resp.StatusCode
 }

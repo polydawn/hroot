@@ -25,7 +25,7 @@ type Container struct {
 	Punting on documentation while things are in flux; see command.go struct for details.
 */
 func Launch(dock *Dock, image string, command []string, attach bool, privileged bool, startIn string, dns []string, mounts [][]string, ports [][]string, environment [][]string) *Container {
-	dockRun := dock.cmd()("run")
+	dockRun := dock.Cmd()("run")
 
 	//Where should docker write the new CID?
 	CIDfilename := CreateCIDfile()
@@ -86,7 +86,7 @@ func Launch(dock *Dock, image string, command []string, attach bool, privileged 
 */
 func (c *Container) Wait() {
 	//TOOD:FUTURE: consider if wait/attach should be just built-in when launching a container, and this method just wraps checks against a promise-pattern.
-	c.dock.cmd()("wait", c.id)()
+	c.dock.Cmd()("wait", c.id)()
 }
 
 /*
@@ -98,14 +98,14 @@ func (c *Container) Wait() {
 	This will error if called on a still-running container.
 */
 func (c *Container) Purge() {
-	c.dock.cmd()("rm", c.id)()
+	c.dock.Cmd()("rm", c.id)()
 }
 
 /*
 	Streams out a tar as produced by `docker export`.
 */
 func (c *Container) Export(writer io.Writer) {
-	c.dock.cmd()("export", c.id)(Opts{Out: writer})()
+	c.dock.Cmd()("export", c.id)(Opts{Out: writer})()
 	writer.(io.WriteCloser).Close() //... this might be fixed by updating gosh
 }
 
@@ -113,7 +113,7 @@ func (c *Container) Export(writer io.Writer) {
 	Commits the container.
 */
 func (c *Container) Commit(name, tag string) {
-	c.dock.cmd()("commit", c.id, name, tag)()
+	c.dock.Cmd()("commit", c.id, name, tag)()
 }
 
 /*

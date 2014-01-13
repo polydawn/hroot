@@ -122,6 +122,15 @@ func (d *Hroot) PrepareOutput() {
 			//Look up the graph, and clear any unwanted state
 			d.dest.graph = dex.NewGraph(d.folders.Graph)
 
+			//If the user's git config isn't ready, we want to tell them *before* building.
+			if !d.dest.graph.IsConfigReady() {
+				ExitGently("\n" +
+					"Git could not find a user name & email."                 + "\n"   +
+					"You'll need to set up git with the following commands:"  + "\n\n" +
+					"git config --global user.email \"you@example.com\""      + "\n"   +
+					"git config --global user.name \"Your Name\"")
+			}
+
 			//Cleanse the graph unless it'd be redundant.
 			Println("Opening destination repository")
 		case "file":
@@ -140,17 +149,9 @@ func (d *Hroot) PrepareOutput() {
 	}
 }
 
-//Starts the docker daemon
-func (d *Hroot) StartDocker() {
-	d.dock = crocker.NewDock(d.folders.Dock)
-
-	//Announce the docker
-	if d.dock.IsChildProcess() {
-		Println("Started a docker in", d.dock.Dir())
-	} else {
-		Println("Connecting to docker", d.dock.Dir())
-	}
-
+//Connects to the docker daemon
+func (d *Hroot) StartDocker(socketURI string) {
+	d.dock = crocker.Dial(socketURI)
 }
 
 //Behavior when docker cache has the image
@@ -180,7 +181,7 @@ func (d *Hroot) prepareCacheWithoutImage(image string) {
 			//Can't continue; specified docker as source and it doesn't have it
 			ExitGently("Docker does not have", image, "loaded.")
 		case "graph":
-			d.dest.graph.Load(
+			d.source.graph.Load(
 				image,
 				&dex.GraphLoadRequest_Image{
 					Dock: d.dock,
@@ -270,6 +271,6 @@ func (d *Hroot) Cleanup() {
 		d.container.Purge()
 	}
 
-	//Stop the docker daemon if it's a child process
-	d.dock.Slay()
+	//Close the docker connection
+	d.dock.Close()
 }
