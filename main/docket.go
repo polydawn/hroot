@@ -54,9 +54,7 @@ func main() {
 		"Run a container based on configuration in the current directory.",
 
 		//Default settings
-		&RunCmdOpts{
-			Source:      "graph",
-		},
+		&RunCmdOpts{ }, //cannot set a default source; default is determined intelligently at runtime
 	)
 	parser.AddCommand(
 		"build",
@@ -65,7 +63,6 @@ func main() {
 
 		//Default settings
 		&BuildCmdOpts{
-			Source:      "", //the build command needs to know if you explicity asked for a source, otherwise it will try some smart options.
 			Destination: "graph",
 		},
 	)

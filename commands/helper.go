@@ -58,6 +58,15 @@ func LoadHroot(args []string, defaultTarget, sourceURI, destURI string) *Hroot {
 		launchImage: configuration.Image.Name, //Stored separately (see above)
 	}
 
+	//If the user did not explicitly ask for a source type, try a smart default
+	if sourceURI == "" {
+		if d.image.Index != "" {
+			sourceURI = "index"
+		} else if d.image.Upstream != "" {
+			sourceURI = "graph"
+		}
+	}
+
 	//Parse input URI
 	sourceScheme, sourcePath := ParseURI(sourceURI)
 	d.source = ImagePath {
