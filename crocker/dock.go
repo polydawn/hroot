@@ -81,6 +81,8 @@ func Dial(uri string) *Dock {
 				sock: httputil.NewClientConn(dial, nil), //open http connection
 				sockURI: uri,                            //socket URI
 			}
+		} else if strings.Contains(err.Error(), "permission denied"){
+			ExitGently("You don't have permission to write to the docker socket. Try running as root.")
 		}
 
 		//Wait for a bit before checking again
