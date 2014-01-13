@@ -42,23 +42,6 @@ func panicHandler() {
 func main() {
 	defer panicHandler()
 
-	//Go-flags is a little too clever with sub-commands.
-	//To keep the help-command parity with git & docker / etc, check for 'help' manually before args parse
-	if len(os.Args) < 2 || os.Args[1] == "help" {
-		parser.WriteHelp(os.Stdout)
-		os.Exit(0)
-	}
-
-	//Parse for command & flags, and exit with a relevant return code.
-	_, err := parser.Parse()
-	if err != nil {
-		os.Exit(EXIT_BADARGS)
-	} else {
-		os.Exit(0)
-	}
-}
-
-func init() {
 	// parser.AddCommand(
 	// 	"command",
 	// 	"description",
@@ -92,4 +75,19 @@ func init() {
 		"Print hroot version",
 		&VersionCmdOpts{},
 	)
+
+	//Go-flags is a little too clever with sub-commands.
+	//To keep the help-command parity with git & docker / etc, check for 'help' manually before args parse
+	if len(os.Args) < 2 || os.Args[1] == "help" {
+		parser.WriteHelp(os.Stdout)
+		os.Exit(0)
+	}
+
+	//Parse for command & flags, and exit with a relevant return code.
+	_, err := parser.Parse()
+	if err != nil {
+		os.Exit(EXIT_BADARGS)
+	} else {
+		os.Exit(0)
+	}
 }
