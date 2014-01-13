@@ -19,16 +19,21 @@ const EXIT_BAD_USER = 10
 func panicHandler() {
 	if err := recover(); err != nil {
 
+		//HrootError is used for user-friendly exits. Just print & exit.
 		if dockErr, ok := err.(HrootError) ; ok {
 			Print(dockErr.Error())
 			os.Exit(EXIT_BAD_USER)
 		}
 
+		//Check for existence of debug environment variable
 		if len(os.Getenv("DEBUG")) == 0 {
+			//Debug not set, be friendlier about the problem
 			Println(err)
 			Println("\n" + "Hroot crashed! This could be a problem with docker or git, or hroot itself." + "\n" + "To see more about what went wrong, turn on stack traces by running:" + "\n\n" + "export DEBUG=1" + "\n\n" + "Feel free to contact the developers for help:" + "\n" + "https://github.com/polydawn/hroot" + "\n")
 			os.Exit(EXIT_PANIC)
 		} else {
+			//Adds main to the top of the stack, but keeps original information.
+			//Nothing we can do about it. Golaaaaannngggg....
 			panic(err)
 		}
 	}
