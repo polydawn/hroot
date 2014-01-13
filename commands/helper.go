@@ -136,7 +136,6 @@ func (d *Hroot) PrepareOutput() {
 				ExitGently("Tar location is same for source and destination:", d.source.path)
 			}
 		case "index":
-			panic("dfhdsj")
 			ExitGently("Destination", d.dest.scheme, "is not supported yet.")
 	}
 }
