@@ -111,6 +111,15 @@ func (g *Graph) isRepoRoot() (v bool) {
 	return
 }
 
+//Is git ready and configured to make commits?
+func (g *Graph) IsConfigReady() bool {
+	//Get the current git configuration
+	config := g.cmd(NullIO)("config", "--list").Output()
+
+	//Check that a user name and email is defined
+	return strings.Contains(config, "user.name=") && strings.Contains(config, "user.email=")
+}
+
 /*
 	Creates a temporary working tree in a new directory.  Changes the cwd to that location.
 	The directory will be empty.  The directory will be removed when your function returns.

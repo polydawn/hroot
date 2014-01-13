@@ -122,6 +122,15 @@ func (d *Hroot) PrepareOutput() {
 			//Look up the graph, and clear any unwanted state
 			d.dest.graph = dex.NewGraph(d.folders.Graph)
 
+			//If the user's git config isn't ready, we want to tell them *before* building.
+			if !d.dest.graph.IsConfigReady() {
+				ExitGently("\n" +
+					"Git could not find a user name & email."                 + "\n"   +
+					"You'll need to set up git with the following commands:"  + "\n\n" +
+					"git config --global user.email \"you@example.com\""      + "\n"   +
+					"git config --global user.name \"Your Name\"")
+			}
+
 			//Cleanse the graph unless it'd be redundant.
 			Println("Opening destination repository")
 		case "file":
