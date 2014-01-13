@@ -180,7 +180,7 @@ func (d *Hroot) prepareCacheWithoutImage(image string) {
 			//Can't continue; specified docker as source and it doesn't have it
 			ExitGently("Docker does not have", image, "loaded.")
 		case "graph":
-			d.dest.graph.Load(
+			d.source.graph.Load(
 				image,
 				&dex.GraphLoadRequest_Image{
 					Dock: d.dock,
