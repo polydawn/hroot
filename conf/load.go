@@ -35,8 +35,7 @@ func LoadConfigurationFromDisk(dir string, parser ConfigParser) (*Configuration,
 
 		//Did we succeed?
 		if err == nil {
-			//Check for folders
-			folders.Dock  = filepath.Join(dir, DockFolder)
+			//Default graph folder is a child of the highest folder that has configuration
 			folders.Graph = filepath.Join(dir, GraphFolder)
 
 			//Convert data to a string, save for later

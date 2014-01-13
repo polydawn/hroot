@@ -5,6 +5,7 @@ import (
 )
 
 type BuildCmdOpts struct {
+	DockerH     string `short:"H"                    description:"Where to connect to docker daemon."`
 	Source      string `short:"s" long:"source"      description:"Container source.      (default: graph)"`
 	Destination string `short:"d" long:"destination" description:"Container destination. (default: graph)"`
 	NoOp        bool   `long:"noop" description:"Set the container command to /bin/true."`
@@ -48,7 +49,7 @@ func (opts *BuildCmdOpts) Execute(args []string) error {
 	hroot.PrepareOutput()
 
 	//Start or connect to a docker daemon
-	hroot.StartDocker()
+	hroot.StartDocker(opts.DockerH)
 	hroot.PrepareCache()
 	hroot.Launch()
 

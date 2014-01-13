@@ -140,20 +140,9 @@ func (d *Hroot) PrepareOutput() {
 	}
 }
 
-//Starts the docker daemon
-func (d *Hroot) StartDocker() {
-	d.dock = crocker.NewDock(d.folders.Dock)
-	if d.dock != nil {
-		ExitGently("Could not connect to docker. Is docker running?")
-	}
-
-	//Announce the docker
-	if d.dock.IsChildProcess() {
-		Println("Started a docker in", d.dock.Dir())
-	} else {
-		Println("Connecting to docker", d.dock.Dir())
-	}
-
+//Connects to the docker daemon
+func (d *Hroot) StartDocker(socketURI string) {
+	d.dock = crocker.Dial(socketURI)
 }
 
 //Behavior when docker cache has the image
@@ -273,6 +262,6 @@ func (d *Hroot) Cleanup() {
 		d.container.Purge()
 	}
 
-	//Stop the docker daemon if it's a child process
-	d.dock.Slay()
+	//Close the docker connection
+	d.dock.Close()
 }

@@ -104,9 +104,6 @@ var DefaultConfiguration = Configuration {
 
 //Folder location
 type Folders struct {
-	//Where we've decided the dock  folder is or should be
-	Dock string
-
 	//Where we've decided the graph folder is or should be
 	Graph string
 }
@@ -114,7 +111,6 @@ type Folders struct {
 //Default folders
 func DefaultFolders(dir string) *Folders {
 	return &Folders {
-		Dock:  filepath.Join(dir, DockFolder),
 		Graph: filepath.Join(dir, GraphFolder),
 	}
 }
