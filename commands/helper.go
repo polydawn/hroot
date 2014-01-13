@@ -96,7 +96,7 @@ func (d *Hroot) PrepareInput() {
 	if d.source.scheme == "index" && d.image.Index == "" {
 		ExitGently("You asked to pull from the index but have no index key configured.")
 	} else if d.source.scheme != "index" && d.image.Upstream == "" {
-		ExitGently("You asked to pull from the index but have no index key configured.")
+		ExitGently("You asked to run from from", d.source.scheme, "but have no upstream key configured.")
 	}
 
 	switch d.source.scheme {
