@@ -61,7 +61,7 @@ func (c *Container) Localize(dir string) {
 	for i := range c.Mounts {
 
 		//Check for triple-dot ... notation, which is relative to that config's directory, not the CWD
-		if strings.Index(c.Mounts[i][0], "...") != 1 {
+		if strings.Index(c.Mounts[i][0], "...") == 0 {
 			c.Mounts[i][0] = strings.Replace(c.Mounts[i][0], "...", cwd, 1)
 		}
 
