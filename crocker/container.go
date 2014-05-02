@@ -113,7 +113,7 @@ func (c *Container) Export(writer io.Writer) {
 	Commits the container.
 */
 func (c *Container) Commit(name, tag string) {
-	c.dock.Cmd()("commit", c.id, name, tag)()
+	c.dock.Cmd()("commit", c.id, name + ":" + tag)()
 }
 
 /*
