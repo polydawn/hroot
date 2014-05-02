@@ -29,7 +29,7 @@ func Launch(dock *Dock, image string, command []string, attach bool, privileged 
 
 	//Where should docker write the new CID?
 	CIDfilename := CreateCIDfile()
-	dockRun = dockRun("-cidfile", CIDfilename)
+	dockRun = dockRun("--cidfile", CIDfilename)
 
 	//Where should the container start?
 	dockRun = dockRun("-w", startIn)
@@ -41,7 +41,7 @@ func Launch(dock *Dock, image string, command []string, attach bool, privileged 
 
 	//Custom DNS servers?
 	for i := range dns {
-		dockRun = dockRun("-dns", dns[i])
+		dockRun = dockRun("--dns", dns[i])
 	}
 
 	//What folders get mounted?
