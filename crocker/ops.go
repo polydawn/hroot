@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"strings"
 	. "polydawn.net/pogo/gosh"
 	. "polydawn.net/hroot/util"
 )
@@ -21,7 +22,11 @@ func (dock *Dock) Pull(image string) {
 */
 func (dock *Dock) Import(reader io.Reader, name string, tag string) {
 	Println("Importing", name + ":" + tag)
-	dock.Cmd()("import", "-", name, tag)(Opts{In: reader})()
+
+	// Docker really hates its own domain. I know, whatever.
+	nameTemp := strings.Replace(name, "docker.io", "docker.IO", -1)
+
+	dock.Cmd()("import", "-", nameTemp + ":" + tag)(Opts{In: reader})()
 }
 
 func (dock *Dock) ImportFromFilename(path string, name string, tag string) {
@@ -49,9 +54,15 @@ func (dock *Dock) CheckCache(image string) bool {
 	if err != nil { ExitGently("Docker API error:", err.Error()) }
 
 	//Check if docker has image & tag
-	for _, cur := range images {
-		if cur.Repository == name && cur.Tag == tag {
-			return true
+	for _, img := range images {
+		//Docker image listings are now grouped by tag, iterate over those
+		for _, curTag := range img.RepoTags {
+			name2, tag2 := SplitImageName(curTag)
+
+			// Docker really hates its own domain. I know, whatever.
+			nameTemp := strings.Replace(name2, "docker.io", "docker.IO", -1)
+
+			if nameTemp == name && tag2 == tag { return true }
 		}
 	}
 

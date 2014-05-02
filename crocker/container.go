@@ -3,6 +3,7 @@ package crocker
 import (
 	"io"
 	"os"
+	"strings"
 	. "polydawn.net/pogo/gosh"
 	. "polydawn.net/hroot/util"
 )
@@ -63,8 +64,11 @@ func Launch(dock *Dock, image string, command []string, attach bool, privileged 
 		dockRun = dockRun("-i", "-t")
 	}
 
+	// Docker really hates its own domain. I know, whatever.
+	nameTemp := strings.Replace(image, "docker.io", "docker.IO", -1)
+
 	//Add image name
-	dockRun = dockRun(image)
+	dockRun = dockRun(nameTemp)
 
 	//What command should it run?
 	for i := range command {
