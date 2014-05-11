@@ -4,6 +4,7 @@ package commands
 
 import (
 	. "fmt"
+	"os"
 	"time"
 	"strings"
 	"polydawn.net/hroot/conf"
@@ -166,6 +167,11 @@ func (d *Hroot) PrepareOutput() {
 //Connects to the docker daemon
 func (d *Hroot) StartDocker(socketURI string) {
 	d.dock = crocker.Dial(socketURI)
+
+	// If debug mode is set, print docker version
+	if len(os.Getenv("DEBUG")) > 0 {
+		d.dock.PrintVersion()
+	}
 }
 
 //Behavior when docker cache has the image

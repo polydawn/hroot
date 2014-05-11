@@ -68,3 +68,8 @@ func (dock *Dock) CheckCache(image string) bool {
 
 	return false
 }
+
+// Run the simple docker version command for debugging
+func (dock *Dock) PrintVersion() {
+	dock.Cmd()("version")()
+}
