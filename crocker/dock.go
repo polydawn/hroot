@@ -109,11 +109,17 @@ func (dock *Dock) Cmd() Command {
 
 // Hit the docker daemon with an HTTP request, returns response byte array
 func (dock *Dock) Call(method, path string, data interface{}) ([]byte, int) {
+	// Print network traffic to terminal if DEBUG env var exists
+	networkDebug := (len(os.Getenv("DEBUG")) > 0)
+	if (networkDebug) { Println("Calling: " + method + " " + path) }
+
 	//Encode data if needed
 	var params io.Reader
 	if data != nil {
 			buf, err := json.Marshal(data)
 			if err != nil { ExitGently("JSON marshalling failed: " + err.Error()) }
+
+			if (networkDebug) { Println("Sending: " + string(buf)) }
 			params = bytes.NewBuffer(buf)
 	}
 
@@ -151,6 +157,8 @@ func (dock *Dock) Call(method, path string, data interface{}) ([]byte, int) {
 			}
 			ExitGently("Bad return: " + string(body))
 	}
+
+	if (networkDebug) { Println("Network: " + string(body)) }
 
 	return body, resp.StatusCode
 }
