@@ -102,9 +102,19 @@ func (dock *Dock) Close() {
 	}
 }
 
+
 //Returns a gosh command struct for use in exec-wrapping docker
 func (dock *Dock) Cmd() Command {
-	return Sh("docker")(DefaultIO)("-H=" + dock.sockURI)
+	template := Sh("docker")(DefaultIO)("-H=" + dock.sockURI)
+
+	// If debug mode is set, print every command before executing
+	if len(os.Getenv("DEBUG")) > 0 {
+		template = template.Debug(func (ct *CommandTemplate) {
+			Println("Exec:", ct.Cmd, ct.Args)
+		})
+	}
+
+	return template
 }
 
 // Hit the docker daemon with an HTTP request, returns response byte array
