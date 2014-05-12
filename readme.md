@@ -290,6 +290,6 @@ Lots of examples are available over at [Boxen](https://github.com/polydawn/boxen
 ## Installing Docker
 
 Hroot uses [Docker](https://www.docker.io/), an excellent container helper based on LXC.
-This gives Hroot all that containerization mojo. We're using Docker 0.7.2 right now.
+This gives Hroot all that containerization mojo. We're using Docker 0.11.1 right now.
 
 Docker offers a variety of [installation instructions](http://docs.docker.io/en/latest/installation/) on their site.
