@@ -97,7 +97,7 @@ The image section can have three entries: *name*, *upstream*, and *index*.
 		<td>Name</td>
 		<td>
 			<p>The name of the image, and the name of the branch that ends up in git.</p>
-			<p>Example: <code>polydawn.net/ubuntu/12.04</code></p>
+			<p>Example: <code>polydawn.net/ubuntu/14.04</code></p>
 		</td>
 	</tr>
 	<tr><tr>
@@ -107,7 +107,7 @@ The image section can have three entries: *name*, *upstream*, and *index*.
 
 			<p>A configuration file has either an Upstream or an Index key, but not both.</p>
 
-			<p>Example: <code>index.docker.io/ubuntu/12.04</code>
+			<p>Example: <code>index.docker.io/ubuntu/14.04</code>
 		</td>
 	</tr><tr>
 	<tr>
@@ -119,7 +119,7 @@ The image section can have three entries: *name*, *upstream*, and *index*.
 
 			<p>For this reason, we store the upstream image's index alias separately, and <i>only</i> use that when pulling from the index.</p>
 
-			<p>Example: <code>ubuntu:12.04</code></p>
+			<p>Example: <code>ubuntu:14.04</code></p>
 		</td>
 	</tr>
 </table>
@@ -153,7 +153,7 @@ hroot build
 
 This command accomplished a few things:
 
-* Hroot chose the public index as the *source*, and looked there for an image called `ubuntu:12.04`
+* Hroot chose the public index as the *source*, and looked there for an image called `ubuntu:14.04`
 * A small [build script](https://github.com/polydawn/boxen/blob/master/ubuntu-index/build.sh) cleaned out apt-get state from the index image that we don't want to save in history.
 * Once downloaded, Hroot saved that image to the graph *destination*.
  * Odds are you didn't have a graph repository, so Hroot created one for you.
@@ -164,10 +164,10 @@ If you check out the log, you'll have a single commit with the image's branch na
 ```
 $ ( cd ../graph ; git log --graph --decorate )
 
-* commit 7105d5622bf8118af1c13001f2b36d51a93f020e (index.docker.io/ubuntu/12.04)
+* commit 7105d5622bf8118af1c13001f2b36d51a93f020e (index.docker.io/ubuntu/14.04)
   Author: Your Name <you@example.com>
 
-      index.docker.io/ubuntu/12.04 imported from an external source
+      index.docker.io/ubuntu/14.04 imported from an external source
 ```
 
 You can push this repository anywhere & share it with the world.
@@ -232,15 +232,15 @@ Your git log has a new commit listed:
 ```
 $ ( cd ../graph ; git log --graph --decorate )
 
-* commit 2a9c8a28220717790de7336d07f86e9857074509 (HEAD, example.com/ubuntu/12.04)
+* commit 2a9c8a28220717790de7336d07f86e9857074509 (HEAD, example.com/ubuntu/14.04)
 | Author: Your Name <you@example.com>
 |
-|     example.com/ubuntu/12.04 updated from index.docker.io/ubuntu/12.04
+|     example.com/ubuntu/14.04 updated from index.docker.io/ubuntu/14.04
 |
-* commit 7105d5622bf8118af1c13001f2b36d51a93f020e (index.docker.io/ubuntu/12.04)
+* commit 7105d5622bf8118af1c13001f2b36d51a93f020e (index.docker.io/ubuntu/14.04)
   Author: Your Name <you@example.com>
 
-      index.docker.io/ubuntu/12.04 imported from an external source
+      index.docker.io/ubuntu/14.04 imported from an external source
 ```
 
 Notice how you now have two branches, named after their respective images.
