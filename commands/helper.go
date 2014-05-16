@@ -4,7 +4,9 @@ package commands
 
 import (
 	. "fmt"
+	"os"
 	"time"
+	"strings"
 	"polydawn.net/hroot/conf"
 	"polydawn.net/hroot/crocker"
 	"polydawn.net/hroot/dex"
@@ -58,6 +60,15 @@ func LoadHroot(args []string, defaultTarget, sourceURI, destURI string) *Hroot {
 		launchImage: configuration.Image.Name, //Stored separately (see above)
 	}
 
+	//If the user did not explicitly ask for a source type, try a smart default
+	if sourceURI == "" {
+		if d.image.Index != "" {
+			sourceURI = "index"
+		} else if d.image.Upstream != "" {
+			sourceURI = "graph"
+		}
+	}
+
 	//Parse input URI
 	sourceScheme, sourcePath := ParseURI(sourceURI)
 	d.source = ImagePath {
@@ -96,7 +107,11 @@ func (d *Hroot) PrepareInput() {
 	if d.source.scheme == "index" && d.image.Index == "" {
 		ExitGently("You asked to pull from the index but have no index key configured.")
 	} else if d.source.scheme != "index" && d.image.Upstream == "" {
-		ExitGently("You asked to pull from the index but have no index key configured.")
+		if d.source.scheme == "docker" {
+			Println("Running an index image from docker cache.")
+		} else {
+			ExitGently("You asked to run from from", d.source.scheme, "but have no upstream key configured.")
+		}
 	}
 
 	switch d.source.scheme {
@@ -152,6 +167,11 @@ func (d *Hroot) PrepareOutput() {
 //Connects to the docker daemon
 func (d *Hroot) StartDocker(socketURI string) {
 	d.dock = crocker.Dial(socketURI)
+
+	// If debug mode is set, print docker version
+	if len(os.Getenv("DEBUG")) > 0 {
+		d.dock.PrintVersion()
+	}
 }
 
 //Behavior when docker cache has the image
@@ -258,8 +278,10 @@ func (d *Hroot) ExportBuild(forceEpoch bool) error {
 	//		hroot build -s docker -d graph
 	//	Docker will already know about your (much cooler) image name :)
 	name, tag := crocker.SplitImageName(d.image.Name)
+	// Docker really hates its own domain. I know, whatever.
+	nameTemp := strings.Replace(name, "docker.io", "docker.IO", -1)
 	Println("Exporting to docker cache:", name, tag)
-	d.container.Commit(name, tag)
+	d.container.Commit(nameTemp, tag)
 
 	return nil
 }

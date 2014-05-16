@@ -5,8 +5,8 @@ import (
 )
 
 type RunCmdOpts struct {
-	DockerH     string `short:"H"                    description:"Where to connect to docker daemon."`
-	Source      string `short:"s" long:"source" default:"graph" description:"Container source."`
+	DockerH     string `short:"H"               description:"Where to connect to docker daemon."`
+	Source      string `short:"s" long:"source" description:"Container source."`
 }
 
 const DefaultRunTarget = "run"

@@ -13,8 +13,7 @@ type APIHistory struct {
 }
 
 type APIImages struct {
-	Repository  string `json:",omitempty"`
-	Tag         string `json:",omitempty"`
+	RepoTags    []string `json:",omitempty"`
 	ID          string `json:"Id"`
 	Created     int64
 	Size        int64
