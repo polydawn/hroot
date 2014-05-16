@@ -3,6 +3,7 @@ package crocker
 import (
 	"io"
 	"os"
+	"strings"
 	. "polydawn.net/pogo/gosh"
 	. "polydawn.net/hroot/util"
 )
@@ -29,7 +30,7 @@ func Launch(dock *Dock, image string, command []string, attach bool, privileged 
 
 	//Where should docker write the new CID?
 	CIDfilename := CreateCIDfile()
-	dockRun = dockRun("-cidfile", CIDfilename)
+	dockRun = dockRun("--cidfile", CIDfilename)
 
 	//Where should the container start?
 	dockRun = dockRun("-w", startIn)
@@ -41,7 +42,7 @@ func Launch(dock *Dock, image string, command []string, attach bool, privileged 
 
 	//Custom DNS servers?
 	for i := range dns {
-		dockRun = dockRun("-dns", dns[i])
+		dockRun = dockRun("--dns", dns[i])
 	}
 
 	//What folders get mounted?
@@ -63,8 +64,11 @@ func Launch(dock *Dock, image string, command []string, attach bool, privileged 
 		dockRun = dockRun("-i", "-t")
 	}
 
+	// Docker really hates its own domain. I know, whatever.
+	nameTemp := strings.Replace(image, "docker.io", "docker.IO", -1)
+
 	//Add image name
-	dockRun = dockRun(image)
+	dockRun = dockRun(nameTemp)
 
 	//What command should it run?
 	for i := range command {
@@ -113,7 +117,7 @@ func (c *Container) Export(writer io.Writer) {
 	Commits the container.
 */
 func (c *Container) Commit(name, tag string) {
-	c.dock.Cmd()("commit", c.id, name, tag)()
+	c.dock.Cmd()("commit", c.id, name + ":" + tag)()
 }
 
 /*

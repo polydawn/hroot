@@ -18,6 +18,7 @@ packages+=("$prefix/conf")
 
 
 function build {
+	git submodule update --init
 	go build -race -o hroot $prefix/main
 }
 

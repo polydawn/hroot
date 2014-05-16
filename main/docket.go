@@ -26,7 +26,7 @@ func panicHandler() {
 		}
 
 		//Check for existence of debug environment variable
-		if len(os.Getenv("DEBUG")) == 0 {
+		if len(os.Getenv("DEBUG")) == 0 && len(os.Getenv("DEBUG_STACK")) == 0  {
 			//Debug not set, be friendlier about the problem
 			Println(err)
 			Println("\n" + "Hroot crashed! This could be a problem with docker or git, or hroot itself." + "\n" + "To see more about what went wrong, turn on stack traces by running:" + "\n\n" + "export DEBUG=1" + "\n\n" + "Feel free to contact the developers for help:" + "\n" + "https://github.com/polydawn/hroot" + "\n")

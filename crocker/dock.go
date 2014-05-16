@@ -19,8 +19,8 @@ import (
 const defaultSock = "unix:///var/run/docker.sock" //Where a docker daemon will run by default
 const waitDuraction = 500 * time.Millisecond      //How long to wait for docker to create a socket
 const pollDuraction = 10 * time.Millisecond       //How long to wait between polling for socket
-const ApiVersion = "1.4"                          //Docker api version
-const ServerVersion = "0.6.3"                     //Docker header version so its log can complain :)
+const ApiVersion = "1.10"                          //Docker api version
+const ServerVersion = "0.10.0"                     //Docker header version so its log can complain :)
 
 //A struct representing a connection to a docker daemon
 type Dock struct {
@@ -102,18 +102,34 @@ func (dock *Dock) Close() {
 	}
 }
 
+
 //Returns a gosh command struct for use in exec-wrapping docker
 func (dock *Dock) Cmd() Command {
-	return Sh("docker")(DefaultIO)("-H=" + dock.sockURI)
+	template := Sh("docker")(DefaultIO)("-H=" + dock.sockURI)
+
+	// If debug mode is set, print every command before executing
+	if len(os.Getenv("DEBUG")) > 0 {
+		template = template.Debug(func (ct *CommandTemplate) {
+			Println("Exec:", ct.Cmd, ct.Args)
+		})
+	}
+
+	return template
 }
 
 // Hit the docker daemon with an HTTP request, returns response byte array
 func (dock *Dock) Call(method, path string, data interface{}) ([]byte, int) {
+	// Print network traffic to terminal if DEBUG env var exists
+	networkDebug := (len(os.Getenv("DEBUG")) > 0)
+	if (networkDebug) { Println("Calling: " + method + " " + path) }
+
 	//Encode data if needed
 	var params io.Reader
 	if data != nil {
 			buf, err := json.Marshal(data)
 			if err != nil { ExitGently("JSON marshalling failed: " + err.Error()) }
+
+			if (networkDebug) { Println("Sending: " + string(buf)) }
 			params = bytes.NewBuffer(buf)
 	}
 
@@ -151,6 +167,8 @@ func (dock *Dock) Call(method, path string, data interface{}) ([]byte, int) {
 			}
 			ExitGently("Bad return: " + string(body))
 	}
+
+	if (networkDebug) { Println("Network: " + string(body)) }
 
 	return body, resp.StatusCode
 }

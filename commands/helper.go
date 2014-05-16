@@ -4,7 +4,9 @@ package commands
 
 import (
 	. "fmt"
+	"os"
 	"time"
+	"strings"
 	"polydawn.net/hroot/conf"
 	"polydawn.net/hroot/crocker"
 	"polydawn.net/hroot/dex"
@@ -165,6 +167,11 @@ func (d *Hroot) PrepareOutput() {
 //Connects to the docker daemon
 func (d *Hroot) StartDocker(socketURI string) {
 	d.dock = crocker.Dial(socketURI)
+
+	// If debug mode is set, print docker version
+	if len(os.Getenv("DEBUG")) > 0 {
+		d.dock.PrintVersion()
+	}
 }
 
 //Behavior when docker cache has the image
@@ -271,8 +278,10 @@ func (d *Hroot) ExportBuild(forceEpoch bool) error {
 	//		hroot build -s docker -d graph
 	//	Docker will already know about your (much cooler) image name :)
 	name, tag := crocker.SplitImageName(d.image.Name)
+	// Docker really hates its own domain. I know, whatever.
+	nameTemp := strings.Replace(name, "docker.io", "docker.IO", -1)
 	Println("Exporting to docker cache:", name, tag)
-	d.container.Commit(name, tag)
+	d.container.Commit(nameTemp, tag)
 
 	return nil
 }
