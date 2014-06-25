@@ -1,12 +1,10 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # Where is this script located?
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
 export GOPATH="$PWD"/.gopath/
 export BASEDIR="$PWD"
-
-
 
 prefix="polydawn.net/hroot"
 packages=()
@@ -16,13 +14,10 @@ packages+=("$prefix/util")
 packages+=("$prefix/conf")
 
 
-
 function build {
 	git submodule update --init
 	go build -race -o hroot $prefix/main
 }
-
-
 
 function test {
 	echo "${packages[@]}" | xargs go test -race
@@ -30,19 +25,99 @@ function test {
 	# evidentally this is a lie.
 }
 
+# CI script assumes running as root on Ubuntu-based x64
+# Intended for use as a build canary to alert us to breaking docker/index changes
+function ci {
+	set -x
+	echo "Warning: this will clear docker state!"
 
+	# Check git config
+	set +e
+	touch ~/.gitconfig
+	git config --global --list | grep user.name
+	if [[ $? == 1 ]] ; then
+		echo "Setting a default git user name"
+		git config --global user.name "Example User"
+	fi
+	git config --global --list | grep user.email
+	if [[ $? == 1 ]] ; then
+		echo "Setting a default git user email"
+		git config --global user.email "user@example.com"
+	fi
+	set -e
+
+	# Required packages
+	apt-get install -y aufs-tools cgroup-lite
+
+	# Travis uses GVM, apparently? Try that?
+	[[-s "$HOME/.gvm/scripts/gvm"]] && source "$HOME/.gvm/scripts/gvm"
+
+	# Build hroot
+	echo ""
+	echo $PATH
+	which go
+	build
+	git log --pretty=format:'%h %s %cr %an' -n 1
+
+	# Generate a temporary directory
+	tempDir=/tmp/hroot-ci-$RANDOM$RANDOM$RANDOM$RANDOM
+	rm -rf $tempDir; mkdir -p $tempDir
+	echo "Testing latest docker in $tempDir"
+	echo ""
+
+	docker=$tempDir/docker-latest
+	PATH=$PATH:$tempDir
+	dockerStorage=$tempDir/storage
+	boxen=$tempDir/boxen
+	hroot=$PWD/hroot
+
+	# Download boxen and docker
+	git clone https://github.com/polydawn/boxen.git $boxen
+	wget https://get.docker.io/builds/Linux/x86_64/docker-latest -O $docker
+	chmod +x $docker
+
+	# Print info about golang, hroot, and docker
+	$hroot version
+	go version
+	echo -n "Docker hash: "
+	sha1sum $docker | cut -f 1 -d " "
+	$docker version 2>&1 | grep -v dial
+
+	# Walk through the Getting Started guide
+	(
+		DEBUG=1
+
+		# Start docker daemon
+		$docker -d -D -r=false --icc=false --graph=$dockerStorage &
+
+		# Import index
+		cd $boxen/ubuntu-index
+		time $hroot build
+		( cd ../graph ; git log --graph --decorate )
+
+		# Upgrade apt-get packages
+		cd ../ubuntu
+		time $hroot build
+		$hroot run
+		( cd ../graph ; git log --graph --decorate )
+
+		# Kill off docker
+		pkill docker
+	)
+
+	#Cleanup
+	rm -rf $tempDir || echo "AUFS is unhappy; disregard!"
+}
 
 case "$1" in
-        build)
-                build
-                ;;
-        test)
-                test
-                ;;
-        *)
-                echo "Usage: $0 {build|test}" 1>&2;
-                exit 1
-                ;;
+	build) build ;;
+	test)  test  ;;
+	ci)    ci    ;;
+
+	*)
+		echo "Usage: $0 {build|test}" 1>&2;
+		exit 1
+	;;
 esac
 
 

@@ -1,0 +1,25 @@
+# Travis CI build configuration
+# Intended for use as a build canary to alert us to breaking docker/index changes
+
+language:
+  - go
+go:
+  - 1.3
+
+# Explicitly disable build caching
+cache: false
+
+# Disable travis golang fiddling
+install:
+  - true
+before_install:
+  - true
+
+# Tell commands to behave
+env:
+  global:
+    - TERM=dumb
+
+# Build
+script:
+  - sudo ./goad ci
