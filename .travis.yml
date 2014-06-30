@@ -9,12 +9,6 @@ go:
 # Explicitly disable build caching
 cache: false
 
-# Disable travis golang fiddling
-install:
-  - true
-before_install:
-  - true
-
 # Tell commands to behave
 env:
   global:
